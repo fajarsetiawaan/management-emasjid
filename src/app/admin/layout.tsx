@@ -7,17 +7,15 @@ import {
     LayoutGrid,
     Calendar,
     Plus,
-    Folder,
     User,
     Bell,
-    LogOut,
     Building2,
     Wallet,
     CalendarPlus,
     FilePlus,
-    X
+    Box
 } from 'lucide-react';
-import { MOCK_USER, MOCK_MOSQUE } from '@/lib/mock-data';
+import { MOCK_MOSQUE } from '@/lib/mock-data';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -38,16 +36,12 @@ export default function MobileAppShell({
     ];
 
     return (
-        <div className="min-h-screen bg-slate-900 flex justify-center font-sans tracking-tight">
+        <div className="min-h-screen bg-transparent flex justify-center font-sans tracking-tight">
             {/* Mobile Constraint Container */}
-            <div className="w-full max-w-[480px] bg-slate-50 dark:bg-slate-950 min-h-screen shadow-2xl relative flex flex-col overflow-hidden">
-
-                {/* Decorative Background Blobs */}
-                <div className="absolute top-0 left-0 w-full h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 pointer-events-none" />
-                <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/3 pointer-events-none" />
+            <div className="w-full max-w-[480px] bg-white/50 dark:bg-slate-950/50 min-h-screen shadow-2xl relative flex flex-col overflow-hidden transition-colors duration-300 backdrop-blur-3xl border-x border-white/20 dark:border-white/5">
 
                 {/* Sticky Top Bar (Glassmorphism Premium) */}
-                <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 h-16 flex items-center justify-between px-5 transition-all duration-300">
+                <header className="sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/20 dark:border-white/5 h-16 flex items-center justify-between px-5 transition-all duration-300">
 
                     {/* Left: Branding */}
                     <div className="flex items-center gap-3">
@@ -67,7 +61,7 @@ export default function MobileAppShell({
                     {/* Right: User Actions */}
                     <div className="flex items-center gap-3">
                         <ThemeToggle />
-                        <button className="relative w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:shadow-md transition-all">
+                        <button className="relative w-10 h-10 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:shadow-md transition-all">
                             <Bell size={20} />
                             <span className="absolute top-2 right-2.5 h-2 w-2 bg-rose-500 rounded-full border-2 border-white dark:border-slate-800"></span>
                         </button>
@@ -142,7 +136,7 @@ export default function MobileAppShell({
                                 >
                                     <Link href="/admin/finance/new" onClick={() => setIsFabOpen(false)}>
                                         <div className="flex flex-col items-center gap-1 group">
-                                            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center shadow-2xl shadow-emerald-200/50 hover:scale-110 transition-transform border-4 border-slate-50">
+                                            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center shadow-2xl shadow-emerald-200/50 hover:scale-110 transition-transform border-4 border-slate-50 dark:border-slate-900">
                                                 <Wallet size={30} />
                                             </div>
                                             <span className="bg-white/90 backdrop-blur-sm text-slate-700 text-xs font-bold px-3 py-1 rounded-lg shadow-sm">
@@ -156,8 +150,8 @@ export default function MobileAppShell({
                     </AnimatePresence>
                 </div>
 
-                {/* Bottom Navigation Dock (Floating Island) */}
-                <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-[420px] z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/40 dark:border-slate-800/40 shadow-[0_20px_40px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-1.5">
+                {/* Bottom Navigation Dock (Glassmorphism Island) */}
+                <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-[420px] z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-1.5 ring-1 ring-white/20 dark:ring-white/5">
                     <div className="grid grid-cols-5 h-16 items-center px-1 relative">
                         {menuItems.map((item) => {
                             const isActive = pathname === item.href;

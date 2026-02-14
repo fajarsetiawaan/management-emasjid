@@ -28,7 +28,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
             try {
                 const mosqueData = await getMosqueBySlug(slug);
                 if (!mosqueData) {
-                    notFound(); // This might not work effectively inside client useEffect, better to handle UI state
+                    notFound();
                     return;
                 }
                 setMosque(mosqueData);
@@ -63,10 +63,10 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
     }, [mosque]);
 
     if (loading) {
-        return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400">Loading...</div>;
+        return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-400">Loading...</div>;
     }
 
-    if (!mosque) return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400">Mosque not found</div>;
+    if (!mosque) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-400">Mosque not found</div>;
 
     // Helpers
     const formatRupiah = (amount: number) => {
@@ -160,14 +160,14 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                             Saldo Kas Aktif
                         </p>
-                        <h2 className="text-[3.5rem] leading-none font-black text-slate-800 tracking-tighter drop-shadow-sm">
+                        <h2 className="text-[3.5rem] leading-none font-black text-slate-800 dark:text-white tracking-tighter drop-shadow-sm">
                             <span className="text-xl align-top text-slate-400 font-bold mr-1 relative top-2">Rp</span>
                             {formatRupiah(mosque.balance).replace('Rp', '').split(',')[0]}
                         </h2>
                     </motion.div>
                 </div>
 
-                {/* Monthly Summary (Interactive Cards - Premium Gradients) */}
+                {/* Monthly Summary (Interactive Cards - Glassmorphism) */}
                 <div className="grid grid-cols-2 gap-4 px-1">
                     <motion.button
                         whileTap={{ scale: 0.95 }}
@@ -175,7 +175,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                         onClick={() => setReportType('INCOME')}
                         className={`p-6 rounded-[2rem] text-left relative overflow-hidden transition-all duration-300 group border ${reportType === 'INCOME'
                             ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-xl shadow-emerald-500/30 border-emerald-400'
-                            : 'bg-white text-slate-400 border-slate-100 shadow-[0_2px_20px_rgba(0,0,0,0.04)] hover:shadow-md'
+                            : 'bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm text-slate-400 border-white/40 dark:border-white/5 shadow-sm hover:shadow-md'
                             }`}
                     >
                         {/* Pattern Overlay */}
@@ -188,13 +188,13 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
 
                         <div className="relative z-10">
                             <div className={`flex items-center gap-2 mb-8 transition-opacity duration-300 ${reportType === 'INCOME' ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'}`}>
-                                <div className={`p-2 rounded-full transition-colors duration-300 ${reportType === 'INCOME' ? 'bg-white/20 backdrop-blur-md text-white' : 'bg-emerald-50 text-emerald-500'
+                                <div className={`p-2 rounded-full transition-colors duration-300 ${reportType === 'INCOME' ? 'bg-white/20 backdrop-blur-md text-white' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500'
                                     }`}>
                                     <ArrowDownLeft size={16} strokeWidth={3} />
-                                </div>
+                                    - </div>
                                 <span className="text-[10px] font-bold uppercase tracking-widest">Masuk</span>
                             </div>
-                            <p className={`text-2xl font-bold tracking-tight transition-colors duration-300 ${reportType === 'INCOME' ? 'text-white' : 'text-slate-800'}`}>
+                            <p className={`text-2xl font-bold tracking-tight transition-colors duration-300 ${reportType === 'INCOME' ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
                                 {formatRupiah(monthlyIncome).replace(',00', '')}
                             </p>
                             <div className={`flex items-center gap-1 mt-1.5 transition-opacity ${reportType === 'INCOME' ? 'opacity-80' : 'opacity-0'}`}>
@@ -210,7 +210,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                         onClick={() => setReportType('EXPENSE')}
                         className={`p-6 rounded-[2rem] text-left relative overflow-hidden transition-all duration-300 group border ${reportType === 'EXPENSE'
                             ? 'bg-gradient-to-br from-rose-500 to-rose-600 text-white shadow-xl shadow-rose-500/30 border-rose-400'
-                            : 'bg-white text-slate-400 border-slate-100 shadow-[0_2px_20px_rgba(0,0,0,0.04)] hover:shadow-md'
+                            : 'bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm text-slate-400 border-white/40 dark:border-white/5 shadow-sm hover:shadow-md'
                             }`}
                     >
                         {/* Pattern Overlay */}
@@ -223,13 +223,13 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
 
                         <div className="relative z-10">
                             <div className={`flex items-center gap-2 mb-8 transition-opacity duration-300 ${reportType === 'EXPENSE' ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'}`}>
-                                <div className={`p-2 rounded-full transition-colors duration-300 ${reportType === 'EXPENSE' ? 'bg-white/20 backdrop-blur-md text-white' : 'bg-rose-50 text-rose-500'
+                                <div className={`p-2 rounded-full transition-colors duration-300 ${reportType === 'EXPENSE' ? 'bg-white/20 backdrop-blur-md text-white' : 'bg-rose-50 dark:bg-rose-900/20 text-rose-500'
                                     }`}>
                                     <ArrowUpRight size={16} strokeWidth={3} />
                                 </div>
                                 <span className="text-[10px] font-bold uppercase tracking-widest">Keluar</span>
                             </div>
-                            <p className={`text-2xl font-bold tracking-tight transition-colors duration-300 ${reportType === 'EXPENSE' ? 'text-white' : 'text-slate-800'}`}>
+                            <p className={`text-2xl font-bold tracking-tight transition-colors duration-300 ${reportType === 'EXPENSE' ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
                                 {formatRupiah(monthlyExpense).replace(',00', '')}
                             </p>
                             <div className={`flex items-center gap-1 mt-1.5 transition-opacity ${reportType === 'EXPENSE' ? 'opacity-80' : 'opacity-0'}`}>
@@ -240,12 +240,12 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                     </motion.button>
                 </div>
 
-                {/* Dynamic Analysis Section (Muted Background Container) */}
+                {/* Dynamic Analysis Section (Glass Card) */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between px-2">
-                        <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg flex items-center gap-2">
                             Analisa {activeLabel}
-                            <span className={`text-[10px] px-2.5 py-1 rounded-full bg-slate-100 uppercase tracking-wider font-bold ${activeTextColor}`}>
+                            <span className={`text-[10px] px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 uppercase tracking-wider font-bold ${activeTextColor}`}>
                                 {reportType === 'INCOME' ? 'Detail Sumber' : 'Detail Alokasi'}
                             </span>
                         </h3>
@@ -258,11 +258,8 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.3, ease: 'easeOut' }}
-                            className="bg-white p-6 rounded-[2.5rem] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100/80 relative overflow-hidden"
+                            className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-[2.5rem] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-white/40 dark:border-white/5 relative overflow-hidden"
                         >
-                            {/* Subtle Background Pattern */}
-                            <div className="absolute top-0 right-0 w-40 h-40 bg-slate-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 -z-10" />
-
                             <div className="space-y-6">
                                 {activeData.slice(0, 4).map((item, idx) => {
                                     const Icon = getCategoryIcon(item.cat);
@@ -270,20 +267,20 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                                         <div key={idx} className="group">
                                             <div className="flex justify-between items-start mb-3">
                                                 <div className="flex items-center gap-4">
-                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg shadow-sm border border-slate-100 transition-colors duration-300 ${reportType === 'INCOME' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg shadow-sm border border-white/20 transition-colors duration-300 ${reportType === 'INCOME' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600' : 'bg-rose-50 dark:bg-rose-900/20 text-rose-600'
                                                         }`}>
                                                         <Icon size={20} strokeWidth={2} />
                                                     </div>
                                                     <div>
-                                                        <p className="font-bold text-slate-800 text-sm mb-0.5">{item.cat.replace(/_/g, ' ')}</p>
+                                                        <p className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-0.5">{item.cat.replace(/_/g, ' ')}</p>
                                                         <div className="flex items-center gap-2">
-                                                            <p className="text-[10px] text-slate-400 font-bold bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">{item.percentage.toFixed(1)}%</p>
+                                                            <p className="text-[10px] text-slate-400 font-bold bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-700">{item.percentage.toFixed(1)}%</p>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <p className="font-bold text-slate-800 text-sm mt-1">{formatRupiah(item.amount).replace(',00', '')}</p>
+                                                <p className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-1">{formatRupiah(item.amount).replace(',00', '')}</p>
                                             </div>
-                                            <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 shadow-inner">
+                                            <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 shadow-inner">
                                                 <motion.div
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${item.percentage}%` }}
@@ -296,7 +293,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                                 })}
                                 {activeData.length === 0 && (
                                     <div className="text-center py-12 flex flex-col items-center justify-center opacity-50">
-                                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                                        <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-slate-300">
                                             <PieChart size={24} />
                                         </div>
                                         <p className="text-sm font-bold text-slate-400">Belum ada data {activeLabel.toLowerCase()}.</p>
@@ -310,15 +307,12 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                 {/* Recent Transactions List (Glassy List) */}
                 <div>
                     <div className="flex items-center justify-between px-2 mb-4">
-                        <h3 className="font-bold text-slate-800 text-lg">Mutasi Terbaru</h3>
-                        <button className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 flex items-center gap-1 transition-colors">
+                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Mutasi Terbaru</h3>
+                        <button className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-800/50 flex items-center gap-1 transition-colors">
                             Lihat Semua <ChevronRight size={12} strokeWidth={3} />
                         </button>
                     </div>
                     <div className="space-y-3 relative">
-                        {/* Connecting Line (Timeline Style) */}
-                        <div className="absolute left-[29px] top-6 bottom-6 w-[2px] bg-slate-100 -z-10 rounded-full"></div>
-
                         {transactions.slice(0, 5).map((t, idx) => {
                             const Icon = getCategoryIcon(t.category || '');
                             return (
@@ -327,19 +321,19 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: 0.4 + (idx * 0.05) }}
-                                    className="flex items-center justify-between py-3 px-3 bg-white hover:bg-slate-50 rounded-2xl border border-transparent hover:border-slate-100 transition-all group"
+                                    className="flex items-center justify-between py-3 px-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md hover:bg-white/80 dark:hover:bg-slate-800/80 rounded-2xl border border-white/40 dark:border-white/5 transition-all group shadow-sm"
                                 >
                                     <div className="flex gap-4 items-center">
-                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-4 ring-white z-10 ${t.type === 'INCOME' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-4 ring-white dark:ring-slate-900 z-10 ${t.type === 'INCOME' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600' : 'bg-rose-50 dark:bg-rose-900/20 text-rose-600'
                                             }`}>
                                             <Icon size={18} strokeWidth={2.5} />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-slate-800 text-sm group-hover:text-primary transition-colors">{t.description}</h4>
+                                            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{t.description}</h4>
                                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{formatDate(t.date)} • {(t.category || '').replace(/_/g, ' ')}</p>
                                         </div>
                                     </div>
-                                    <div className={`font-bold text-sm ${t.type === 'INCOME' ? 'text-emerald-600' : 'text-slate-800'
+                                    <div className={`font-bold text-sm ${t.type === 'INCOME' ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-200'
                                         }`}>
                                         {t.type === 'INCOME' ? '+' : '-'} {formatRupiah(t.amount).replace(',00', '')}
                                     </div>
@@ -356,16 +350,16 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
         const publicEvents = events.filter(e => e.status === 'UPCOMING');
         return (
             <div className="space-y-4">
-                <h3 className="font-bold text-slate-800">Agenda Mendatang</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100">Agenda Mendatang</h3>
                 {publicEvents.map((event) => (
-                    <div key={event.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex gap-4">
-                        <div className="bg-blue-50 text-blue-600 w-16 flex-shrink-0 flex flex-col items-center justify-center rounded-lg border border-blue-100">
+                    <div key={event.id} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md p-4 rounded-xl border border-white/40 dark:border-white/5 shadow-sm flex gap-4">
+                        <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 w-16 flex-shrink-0 flex flex-col items-center justify-center rounded-lg border border-blue-100 dark:border-blue-800/50">
                             <span className="text-xs font-bold uppercase">{event.date.toLocaleString('default', { month: 'short' })}</span>
                             <span className="text-2xl font-bold leading-none">{event.date.getDate()}</span>
                         </div>
                         <div className="flex-1">
-                            <h4 className="font-bold text-slate-800">{event.title}</h4>
-                            <p className="text-sm text-slate-500">{event.ustadz}</p>
+                            <h4 className="font-bold text-slate-800 dark:text-slate-100">{event.title}</h4>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">{event.ustadz}</p>
                             <div className="flex items-center gap-2 mt-2 text-xs text-slate-400">
                                 <Calendar size={12} /> {event.time} WIB
                             </div>
@@ -382,25 +376,25 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
     const renderProfil = () => {
         return (
             <div className="space-y-6">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
-                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-4">
+                <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-white/40 dark:border-white/5 text-center">
+                    <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-4 border border-emerald-200 dark:border-emerald-800/50">
                         <Building2 size={40} />
                     </div>
-                    <h2 className="text-xl font-bold text-slate-800">{mosque.name}</h2>
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-white">{mosque.name}</h2>
                     <p className="text-sm text-slate-500 mt-2">{mosque.address}</p>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 className="font-bold text-slate-800 mb-4">Rekening Bank</h3>
-                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-white/40 dark:border-white/5">
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">Rekening Bank</h3>
+                    <div className="bg-slate-50/50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
                         <p className="text-xs text-slate-500 uppercase font-bold mb-1">Bank Syariah Indonesia (BSI)</p>
                         <div className="flex items-center justify-between">
-                            <p className="text-lg font-mono font-bold text-slate-800">7700 8800 99</p>
+                            <p className="text-lg font-mono font-bold text-slate-800 dark:text-slate-200">7700 8800 99</p>
                             <button className="text-emerald-600 hover:text-emerald-700">
                                 <Copy size={18} />
                             </button>
                         </div>
-                        <p className="text-sm text-slate-600 mt-1">a.n. DKM Masjid Raya Bogor</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">a.n. DKM Masjid Raya Bogor</p>
                     </div>
                 </div>
             </div>
@@ -408,8 +402,14 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans flex justify-center">
-            <div className="w-full max-w-[480px] bg-white min-h-screen shadow-xl flex flex-col relative">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans flex justify-center transition-colors duration-300 relative overflow-hidden">
+            {/* Background Orbs */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none fixed">
+                <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-emerald-400/5 dark:bg-emerald-600/5 rounded-full blur-[100px]" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-400/5 dark:bg-blue-600/5 rounded-full blur-[100px]" />
+            </div>
+
+            <div className="w-full max-w-[480px] bg-white/40 dark:bg-slate-950/40 backdrop-blur-3xl min-h-screen shadow-xl flex flex-col relative border-x border-white/20 dark:border-white/5">
                 {/* Header (Transparent & Absolute) */}
                 <header className="absolute top-0 left-0 w-full p-6 z-50">
                     <div className="flex items-center gap-3">
@@ -427,8 +427,8 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                 <PrayerWidget city={mosque.city} timings={prayerTimings} />
 
                 {/* Tab Navigation (Sticky Segmented Control) */}
-                <div className="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-xl py-3 px-4 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
-                    <div className="bg-slate-200/50 p-1 rounded-2xl flex relative">
+                <div className="sticky top-0 z-40 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl py-3 px-4 shadow-[0_1px_0_rgba(0,0,0,0.05)] border-b border-white/10">
+                    <div className="bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-2xl flex relative">
                         {[
                             { id: 'LAPORAN', label: 'Keuangan', icon: PieChart },
                             { id: 'AGENDA', label: 'Agenda', icon: Calendar },
@@ -439,18 +439,18 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex-1 py-2.5 text-xs font-bold flex items-center justify-center gap-2 rounded-xl transition-all relative z-10
                     ${activeTab === tab.id
-                                        ? 'text-slate-800'
-                                        : 'text-slate-500 hover:text-slate-700'
+                                        ? 'text-slate-800 dark:text-slate-200'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                                     }
                   `}
                             >
                                 {activeTab === tab.id && (
                                     <motion.div
                                         layoutId="active-tab-segment"
-                                        className="absolute inset-0 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] -z-10"
+                                        className="absolute inset-0 bg-white dark:bg-slate-700/50 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] -z-10"
                                     />
                                 )}
-                                <tab.icon size={16} strokeWidth={2.5} className={activeTab === tab.id ? "text-emerald-600" : ""} />
+                                <tab.icon size={16} strokeWidth={2.5} className={activeTab === tab.id ? "text-emerald-600 dark:text-emerald-400" : ""} />
                                 <span>{tab.label}</span>
                             </button>
                         ))}
@@ -458,7 +458,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                 </div>
 
                 {/* Content */}
-                <main className="flex-1 p-5 bg-slate-50 min-h-screen">
+                <main className="flex-1 p-5 min-h-screen relative z-10">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}

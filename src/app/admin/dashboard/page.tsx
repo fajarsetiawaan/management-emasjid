@@ -20,13 +20,10 @@ import {
 import { MOCK_MOSQUE, MOCK_EVENTS } from '@/lib/mock-data';
 
 export default function AdminDashboardPage() {
-    // Local State for "New User" Simulation
-    // In a real app, this would come from the database. 
-    // Here we initialize to 0 to show "Empty State" until the Wizard updates it.
     const [displayBalance, setDisplayBalance] = useState(MOCK_MOSQUE.balance);
-    const [hasUpcomingEvents, setHasUpcomingEvents] = useState(false);
+    const isNewUser = displayBalance === 0;
+    const nextEvent = isNewUser ? null : MOCK_EVENTS.find(e => e.status === 'UPCOMING');
 
-    // Format Currency
     const formatRupiah = (amount: number) => {
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',
@@ -34,13 +31,6 @@ export default function AdminDashboardPage() {
             minimumFractionDigits: 0,
         }).format(amount);
     };
-
-    // Use Mock only if we have events (Simulate adding event later?)
-    // For now, let's just say if balance is 0 (new user), we show no events either, or just show them as is if unrelated.
-    // User said "sudah ada agenda kajian subuh" - implying they want that empty too.
-    // let's use a simpler check: 
-    const isNewUser = displayBalance === 0;
-    const nextEvent = isNewUser ? null : MOCK_EVENTS.find(e => e.status === 'UPCOMING');
 
     const menuItems = [
         { name: 'Keuangan', href: '/admin/finance', icon: Wallet, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-100 dark:border-emerald-800/50' },
@@ -67,11 +57,18 @@ export default function AdminDashboardPage() {
     };
 
     return (
-        <div className="bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-300">
+        <div className="bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-300 relative">
+
+            {/* Background Gradients */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] right-[-20%] w-[80%] h-[80%] bg-emerald-400/10 dark:bg-emerald-600/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] left-[-20%] w-[70%] h-[70%] bg-blue-400/10 dark:bg-blue-600/5 rounded-full blur-[100px]" />
+            </div>
+
             {/* Hero Section (Finance) */}
-            <div className="relative overflow-hidden rounded-b-[2.5rem] shadow-2xl shadow-emerald-900/20 z-0">
+            <div className="relative overflow-hidden rounded-b-[2.5rem] shadow-2xl shadow-emerald-900/20 z-10 mx-2 mt-2">
                 {/* Mesh Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900 rounded-b-[2.5rem] rounded-t-[2rem]"></div>
                 <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-400 rounded-full blur-3xl opacity-20 translate-y-1/2 -translate-x-1/2"></div>
 
@@ -83,7 +80,7 @@ export default function AdminDashboardPage() {
                                 {formatRupiah(displayBalance)}
                             </h2>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg">
                             <Wallet className="text-emerald-300" size={20} />
                         </div>
                     </div>
@@ -99,19 +96,17 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Grid Menu System */}
-            <div className="px-5 -mt-10 relative z-10">
-                {/* SetupWizard removed - moved to /admin/onboarding */}
-
+            <div className="px-5 -mt-10 relative z-20">
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100 dark:ring-slate-800 p-5 grid grid-cols-4 gap-y-6 gap-x-2"
+                    className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 dark:border-white/5 p-5 grid grid-cols-4 gap-y-6 gap-x-2"
                 >
                     {menuItems.map((item) => (
                         <motion.div key={item.name} variants={itemVariants} className="w-full">
                             <Link href={item.href} className="flex flex-col items-center gap-2 group w-full">
-                                <div className={`w-14 h-14 rounded-2xl ${item.bg} border ${item.border} flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-active:scale-95`}>
+                                <div className={`w-14 h-14 rounded-2xl ${item.bg} border ${item.border} flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-active:scale-95 shadow-sm`}>
                                     <item.icon className={item.color} size={26} strokeWidth={2} />
                                 </div>
                                 <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 text-center leading-tight tracking-tight group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
@@ -120,13 +115,11 @@ export default function AdminDashboardPage() {
                             </Link>
                         </motion.div>
                     ))}
-
-                    {/* Placeholders to fill grid nicely if needed, or keeping it clean */}
                 </motion.div>
             </div>
 
             {/* Widgets Area */}
-            <div className="p-5 space-y-6 mt-2">
+            <div className="p-5 space-y-6 mt-2 relative z-10">
 
                 {/* Agenda Section */}
                 <div className="space-y-3">
@@ -140,7 +133,7 @@ export default function AdminDashboardPage() {
                     {
                         nextEvent ? (
                             <Link href="/admin/events" className="block group">
-                                <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-5 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group-hover:-translate-y-1">
+                                <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-lg rounded-2xl p-5 shadow-sm border border-white/40 dark:border-white/10 flex items-center gap-5 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group-hover:-translate-y-1">
                                     <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 w-14 h-14 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 border border-blue-100 dark:border-blue-800/50 shadow-sm">
                                         <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 dark:text-blue-500">{nextEvent.date.toLocaleString('default', { month: 'short' })}</span>
                                         <span className="text-xl font-bold leading-none">{nextEvent.date.getDate()}</span>
@@ -165,7 +158,7 @@ export default function AdminDashboardPage() {
                                 </div>
                             </Link>
                         ) : (
-                            <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 border-dashed">
+                            <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">
                                 Belum ada agenda terdekat
                             </div>
                         )
