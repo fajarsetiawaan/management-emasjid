@@ -4,30 +4,54 @@ import { useState, use, useEffect } from 'react';
 import { notFound } from 'next/navigation';
 import { interpolate, useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
 import { ArrowDownLeft, ArrowUpRight, Building2, Calendar, FileText, User, Copy, ChevronRight, TrendingUp, TrendingDown, PieChart, Wallet, ShoppingBag, Zap, HeartHandshake, CircleDollarSign, Wrench } from 'lucide-react';
-import { MOCK_MOSQUES, MOCK_TRANSACTIONS, MOCK_EVENTS } from '@/lib/mock-data';
+import { getMosqueBySlug, getTransactions, getEvents } from '@/lib/api';
 import PrayerWidget from '@/components/public/PrayerWidget';
 import { getPrayerTimes, PrayerTimes } from '@/lib/prayer-service';
-import { Mosque } from '@/types';
+import { Mosque, Transaction, Event } from '@/types';
 
 export default function PublicMosquePage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
 
-    // Validate Slug & Get Data
-    const mosqueData = MOCK_MOSQUES.find(m => m.slug === slug);
+    const [mosque, setMosque] = useState<Mosque | null>(null);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [events, setEvents] = useState<Event[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    if (!mosqueData) {
-        notFound();
-    }
-
-    // Rename for usage
-    const mosque: Mosque = mosqueData;
-
+    // UI State
     const [activeTab, setActiveTab] = useState<'LAPORAN' | 'AGENDA' | 'PROFIL'>('LAPORAN');
     const [reportType, setReportType] = useState<'INCOME' | 'EXPENSE'>('INCOME');
     const [prayerTimings, setPrayerTimings] = useState<PrayerTimes | null>(null);
 
+    // Fetch Data
     useEffect(() => {
-        // Fetch Prayer Times
+        const loadData = async () => {
+            try {
+                const mosqueData = await getMosqueBySlug(slug);
+                if (!mosqueData) {
+                    notFound(); // This might not work effectively inside client useEffect, better to handle UI state
+                    return;
+                }
+                setMosque(mosqueData);
+
+                const [txData, eventsData] = await Promise.all([
+                    getTransactions(),
+                    getEvents()
+                ]);
+                setTransactions(txData);
+                setEvents(eventsData);
+            } catch (e) {
+                console.error("Failed to load mosque data", e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadData();
+    }, [slug]);
+
+    // Fetch Prayer Times when mosque data is ready
+    useEffect(() => {
+        if (!mosque) return;
+
         const fetchPrayers = async () => {
             const coords = mosque.latitude && mosque.longitude
                 ? { lat: mosque.latitude, lng: mosque.longitude }
@@ -36,7 +60,13 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
             setPrayerTimings(data);
         };
         fetchPrayers();
-    }, [mosque.city, mosque.latitude, mosque.longitude]);
+    }, [mosque]);
+
+    if (loading) {
+        return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400">Loading...</div>;
+    }
+
+    if (!mosque) return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400">Mosque not found</div>;
 
     // Helpers
     const formatRupiah = (amount: number) => {
@@ -57,6 +87,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
 
     // Category Icons Helper
     const getCategoryIcon = (category: string) => {
+        if (!category) return CircleDollarSign;
         const cat = category.toUpperCase();
         if (cat.includes('INFAQ') || cat.includes('JUMAT')) return Wallet;
         if (cat.includes('OPERASIONAL')) return Zap;
@@ -71,7 +102,8 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
     const renderLaporan = () => {
         // Calculate Monthly Stats
         const currentMonth = new Date().getMonth();
-        const monthlyTransactions = MOCK_TRANSACTIONS.filter(t => t.date.getMonth() === currentMonth);
+        // Assuming transactions mocks are always roughly current/recent for testing
+        const monthlyTransactions = transactions.filter(t => t.date.getMonth() === currentMonth);
 
         const monthlyIncome = monthlyTransactions
             .filter(t => t.type === 'INCOME')
@@ -85,25 +117,27 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
         const incomeByCategory = monthlyTransactions
             .filter(t => t.type === 'INCOME')
             .reduce((acc, curr) => {
-                acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
+                const cat = curr.category || 'LAINNYA'; // Fallback
+                acc[cat] = (acc[cat] || 0) + curr.amount;
                 return acc;
             }, {} as Record<string, number>);
 
         const expenseByCategory = monthlyTransactions
             .filter(t => t.type === 'EXPENSE')
             .reduce((acc, curr) => {
-                acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
+                const cat = curr.category || 'LAINNYA';
+                acc[cat] = (acc[cat] || 0) + curr.amount;
                 return acc;
             }, {} as Record<string, number>);
 
         // Sort Categories
         const sortedIncomeCategories = Object.entries(incomeByCategory)
             .sort(([, a], [, b]) => b - a)
-            .map(([cat, amount]) => ({ cat, amount, percentage: (amount / monthlyIncome) * 100 }));
+            .map(([cat, amount]) => ({ cat, amount, percentage: monthlyIncome > 0 ? (amount / monthlyIncome) * 100 : 0 }));
 
         const sortedExpenseCategories = Object.entries(expenseByCategory)
             .sort(([, a], [, b]) => b - a)
-            .map(([cat, amount]) => ({ cat, amount, percentage: (amount / monthlyExpense) * 100 }));
+            .map(([cat, amount]) => ({ cat, amount, percentage: monthlyExpense > 0 ? (amount / monthlyExpense) * 100 : 0 }));
 
         const activeData = reportType === 'INCOME' ? sortedIncomeCategories : sortedExpenseCategories;
         const activeColor = reportType === 'INCOME' ? 'bg-emerald-500' : 'bg-rose-500';
@@ -285,8 +319,8 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                         {/* Connecting Line (Timeline Style) */}
                         <div className="absolute left-[29px] top-6 bottom-6 w-[2px] bg-slate-100 -z-10 rounded-full"></div>
 
-                        {MOCK_TRANSACTIONS.slice(0, 5).map((t, idx) => {
-                            const Icon = getCategoryIcon(t.category);
+                        {transactions.slice(0, 5).map((t, idx) => {
+                            const Icon = getCategoryIcon(t.category || '');
                             return (
                                 <motion.div
                                     key={t.id}
@@ -302,7 +336,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                                         </div>
                                         <div>
                                             <h4 className="font-bold text-slate-800 text-sm group-hover:text-primary transition-colors">{t.description}</h4>
-                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{formatDate(t.date)} • {t.category.replace(/_/g, ' ')}</p>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{formatDate(t.date)} • {(t.category || '').replace(/_/g, ' ')}</p>
                                         </div>
                                     </div>
                                     <div className={`font-bold text-sm ${t.type === 'INCOME' ? 'text-emerald-600' : 'text-slate-800'
@@ -319,7 +353,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
     };
 
     const renderAgenda = () => {
-        const publicEvents = MOCK_EVENTS.filter(e => e.status === 'UPCOMING');
+        const publicEvents = events.filter(e => e.status === 'UPCOMING');
         return (
             <div className="space-y-4">
                 <h3 className="font-bold text-slate-800">Agenda Mendatang</h3>
@@ -357,7 +391,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 className="font-bold text-slate-800 mb-4">Rekening Donasi</h3>
+                    <h3 className="font-bold text-slate-800 mb-4">Rekening Bank</h3>
                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <p className="text-xs text-slate-500 uppercase font-bold mb-1">Bank Syariah Indonesia (BSI)</p>
                         <div className="flex items-center justify-between">

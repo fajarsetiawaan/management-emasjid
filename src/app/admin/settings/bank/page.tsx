@@ -1,12 +1,20 @@
 'use client';
 
-import { ArrowLeft, CreditCard, Plus, Trash2, Edit2, Wallet } from 'lucide-react';
+import { ArrowLeft, CreditCard, Plus, Trash2, Edit2, Wallet, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { MOCK_BANK_ACCOUNTS } from '@/lib/mock-data';
 import { BankAccount } from '@/types';
+
+const CARD_GRADIENTS = [
+    'bg-gradient-to-br from-blue-500 to-cyan-600',
+    'bg-gradient-to-br from-emerald-500 to-teal-600',
+    'bg-gradient-to-br from-indigo-500 to-purple-600',
+    'bg-gradient-to-br from-rose-500 to-orange-600',
+    'bg-gradient-to-br from-slate-700 to-slate-800',
+];
 
 export default function BankAccountsPage() {
     // Mock State for Accounts
@@ -24,34 +32,63 @@ export default function BankAccountsPage() {
         }
     }, []);
 
+    // Form State
     const [isAddOpen, setIsAddOpen] = useState(false);
+    const [formData, setFormData] = useState({
+        bankName: 'Bank Syariah Indonesia (BSI)',
+        accountNumber: '',
+        holderName: ''
+    });
 
     const handleDelete = (id: string, bank: string) => {
         if (confirm(`Hapus rekening ${bank}?`)) {
-            setAccounts(accounts.filter(a => a.id !== id));
+            const newAccounts = accounts.filter(a => a.id !== id);
+            setAccounts(newAccounts);
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('sim_bank_accounts', JSON.stringify(newAccounts));
+            }
         }
     };
 
-    const handleAddMock = () => {
+    const handleAddAccount = () => {
+        if (!formData.bankName || !formData.accountNumber || !formData.holderName) {
+            alert('Mohon lengkapi semua data rekening.');
+            return;
+        }
+
+        const randomColor = CARD_GRADIENTS[Math.floor(Math.random() * CARD_GRADIENTS.length)];
+
         const newAccount: BankAccount = {
-            id: Math.random().toString(),
-            bankName: 'BRI',
-            accountNumber: '1234567890',
-            holderName: 'Masjid Raya Bogor',
-            color: 'bg-gradient-to-br from-blue-500 to-cyan-600',
+            id: Math.random().toString(36).substr(2, 9),
+            bankName: formData.bankName,
+            accountNumber: formData.accountNumber,
+            holderName: formData.holderName,
+            color: randomColor,
         };
-        setAccounts([...accounts, newAccount]);
+
+        const newAccounts = [...accounts, newAccount];
+        setAccounts(newAccounts);
+
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('sim_bank_accounts', JSON.stringify(newAccounts));
+        }
+
         setIsAddOpen(false);
+        setFormData({
+            bankName: 'Bank Syariah Indonesia (BSI)',
+            accountNumber: '',
+            holderName: ''
+        });
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-24 relative">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-32 relative">
             {/* Header */}
-            <header className="bg-white px-4 h-16 flex items-center gap-3 border-b border-slate-100 sticky top-0 z-50">
-                <Link href="/admin/settings" className="w-10 h-10 flex items-center justify-center -ml-2 text-slate-500 hover:text-slate-800 rounded-full hover:bg-slate-50 transition-colors">
+            <header className="bg-white dark:bg-slate-900 px-4 h-16 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 sticky top-0 z-50">
+                <Link href="/admin/settings" className="w-10 h-10 flex items-center justify-center -ml-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                     <ArrowLeft size={24} />
                 </Link>
-                <h1 className="font-bold text-slate-800 text-lg">Rekening Donasi</h1>
+                <h1 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Rekening Bank</h1>
             </header>
 
             <div className="p-5 space-y-6">
@@ -124,10 +161,10 @@ export default function BankAccountsPage() {
             </div>
 
             {/* FAB */}
-            <div className="fixed bottom-6 right-6 z-40">
+            <div className="fixed bottom-32 right-6 z-[60]">
                 <button
                     onClick={() => setIsAddOpen(true)}
-                    className="w-14 h-14 bg-slate-900 text-white rounded-full shadow-xl shadow-slate-900/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
+                    className="w-14 h-14 bg-slate-900 dark:bg-emerald-600 text-white rounded-full shadow-xl shadow-slate-900/40 dark:shadow-emerald-900/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all border-4 border-slate-50 dark:border-slate-950"
                 >
                     <Plus size={28} />
                 </button>
@@ -135,39 +172,65 @@ export default function BankAccountsPage() {
 
             {/* Mock Bottom Sheet / Modal for Adding */}
             {isAddOpen && (
-                <div className="fixed inset-0 z-50 flex items-end justify-center">
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsAddOpen(false)} />
                     <motion.div
-                        initial={{ y: '100%' }}
-                        animate={{ y: 0 }}
-                        exit={{ y: '100%' }}
-                        className="bg-white w-full max-w-md rounded-t-3xl p-6 relative z-10"
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        className="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl p-6 relative z-10 shadow-2xl border border-slate-100 dark:border-slate-800"
                     >
-                        <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6" />
-                        <h3 className="text-xl font-bold text-slate-800 mb-6">Tambah Rekening Baru</h3>
+                        <div className="w-12 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mx-auto mb-6 opacity-0" /> {/* Hidden visual anchor or just remove */}
+                        <div className="absolute top-4 right-4">
+                            <button onClick={() => setIsAddOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 mb-6 mt-2">Tambah Rekening Baru</h3>
 
                         <div className="space-y-4">
                             <div>
                                 <label htmlFor="bankName" className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Bank</label>
-                                <select id="bankName" name="bankName" className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white font-medium">
+                                <select
+                                    id="bankName"
+                                    value={formData.bankName}
+                                    onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white font-medium"
+                                >
                                     <option>Bank Syariah Indonesia (BSI)</option>
                                     <option>Bank Mandiri</option>
                                     <option>Bank BCA</option>
                                     <option>Bank BRI</option>
                                     <option>Bank Muamalat</option>
+                                    <option>Bank Jago Syariah</option>
+                                    <option>Bank Raya</option>
                                 </select>
                             </div>
                             <div>
                                 <label htmlFor="accountNumber" className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nomor Rekening</label>
-                                <input id="accountNumber" name="accountNumber" type="number" className="w-full px-4 py-3 rounded-xl border border-slate-200 font-medium" placeholder="Contoh: 7712345678" />
+                                <input
+                                    id="accountNumber"
+                                    type="number"
+                                    value={formData.accountNumber}
+                                    onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 font-medium"
+                                    placeholder="Contoh: 7712345678"
+                                />
                             </div>
                             <div>
                                 <label htmlFor="holderName" className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Atas Nama</label>
-                                <input id="holderName" name="holderName" type="text" className="w-full px-4 py-3 rounded-xl border border-slate-200 font-medium" placeholder="Contoh: DKM Masjid Raya" />
+                                <input
+                                    id="holderName"
+                                    type="text"
+                                    value={formData.holderName}
+                                    onChange={(e) => setFormData({ ...formData, holderName: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 font-medium"
+                                    placeholder="Contoh: DKM Masjid Raya"
+                                />
                             </div>
 
                             <button
-                                onClick={handleAddMock}
+                                onClick={handleAddAccount}
                                 className="w-full bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-200 hover:bg-emerald-700 active:scale-95 transition-all mt-4"
                             >
                                 Simpan Rekening

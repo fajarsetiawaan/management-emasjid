@@ -2,7 +2,8 @@
  * src/lib/mock-data.ts
  *
  * Centralized mock data for development & prototyping.
- * All mock constants are imported from here via lib/api.ts.
+ * Implements 2D Fund Accounting:
+ * Total Assets (Physical) == Total Programs (Logical)
  *
  * ⚠️ UI components should NOT import this file directly.
  *    Use functions from '@/lib/api' instead.
@@ -21,6 +22,8 @@ import type {
     FAQ,
     LegalMenuItem,
     TeamMember,
+    AssetAccount,
+    Program,
 } from '@/types';
 
 // ─── Mosque ────────────────────────────────────────
@@ -34,7 +37,7 @@ export const MOCK_MOSQUES: Mosque[] = [
         city: 'Tangerang Selatan',
         latitude: -6.2088,
         longitude: 106.8456,
-        balance: 15450000,
+        balance: 15000000,
     },
     {
         id: 'm2',
@@ -79,11 +82,126 @@ export const MOCK_USER: User = {
     }
 };
 
-// ─── Bank Accounts ─────────────────────────────────
+// ─── 2D Accounting: Dimension 1 (Assets) ───────────
 
-export const MOCK_BANK_ACCOUNTS: BankAccount[] = [
-    { id: '1', bankName: 'Mandiri', accountNumber: '1330015566778', holderName: 'Masjid Raya Bogor', color: 'bg-gradient-to-br from-blue-600 to-indigo-800' },
-    { id: '2', bankName: 'BSI', accountNumber: '7788990011', holderName: 'Masjid Raya Bogor', color: 'bg-gradient-to-br from-emerald-500 to-teal-700' },
+export const MOCK_ASSET_ACCOUNTS: AssetAccount[] = [
+    {
+        id: 'a1',
+        name: 'Kas Tunai',
+        type: 'CASH',
+        balance: 5000000,
+        description: 'Uang tunai di brankas masjid',
+        color: 'emerald',
+    },
+    {
+        id: 'a2',
+        name: 'Bank BSI',
+        type: 'BANK',
+        balance: 10000000,
+        accountNumber: '7788990011',
+        description: 'Rekening operasional utama',
+        color: 'cyan',
+    },
+];
+
+// Legacy support for UI components still using BankAccount
+export const MOCK_BANK_ACCOUNTS: BankAccount[] = MOCK_ASSET_ACCOUNTS
+    .filter(a => a.type === 'BANK')
+    .map(a => ({
+        id: a.id,
+        bankName: a.name,
+        accountNumber: a.accountNumber || '',
+        holderName: MOCK_MOSQUE.name,
+        color: 'bg-gradient-to-br from-emerald-500 to-teal-700',
+    }));
+
+// ─── 2D Accounting: Dimension 2 (Programs) ─────────
+
+export const MOCK_PROGRAMS: Program[] = [
+    {
+        id: 'p1',
+        name: 'Operasional Masjid',
+        type: 'UNRESTRICTED',
+        balance: 10000000,
+        description: 'Biaya listrik, air, kebersihan, dan admin',
+        color: 'blue',
+    },
+    {
+        id: 'p2',
+        name: 'Santunan Yatim',
+        type: 'RESTRICTED',
+        balance: 5000000,
+        description: 'Dana khusus untuk anak yatim & dhuafa',
+        color: 'amber',
+    },
+    {
+        id: 'p3',
+        name: 'Pembangunan Menara',
+        type: 'RESTRICTED',
+        balance: 0,
+        description: 'Wakaf khusus pembangunan fisik',
+        color: 'purple',
+    },
+];
+
+// ─── Transactions (Linked to Asset & Program) ──────
+
+export const MOCK_TRANSACTIONS: Transaction[] = [
+    {
+        id: 't1',
+        date: new Date('2024-02-10'),
+        amount: 2500000,
+        type: 'INCOME',
+        accountId: 'a1',   // Masuk ke Kas Tunai
+        programId: 'p1',   // Untuk Operasional (Kotak Jumat)
+        category: 'INFAQ_JUMAT',
+        description: 'Kotak Amal Jumat Pekan 2',
+        status: 'COMPLETED',
+    },
+    {
+        id: 't2',
+        date: new Date('2024-02-09'),
+        amount: 1500000,
+        type: 'EXPENSE',
+        accountId: 'a1',   // Keluar dari Kas Tunai
+        programId: 'p1',   // Dari Anggaran Operasional
+        category: 'OPERASIONAL',
+        description: 'Bayar Listrik & Air',
+        status: 'COMPLETED',
+    },
+    {
+        id: 't3',
+        date: new Date('2024-02-08'),
+        amount: 5000000,
+        type: 'INCOME',
+        accountId: 'a2',   // Masuk ke Bank BSI
+        programId: 'p2',   // Untuk Yatim (Zakat Mal)
+        category: 'ZAKAT_MAL',
+        description: 'Hamba Allah - Zakat Mal',
+        status: 'COMPLETED',
+    },
+    {
+        id: 't4',
+        date: new Date('2024-02-07'),
+        amount: 750000,
+        type: 'EXPENSE',
+        accountId: 'a1',
+        programId: 'p1',
+        category: 'HONOR_PETUGAS',
+        description: 'Insentif Marbot',
+        status: 'COMPLETED',
+    },
+    {
+        id: 't5',
+        date: new Date('2024-02-05'),
+        amount: 300000,
+        type: 'EXPENSE',
+        accountId: 'a1',
+        programId: 'p1',
+        category: 'OPERASIONAL',
+        description: 'Beli Alat Kebersihan',
+        status: 'COMPLETED',
+    },
 ];
 
 // ─── FAQ ───────────────────────────────────────────
@@ -119,146 +237,6 @@ export const MOCK_TEAM_MEMBERS: TeamMember[] = [
     { id: 'u2', name: 'Ust. Yusuf Mansur', email: 'yusuf@example.com', role: 'SEKRETARIS', status: 'ACTIVE', avatarColor: 'bg-emerald-500' },
     { id: 'u3', name: 'Kang Emil', email: 'emil@example.com', role: 'BENDAHARA', status: 'ACTIVE', avatarColor: 'bg-blue-500' },
     { id: 'u4', name: 'Pak RT 05', email: 'rt05@example.com', role: 'MEMBER', status: 'PENDING', avatarColor: 'bg-orange-500' },
-];
-
-// ─── Transactions ──────────────────────────────────
-
-export const MOCK_TRANSACTIONS: Transaction[] = [
-    {
-        id: 't1',
-        amount: 2500000,
-        type: 'INCOME',
-        category: 'INFAQ_JUMAT',
-        date: new Date('2024-02-09'),
-        description: 'Kotak Amal Jumat Pekan 2',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't2',
-        amount: 1500000,
-        type: 'EXPENSE',
-        category: 'OPERASIONAL',
-        date: new Date('2024-02-08'),
-        description: 'Bayar Listrik & Air',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't3',
-        amount: 5000000,
-        type: 'INCOME',
-        category: 'ZAKAT_MAL',
-        date: new Date('2024-02-07'),
-        description: 'Hamba Allah',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't4',
-        amount: 750000,
-        type: 'EXPENSE',
-        category: 'HONOR_PETUGAS',
-        date: new Date('2024-02-06'),
-        description: 'Insentif Marbot',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't5',
-        amount: 300000,
-        type: 'EXPENSE',
-        category: 'OPERASIONAL',
-        date: new Date('2024-02-05'),
-        description: 'Beli Alat Kebersihan',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't6',
-        amount: 1200000,
-        type: 'INCOME',
-        category: 'INFAQ_JUMAT',
-        date: new Date('2024-02-02'),
-        description: 'Kotak Amal Jumat Pekan 1',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't7',
-        amount: 10000000,
-        type: 'INCOME',
-        category: 'WAKAF',
-        date: new Date('2024-02-01'),
-        description: 'Wakaf Tunai Pembangunan Menara',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't8',
-        amount: 5000000,
-        type: 'EXPENSE',
-        category: 'PEMBANGUNAN',
-        date: new Date('2024-01-31'),
-        description: 'DP Tukang',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't9',
-        amount: 200000,
-        type: 'INCOME',
-        category: 'DONASI',
-        date: new Date('2024-01-30'),
-        description: 'Sumbangan Nasi Box',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't10',
-        amount: 1500000,
-        type: 'EXPENSE',
-        category: 'SOSIAL_YATIM',
-        date: new Date('2024-01-28'),
-        description: 'Santunan Anak Yatim Bulanan',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't11',
-        amount: 450000,
-        type: 'EXPENSE',
-        category: 'OPERASIONAL',
-        date: new Date('2024-01-27'),
-        description: 'Service AC',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't12',
-        amount: 3200000,
-        type: 'INCOME',
-        category: 'INFAQ_JUMAT',
-        date: new Date('2024-01-26'),
-        description: 'Kotak Amal Jumat Pekan 4',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't13',
-        amount: 100000,
-        type: 'INCOME',
-        category: 'ZAKAT_FITRAH',
-        date: new Date('2024-01-25'),
-        description: 'Zakat Fitrah (Simulasi)',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't14',
-        amount: 2500000,
-        type: 'EXPENSE',
-        category: 'PEMBANGUNAN',
-        date: new Date('2024-01-20'),
-        description: 'Beli Semen 50 Sak',
-        status: 'COMPLETED',
-    },
-    {
-        id: 't15',
-        amount: 500000,
-        type: 'EXPENSE',
-        category: 'HONOR_PETUGAS',
-        date: new Date('2024-01-15'),
-        description: 'Bonus Khotib',
-        status: 'COMPLETED',
-    },
 ];
 
 // ─── Tenants (Super Admin) ─────────────────────────

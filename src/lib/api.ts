@@ -21,6 +21,8 @@ import type {
     FAQ,
     LegalMenuItem,
     TeamMember,
+    AssetAccount,
+    Program,
 } from '@/types';
 
 import {
@@ -37,6 +39,8 @@ import {
     MOCK_LETTERS,
     MOCK_INVENTORY,
     MOCK_DONORS,
+    MOCK_ASSET_ACCOUNTS,
+    MOCK_PROGRAMS,
 } from './mock-data';
 
 // ─── Toggle: set to false when backend is ready ───
@@ -71,7 +75,7 @@ export async function getCurrentUser(): Promise<User> {
     throw new Error('API not implemented');
 }
 
-// ─── Finance ───────────────────────────────────────
+// ─── Finance: 2D Accounting ────────────────────────
 
 /** Get all transactions */
 export async function getTransactions(): Promise<Transaction[]> {
@@ -87,7 +91,19 @@ export async function getTransactionsByType(
     throw new Error('API not implemented');
 }
 
-/** Get bank accounts */
+/** Dimension 1: Get Asset Accounts (Physical) */
+export async function getAssetAccounts(): Promise<AssetAccount[]> {
+    if (USE_MOCK) return MOCK_ASSET_ACCOUNTS;
+    throw new Error('API not implemented');
+}
+
+/** Dimension 2: Get Programs (Logical) */
+export async function getPrograms(): Promise<Program[]> {
+    if (USE_MOCK) return MOCK_PROGRAMS;
+    throw new Error('API not implemented');
+}
+
+/** Legacy: Get bank accounts (Mapped from AssetAccounts) */
 export async function getBankAccounts(): Promise<BankAccount[]> {
     if (USE_MOCK) return MOCK_BANK_ACCOUNTS;
     throw new Error('API not implemented');

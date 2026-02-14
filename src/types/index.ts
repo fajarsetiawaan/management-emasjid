@@ -12,26 +12,61 @@
 
 export type Role = 'OWNER' | 'ADMIN';
 
-// ─── Finance ───────────────────────────────────────
+// ─── Finance: 2D Fund Accounting Core ──────────────
 
-export type TransactionType = 'INCOME' | 'EXPENSE';
+export type AssetType = 'CASH' | 'BANK' | 'EWALLET';
+export type ProgramType = 'UNRESTRICTED' | 'RESTRICTED';
+export type TransactionType = 'INCOME' | 'EXPENSE' | 'TRANSFER'; // Added TRANSFER
+
+/**
+ * Dimension 1: Where is the money? (Physical/Asset)
+ */
+export interface AssetAccount {
+    id: string;
+    name: string; // e.g. "Bank BSI", "Kas Tunai"
+    type: AssetType;
+    balance: number;
+    accountNumber?: string;
+    description?: string;
+    color: string; // UI Color
+}
+
+/**
+ * Dimension 2: What is the money for? (Logical/Program)
+ */
+export interface Program {
+    id: string;
+    name: string; // e.g. "Operasional", "Yatim", "Pembangunan"
+    type: ProgramType;
+    balance: number;
+    description?: string;
+    color: string; // UI Color
+}
 
 export type IncomeCategory = 'INFAQ_JUMAT' | 'ZAKAT_FITRAH' | 'ZAKAT_MAL' | 'WAKAF' | 'DONASI';
 export type ExpenseCategory = 'OPERASIONAL' | 'PEMBANGUNAN' | 'HONOR_PETUGAS' | 'SOSIAL_YATIM';
 
-export type TransactionCategory = IncomeCategory | ExpenseCategory;
+export type TransactionCategory = IncomeCategory | ExpenseCategory; // Keep for backward compat or categorization within programs
 
 export interface Transaction {
     id: string;
+    date: Date;
     amount: number;
     type: TransactionType;
-    category: TransactionCategory;
-    date: Date;
+
+    // 2D Accounting Links
+    accountId: string; // Physical Account (Where)
+    programId: string; // Logical Program (For What)
+
     description: string;
     status: 'COMPLETED' | 'PENDING';
+
+    // Optional: Kept for granular categorization if needed
+    category?: TransactionCategory;
 }
 
-export interface BankAccount {
+
+export interface BankAccount { // Legacy, to be replaced by AssetAccount in UI
     id: string;
     bankName: string;
     accountNumber: string;

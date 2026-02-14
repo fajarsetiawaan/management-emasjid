@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { MOCK_USER, MOCK_MOSQUE } from '@/lib/mock-data';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function MobileAppShell({
     children,
@@ -39,14 +40,14 @@ export default function MobileAppShell({
     return (
         <div className="min-h-screen bg-slate-900 flex justify-center font-sans tracking-tight">
             {/* Mobile Constraint Container */}
-            <div className="w-full max-w-[480px] bg-slate-50 min-h-screen shadow-2xl relative flex flex-col overflow-hidden">
+            <div className="w-full max-w-[480px] bg-slate-50 dark:bg-slate-950 min-h-screen shadow-2xl relative flex flex-col overflow-hidden">
 
                 {/* Decorative Background Blobs */}
                 <div className="absolute top-0 left-0 w-full h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 pointer-events-none" />
                 <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/3 pointer-events-none" />
 
                 {/* Sticky Top Bar (Glassmorphism Premium) */}
-                <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/50 h-16 flex items-center justify-between px-5 transition-all duration-300">
+                <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 h-16 flex items-center justify-between px-5 transition-all duration-300">
 
                     {/* Left: Branding */}
                     <div className="flex items-center gap-3">
@@ -54,10 +55,10 @@ export default function MobileAppShell({
                             <Building2 size={20} />
                         </div>
                         <div className="flex flex-col">
-                            <h1 className="text-sm font-bold text-slate-800 leading-tight">
+                            <h1 className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
                                 {MOCK_MOSQUE.name}
                             </h1>
-                            <span className="text-[10px] text-slate-500 font-medium tracking-wide">
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-wide">
                                 ADMIN DASHBOARD
                             </span>
                         </div>
@@ -65,9 +66,10 @@ export default function MobileAppShell({
 
                     {/* Right: User Actions */}
                     <div className="flex items-center gap-3">
-                        <button className="relative w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:shadow-md transition-all">
+                        <ThemeToggle />
+                        <button className="relative w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:shadow-md transition-all">
                             <Bell size={20} />
-                            <span className="absolute top-2 right-2.5 h-2 w-2 bg-rose-500 rounded-full border-2 border-white"></span>
+                            <span className="absolute top-2 right-2.5 h-2 w-2 bg-rose-500 rounded-full border-2 border-white dark:border-slate-800"></span>
                         </button>
                     </div>
                 </header>
@@ -155,7 +157,7 @@ export default function MobileAppShell({
                 </div>
 
                 {/* Bottom Navigation Dock (Floating Island) */}
-                <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-[420px] z-50 bg-white/90 backdrop-blur-2xl border border-white/40 shadow-[0_20px_40px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-1.5">
+                <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-[420px] z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/40 dark:border-slate-800/40 shadow-[0_20px_40px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-1.5">
                     <div className="grid grid-cols-5 h-16 items-center px-1 relative">
                         {menuItems.map((item) => {
                             const isActive = pathname === item.href;
@@ -165,9 +167,9 @@ export default function MobileAppShell({
                                     <div key={item.name} className="relative flex justify-center h-full items-center -mt-6">
                                         <button
                                             onClick={() => setIsFabOpen(!isFabOpen)}
-                                            className={`h-16 w-16 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) border-4 border-slate-50
+                                            className={`h-16 w-16 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) border-4 border-slate-50 dark:border-slate-950
                         ${isFabOpen
-                                                    ? 'bg-slate-800 rotate-45 scale-90'
+                                                    ? 'bg-slate-800 dark:bg-slate-700 rotate-45 scale-90'
                                                     : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/40 hover:scale-110 hover:-translate-y-1'
                                                 }
                       `}
@@ -190,7 +192,7 @@ export default function MobileAppShell({
                                             className="absolute -bottom-1 w-1 h-1 bg-emerald-500 rounded-full mb-2"
                                         />
                                     )}
-                                    <div className={`p-2 rounded-2xl transition-all duration-300 ${isActive ? 'text-emerald-600 bg-emerald-50/0 -translate-y-1' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                                    <div className={`p-2 rounded-2xl transition-all duration-300 ${isActive ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50/0 -translate-y-1' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`}>
                                         <item.icon
                                             size={24}
                                             className={isActive ? 'stroke-[2.5px] drop-shadow-sm' : 'stroke-[1.5px]'}

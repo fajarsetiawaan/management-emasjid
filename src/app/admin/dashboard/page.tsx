@@ -43,12 +43,12 @@ export default function AdminDashboardPage() {
     const nextEvent = isNewUser ? null : MOCK_EVENTS.find(e => e.status === 'UPCOMING');
 
     const menuItems = [
-        { name: 'Keuangan', href: '/admin/finance', icon: Wallet, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
-        { name: 'Agenda', href: '/admin/events', icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-        { name: 'Surat', href: '/admin/letters', icon: FileText, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
-        { name: 'Aset', href: '/admin/inventory', icon: Box, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
-        { name: 'Jamaah', href: '/admin/donors', icon: Users, color: 'text-cyan-600', bg: 'bg-cyan-50', border: 'border-cyan-100' },
-        { name: 'Laporan', href: '/admin/reports', icon: BarChart3, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+        { name: 'Keuangan', href: '/admin/finance', icon: Wallet, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-100 dark:border-emerald-800/50' },
+        { name: 'Agenda', href: '/admin/events', icon: Calendar, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-100 dark:border-blue-800/50' },
+        { name: 'Surat', href: '/admin/letters', icon: FileText, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/20', border: 'border-orange-100 dark:border-orange-800/50' },
+        { name: 'Aset', href: '/admin/inventory', icon: Box, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-100 dark:border-purple-800/50' },
+        { name: 'Jamaah', href: '/admin/donors', icon: Users, color: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-50 dark:bg-cyan-900/20', border: 'border-cyan-100 dark:border-cyan-800/50' },
+        { name: 'Laporan', href: '/admin/reports', icon: BarChart3, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/20', border: 'border-indigo-100 dark:border-indigo-800/50' },
     ];
 
     const containerVariants = {
@@ -67,7 +67,7 @@ export default function AdminDashboardPage() {
     };
 
     return (
-        <div className="bg-slate-50 min-h-screen">
+        <div className="bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-300">
             {/* Hero Section (Finance) */}
             <div className="relative overflow-hidden rounded-b-[2.5rem] shadow-2xl shadow-emerald-900/20 z-0">
                 {/* Mesh Gradient Background */}
@@ -106,7 +106,7 @@ export default function AdminDashboardPage() {
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100 p-5 grid grid-cols-4 gap-y-6 gap-x-2"
+                    className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100 dark:ring-slate-800 p-5 grid grid-cols-4 gap-y-6 gap-x-2"
                 >
                     {menuItems.map((item) => (
                         <motion.div key={item.name} variants={itemVariants} className="w-full">
@@ -114,7 +114,7 @@ export default function AdminDashboardPage() {
                                 <div className={`w-14 h-14 rounded-2xl ${item.bg} border ${item.border} flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-active:scale-95`}>
                                     <item.icon className={item.color} size={26} strokeWidth={2} />
                                 </div>
-                                <span className="text-[11px] font-bold text-slate-600 text-center leading-tight tracking-tight group-hover:text-slate-900 transition-colors">
+                                <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 text-center leading-tight tracking-tight group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
                                     {item.name}
                                 </span>
                             </Link>
@@ -131,8 +131,8 @@ export default function AdminDashboardPage() {
                 {/* Agenda Section */}
                 <div className="space-y-3">
                     <div className="flex items-center justify-between px-1">
-                        <h3 className="font-bold text-slate-800 text-lg tracking-tight">Agenda Terdekat</h3>
-                        <Link href="/admin/events" className="flex items-center gap-1 text-xs text-emerald-600 font-bold hover:underline">
+                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg tracking-tight">Agenda Terdekat</h3>
+                        <Link href="/admin/events" className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
                             Lihat Semua <ArrowUpRight size={14} />
                         </Link>
                     </div>
@@ -140,17 +140,17 @@ export default function AdminDashboardPage() {
                     {
                         nextEvent ? (
                             <Link href="/admin/events" className="block group">
-                                <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-5 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group-hover:-translate-y-1">
-                                    <div className="bg-blue-50 text-blue-600 w-14 h-14 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 border border-blue-100 shadow-sm">
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">{nextEvent.date.toLocaleString('default', { month: 'short' })}</span>
+                                <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-5 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group-hover:-translate-y-1">
+                                    <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 w-14 h-14 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 border border-blue-100 dark:border-blue-800/50 shadow-sm">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 dark:text-blue-500">{nextEvent.date.toLocaleString('default', { month: 'short' })}</span>
                                         <span className="text-xl font-bold leading-none">{nextEvent.date.getDate()}</span>
                                     </div>
                                     <div className="flex-1 min-w-0 py-1">
-                                        <h4 className="font-bold text-slate-800 text-base truncate group-hover:text-blue-600 transition-colors">{nextEvent.title}</h4>
-                                        <p className="text-xs text-slate-500 mt-1 truncate font-medium">{nextEvent.ustadz || 'Agenda Internal DKM'}</p>
-                                        <div className="flex items-center gap-3 mt-2.5 text-xs text-slate-400 font-medium">
-                                            <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md">
-                                                <Clock size={12} className="text-slate-500" />
+                                        <h4 className="font-bold text-slate-800 dark:text-slate-100 text-base truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{nextEvent.title}</h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate font-medium">{nextEvent.ustadz || 'Agenda Internal DKM'}</p>
+                                        <div className="flex items-center gap-3 mt-2.5 text-xs text-slate-400 dark:text-slate-500 font-medium">
+                                            <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md">
+                                                <Clock size={12} className="text-slate-500 dark:text-slate-400" />
                                                 <span>{nextEvent.time} WIB</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
@@ -159,13 +159,13 @@ export default function AdminDashboardPage() {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all">
-                                        <ChevronRight size={18} className="text-slate-300 group-hover:text-white" />
+                                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all">
+                                        <ChevronRight size={18} className="text-slate-300 dark:text-slate-600 group-hover:text-white" />
                                     </div>
                                 </div>
                             </Link>
                         ) : (
-                            <div className="text-center py-10 text-slate-400 text-sm bg-white rounded-2xl border border-slate-100 border-dashed">
+                            <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 border-dashed">
                                 Belum ada agenda terdekat
                             </div>
                         )

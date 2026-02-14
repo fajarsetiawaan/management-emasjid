@@ -1,27 +1,51 @@
 'use client';
 
-import { useState } from 'react';
-import { MOCK_TRANSACTIONS, MOCK_MOSQUE } from '@/lib/mock-data';
-import { Download, ChevronLeft, ChevronRight, PieChart, TrendingUp, Wallet, ShieldCheck } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Transaction, Program } from '@/types';
+import { getTransactions, getPrograms } from '@/lib/api';
+import { Download, ChevronLeft, ChevronRight, PieChart, TrendingUp, Wallet, ShieldCheck, Layers } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function ReportsPage() {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
+    // Data State
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [programs, setPrograms] = useState<Program[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadData = async () => {
+            const [txData, progData] = await Promise.all([
+                getTransactions(),
+                getPrograms()
+            ]);
+            setTransactions(txData);
+            setPrograms(progData);
+            setLoading(false);
+        };
+        loadData();
+    }, []);
+
     const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
     // Filter Transactions for Selected Month
-    const monthlyTransactions = MOCK_TRANSACTIONS.filter(t => {
+    const monthlyTransactions = transactions.filter(t => {
         return t.date.getMonth() === currentMonth && t.date.getFullYear() === currentYear;
     });
 
     const income = monthlyTransactions.filter(t => t.type === 'INCOME').reduce((a, b) => a + b.amount, 0);
     const expense = monthlyTransactions.filter(t => t.type === 'EXPENSE').reduce((a, b) => a + b.amount, 0);
 
-    // Fund Separation Logic (Mock Percentage)
-    // In real app, this would be summed from categories like ZAKAT vs INFAQ
-    const restrictedBalance = MOCK_MOSQUE.balance * 0.3; // 30% Zakat/Yatim
-    const operationalBalance = MOCK_MOSQUE.balance * 0.7; // 70% Operasional
+    // Fund Separation Logic (Real Data)
+    const restrictedBalance = programs
+        .filter(p => p.type === 'RESTRICTED')
+        .reduce((sum, p) => sum + p.balance, 0);
+
+    const operationalBalance = programs
+        .filter(p => p.type === 'UNRESTRICTED')
+        .reduce((sum, p) => sum + p.balance, 0);
 
     const formatRupiah = (amount: number) => {
         return new Intl.NumberFormat('id-ID', {
@@ -50,6 +74,8 @@ export default function ReportsPage() {
         }
     };
 
+    if (loading) return <div className="p-10 text-center text-slate-400">Loading reports...</div>;
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -69,7 +95,7 @@ export default function ReportsPage() {
                 </button>
             </div>
 
-            {/* Arus Kas Chart (Visual CSS) */}
+            {/* Arus Kas Chart */}
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
                 <div className="flex items-center gap-2 mb-6">
                     <TrendingUp size={18} className="text-emerald-600" />
@@ -84,7 +110,7 @@ export default function ReportsPage() {
                         </span>
                         <div
                             className="w-full bg-emerald-500 rounded-t-xl hover:bg-emerald-600 transition-all relative"
-                            style={{ height: `${(income / (income + expense || 1)) * 100}%`, minHeight: '10%' }}
+                            style={{ height: `${(income / ((income + expense) || 1)) * 100}%`, minHeight: '4px' }}
                         ></div>
                         <span className="text-xs font-medium text-slate-500">Masuk</span>
                     </div>
@@ -96,7 +122,7 @@ export default function ReportsPage() {
                         </span>
                         <div
                             className="w-full bg-rose-500 rounded-t-xl hover:bg-rose-600 transition-all relative"
-                            style={{ height: `${(expense / (income + expense || 1)) * 100}%`, minHeight: '10%' }}
+                            style={{ height: `${(expense / ((income + expense) || 1)) * 100}%`, minHeight: '4px' }}
                         ></div>
                         <span className="text-xs font-medium text-slate-500">Keluar</span>
                     </div>
@@ -107,7 +133,7 @@ export default function ReportsPage() {
             <div className="space-y-3">
                 <h3 className="font-bold text-slate-800 flex items-center gap-2">
                     <PieChart size={18} className="text-slate-500" />
-                    Posisi Saldo
+                    Posisi Saldo per Program
                 </h3>
 
                 {/* Operational */}
@@ -118,7 +144,7 @@ export default function ReportsPage() {
                         </div>
                         <span className="text-sm font-medium text-blue-50">Dana Operasional</span>
                     </div>
-                    <p className="text-sm text-blue-100 mb-1">Bebas digunakan untuk kegiatan</p>
+                    <p className="text-sm text-blue-100 mb-1">Bebas digunakan (Unrestricted)</p>
                     <p className="text-2xl font-bold">{formatRupiah(operationalBalance)}</p>
                 </div>
 
@@ -128,10 +154,24 @@ export default function ReportsPage() {
                         <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                             <ShieldCheck size={20} />
                         </div>
-                        <span className="text-sm font-medium text-amber-50">Dana Terikat (Zakat/Yatim)</span>
+                        <span className="text-sm font-medium text-amber-50">Dana Terikat (Restricted)</span>
                     </div>
-                    <p className="text-sm text-amber-100 mb-1">Hanya untuk asnaf/mustahik</p>
+                    <p className="text-sm text-amber-100 mb-1">Khusus Zakat, Yatim, Wakaf</p>
                     <p className="text-2xl font-bold">{formatRupiah(restrictedBalance)}</p>
+                </div>
+
+                {/* Detailed Program Breakdown */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Rincian Program</h4>
+                    {programs.map(prog => (
+                        <div key={prog.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors">
+                            <div className="flex items-center gap-3">
+                                <span className={`w-2 h-2 rounded-full bg-${prog.color}-500`}></span>
+                                <span className="text-sm font-medium text-slate-700">{prog.name}</span>
+                            </div>
+                            <span className="text-sm font-bold text-slate-800">{formatRupiah(prog.balance)}</span>
+                        </div>
+                    ))}
                 </div>
             </div>
 

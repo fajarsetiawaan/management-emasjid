@@ -1,37 +1,43 @@
 'use client';
 
-import { useState } from 'react';
-import { ArrowDown, ArrowUp, Calendar, Check, Save } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowDown, ArrowUp, Calendar, Check, Save, Wallet, Layers } from 'lucide-react';
 import {
     TransactionType,
-    IncomeCategory,
-    ExpenseCategory,
-    TransactionCategory
+    AssetAccount,
+    Program
 } from '@/types';
+import { getAssetAccounts, getPrograms } from '@/lib/api';
 
 export default function TransactionForm() {
     const [type, setType] = useState<TransactionType>('INCOME');
     const [amountStr, setAmountStr] = useState('');
-    const [category, setCategory] = useState<TransactionCategory | ''>('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [description, setDescription] = useState('');
 
-    const incomeCategories: { value: IncomeCategory; label: string }[] = [
-        { value: 'INFAQ_JUMAT', label: 'Infaq Jumat' },
-        { value: 'ZAKAT_FITRAH', label: 'Zakat Fitrah' },
-        { value: 'ZAKAT_MAL', label: 'Zakat Mal' },
-        { value: 'WAKAF', label: 'Wakaf' },
-        { value: 'DONASI', label: 'Donasi' },
-    ];
+    // 2D Accounting State
+    const [accountId, setAccountId] = useState('');
+    const [programId, setProgramId] = useState('');
 
-    const expenseCategories: { value: ExpenseCategory; label: string }[] = [
-        { value: 'OPERASIONAL', label: 'Operasional' },
-        { value: 'PEMBANGUNAN', label: 'Pembangunan' },
-        { value: 'HONOR_PETUGAS', label: 'Honor Petugas' },
-        { value: 'SOSIAL_YATIM', label: 'Sosial / Yatim' },
-    ];
+    // Data Source
+    const [accounts, setAccounts] = useState<AssetAccount[]>([]);
+    const [programs, setPrograms] = useState<Program[]>([]);
 
-    const categories = type === 'INCOME' ? incomeCategories : expenseCategories;
+    useEffect(() => {
+        const loadData = async () => {
+            const [accData, progData] = await Promise.all([
+                getAssetAccounts(),
+                getPrograms()
+            ]);
+            setAccounts(accData);
+            setPrograms(progData);
+
+            // Set defaults if available
+            if (accData.length > 0) setAccountId(accData[0].id);
+            if (progData.length > 0) setProgramId(progData[0].id);
+        };
+        loadData();
+    }, []);
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         // Remove non-digit characters
@@ -53,18 +59,18 @@ export default function TransactionForm() {
         const payload = {
             amount: parseInt(amountStr.replace(/\./g, '')),
             type,
-            category,
+            accountId,   // Dimension 1: Where
+            programId,   // Dimension 2: What for
             date: new Date(date),
             description,
         };
 
         console.log('Transaction Submitted:', JSON.stringify(payload, null, 2));
-        alert('Data transaksi berhasil disimpan! (Cek Console)');
+        alert(`Data transaksi berhasil disimpan!\n\n${type === 'INCOME' ? 'Masuk ke' : 'Keluar dari'}: ${accounts.find(a => a.id === accountId)?.name}\nUntuk Program: ${programs.find(p => p.id === programId)?.name}`);
 
         // Reset form
         setAmountStr('');
         setDescription('');
-        setCategory('');
     };
 
     return (
@@ -73,7 +79,7 @@ export default function TransactionForm() {
             <div className="grid grid-cols-2">
                 <button
                     type="button"
-                    onClick={() => { setType('INCOME'); setCategory(''); }}
+                    onClick={() => setType('INCOME')}
                     className={`
             p-4 flex items-center justify-center gap-2 font-bold transition-colors
             ${type === 'INCOME'
@@ -87,7 +93,7 @@ export default function TransactionForm() {
                 </button>
                 <button
                     type="button"
-                    onClick={() => { setType('EXPENSE'); setCategory(''); }}
+                    onClick={() => setType('EXPENSE')}
                     className={`
             p-4 flex items-center justify-center gap-2 font-bold transition-colors
             ${type === 'EXPENSE'
@@ -129,49 +135,72 @@ export default function TransactionForm() {
                     </div>
                 </div>
 
-                {/* Date & Category Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label htmlFor="date" className="block text-sm font-medium text-slate-700 mb-2">
-                            Tanggal
-                        </label>
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                            <input
-                                id="date"
-                                name="date"
-                                type="date"
-                                value={date}
-                                onChange={(e) => setDate(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-slate-400 focus:outline-none"
-                                required
-                            />
-                        </div>
-                    </div>
+                {/* 2D Accounting Inputs */}
+                <div className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
 
+                    {/* Dimension 1: Asset Account */}
                     <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-slate-700 mb-2">
-                            Kategori
+                        <label htmlFor="account" className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                            <Wallet size={16} className="text-slate-400" />
+                            {type === 'INCOME' ? 'Masuk ke Akun (Fisik)' : 'Sumber Dana (Fisik)'}
                         </label>
                         <select
-                            id="category"
-                            name="category"
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value as TransactionCategory)}
+                            id="account"
+                            value={accountId}
+                            onChange={(e) => setAccountId(e.target.value)}
                             className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-slate-400 focus:outline-none bg-white"
                             required
                         >
-                            <option value="" disabled>Pilih Kategori</option>
-                            {categories.map((cat) => (
-                                <option key={cat.value} value={cat.value}>
-                                    {cat.label}
+                            {accounts.map((acc) => (
+                                <option key={acc.id} value={acc.id}>
+                                    {acc.name} ({acc.type})
                                 </option>
                             ))}
                         </select>
                     </div>
+
+                    {/* Dimension 2: Program */}
+                    <div>
+                        <label htmlFor="program" className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                            <Layers size={16} className="text-slate-400" />
+                            {type === 'INCOME' ? 'Alokasi Program' : 'Beban Program'}
+                        </label>
+                        <select
+                            id="program"
+                            value={programId}
+                            onChange={(e) => setProgramId(e.target.value)}
+                            className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-slate-400 focus:outline-none bg-white"
+                            required
+                        >
+                            {programs.map((prog) => (
+                                <option key={prog.id} value={prog.id}>
+                                    {prog.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                 </div>
 
-                {/* Description */}
+                {/* Date & Description */}
+                <div>
+                    <label htmlFor="date" className="block text-sm font-medium text-slate-700 mb-2">
+                        Tanggal
+                    </label>
+                    <div className="relative">
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <input
+                            id="date"
+                            name="date"
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-slate-400 focus:outline-none"
+                            required
+                        />
+                    </div>
+                </div>
+
                 <div>
                     <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-2">
                         Keterangan
@@ -181,7 +210,7 @@ export default function TransactionForm() {
                         name="description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Contoh: Kotak Amal Jumat"
+                        placeholder="Contoh: Kotak Amal Jumat, Bayar Listrik..."
                         rows={3}
                         className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-slate-400 focus:outline-none resize-none"
                         required

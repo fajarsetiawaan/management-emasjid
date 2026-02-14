@@ -227,7 +227,7 @@ export default function SetupWizard() {
 
                             {activeModal === 'bank' && (
                                 <div>
-                                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><Wallet className="text-emerald-500" size={24} /> Rekening Donasi</h3>
+                                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><Wallet className="text-emerald-500" size={24} /> Rekening Bank</h3>
                                     <div className="space-y-3">
                                         <div>
                                             <label className="text-xs font-bold text-slate-500 uppercase">Nama Bank</label>
