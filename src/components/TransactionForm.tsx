@@ -8,10 +8,11 @@ import {
     Program
 } from '@/types';
 import { getAssetAccounts, getPrograms } from '@/lib/api';
+import { CalculatorInput } from '@/components/ui/CalculatorInput';
 
 export default function TransactionForm() {
     const [type, setType] = useState<TransactionType>('INCOME');
-    const [amountStr, setAmountStr] = useState('');
+    const [amount, setAmount] = useState<number>(0);
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [description, setDescription] = useState('');
 
@@ -39,25 +40,11 @@ export default function TransactionForm() {
         loadData();
     }, []);
 
-    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // Remove non-digit characters
-        const value = e.target.value.replace(/\D/g, '');
-
-        if (value === '') {
-            setAmountStr('');
-            return;
-        }
-
-        // Format as IDR for display
-        const formatted = new Intl.NumberFormat('id-ID').format(parseInt(value));
-        setAmountStr(formatted);
-    };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         const payload = {
-            amount: parseInt(amountStr.replace(/\./g, '')),
+            amount,
             type,
             accountId,   // Dimension 1: Where
             programId,   // Dimension 2: What for
@@ -69,7 +56,7 @@ export default function TransactionForm() {
         alert(`Data transaksi berhasil disimpan!\n\n${type === 'INCOME' ? 'Masuk ke' : 'Keluar dari'}: ${accounts.find(a => a.id === accountId)?.name}\nUntuk Program: ${programs.find(p => p.id === programId)?.name}`);
 
         // Reset form
-        setAmountStr('');
+        setAmount(0);
         setDescription('');
     };
 
@@ -111,28 +98,13 @@ export default function TransactionForm() {
 
                 {/* Amount Input */}
                 <div>
-                    <label htmlFor="amount" className="block text-sm font-medium text-slate-700 mb-2">
-                        Nominal (Rp)
-                    </label>
-                    <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
-                            Rp
-                        </span>
-                        <input
-                            id="amount"
-                            name="amount"
-                            type="text"
-                            value={amountStr}
-                            onChange={handleAmountChange}
-                            placeholder="0"
-                            className={`
-                w-full pl-12 pr-4 py-4 text-3xl font-bold rounded-xl border border-slate-200 
-                focus:ring-2 focus:outline-none transition-all
-                ${type === 'INCOME' ? 'focus:ring-emerald-500 text-emerald-600' : 'focus:ring-rose-500 text-rose-600'}
-              `}
-                            required
-                        />
-                    </div>
+                    <CalculatorInput
+                        label="Nominal"
+                        value={amount}
+                        onChange={setAmount}
+                        placeholder="0"
+                        className="mb-6"
+                    />
                 </div>
 
                 {/* 2D Accounting Inputs */}

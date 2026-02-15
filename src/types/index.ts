@@ -41,6 +41,10 @@ export interface Program {
     balance: number;
     description?: string;
     color: string; // UI Color
+    allocation?: {
+        type: 'CASH' | 'BANK';
+        bankId?: string;
+    };
 }
 
 export type IncomeCategory = 'INFAQ_JUMAT' | 'ZAKAT_FITRAH' | 'ZAKAT_MAL' | 'WAKAF' | 'DONASI';

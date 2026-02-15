@@ -55,33 +55,35 @@ export default function MobileAppShell({
             {/* Mobile Constraint Container */}
             <div className="w-full max-w-[480px] bg-white/50 dark:bg-slate-950/50 min-h-screen shadow-2xl relative flex flex-col overflow-hidden transition-colors duration-300 backdrop-blur-3xl border-x border-white/20 dark:border-white/5">
 
-                {/* Sticky Top Bar (Glassmorphism Premium) */}
-                <header className="sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/20 dark:border-white/5 h-16 flex items-center justify-between px-5 transition-all duration-300">
+                {/* Sticky Top Bar (Glassmorphism Premium) - Only on Dashboard Home */}
+                {pathname === '/admin/dashboard' && (
+                    <header className="sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/20 dark:border-white/5 h-16 flex items-center justify-between px-5 transition-all duration-300">
 
-                    {/* Left: Branding */}
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-200/50">
-                            <Building2 size={20} />
+                        {/* Left: Branding */}
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-200/50">
+                                <Building2 size={20} />
+                            </div>
+                            <div className="flex flex-col">
+                                <h1 className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
+                                    {MOCK_MOSQUE.name}
+                                </h1>
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-wide">
+                                    ADMIN DASHBOARD
+                                </span>
+                            </div>
                         </div>
-                        <div className="flex flex-col">
-                            <h1 className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
-                                {MOCK_MOSQUE.name}
-                            </h1>
-                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-wide">
-                                ADMIN DASHBOARD
-                            </span>
-                        </div>
-                    </div>
 
-                    {/* Right: User Actions */}
-                    <div className="flex items-center gap-3">
-                        <ThemeToggle />
-                        <button className="relative w-10 h-10 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:shadow-md transition-all">
-                            <Bell size={20} />
-                            <span className="absolute top-2 right-2.5 h-2 w-2 bg-rose-500 rounded-full border-2 border-white dark:border-slate-800"></span>
-                        </button>
-                    </div>
-                </header>
+                        {/* Right: User Actions */}
+                        <div className="flex items-center gap-3">
+                            <ThemeToggle />
+                            <button className="relative w-10 h-10 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:shadow-md transition-all">
+                                <Bell size={20} />
+                                <span className="absolute top-2 right-2.5 h-2 w-2 bg-rose-500 rounded-full border-2 border-white dark:border-slate-800"></span>
+                            </button>
+                        </div>
+                    </header>
+                )}
 
                 {/* Content Area */}
                 <main className="flex-1 pb-24 relative z-0 px-1 overflow-x-hidden">

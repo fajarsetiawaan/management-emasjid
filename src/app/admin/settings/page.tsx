@@ -17,7 +17,8 @@ import {
     ChevronRight,
     Edit2,
     Crown,
-    User
+    User,
+    Wallet
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -180,6 +181,13 @@ export default function SettingsPage() {
                         <SettingsItem
                             icon={QrCode}
                             label="Kode QR Masjid"
+                            onClick={() => { }}
+                        />
+                    </Link>
+                    <Link href="/admin/settings/funds" className="w-full">
+                        <SettingsItem
+                            icon={Wallet}
+                            label="Pos Keuangan & Anggaran"
                             onClick={() => { }}
                         />
                     </Link>

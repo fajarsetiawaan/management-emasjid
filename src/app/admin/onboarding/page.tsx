@@ -22,9 +22,11 @@ import {
     Upload,
     CreditCard,
     Image as ImageIcon,
+
     X
 } from 'lucide-react';
 import { MOCK_MOSQUE } from '@/lib/mock-data';
+import { CalculatorInput } from '@/components/ui/CalculatorInput';
 
 // Helper for Bank Options
 const BANK_OPTIONS = [
@@ -41,7 +43,7 @@ type BankAccount = {
     bankName: string;
     accountNumber: string;
     holderName: string;
-    initialBalance: number;
+    // initialBalance removed, calculated from funds
 };
 
 type FundAllocation = {
@@ -61,11 +63,10 @@ export default function OnboardingSetupPage() {
 
     // Form State for Adding New Bank
     const [isAddingBank, setIsAddingBank] = useState(true); // Start with form open if empty
-    const [currentBank, setCurrentBank] = useState<Omit<BankAccount, 'id'>>({
+    const [currentBank, setCurrentBank] = useState<Omit<BankAccount, 'id' | 'initialBalance'>>({
         bankName: '',
         accountNumber: '',
         holderName: MOCK_MOSQUE.name,
-        initialBalance: 0
     });
 
     // QRIS State
@@ -95,7 +96,7 @@ export default function OnboardingSetupPage() {
 
         setBankAccounts([...bankAccounts, newBank]);
         // Reset form but keep holder name for convenience
-        setCurrentBank({ bankName: '', accountNumber: '', holderName: currentBank.holderName, initialBalance: 0 });
+        setCurrentBank({ bankName: '', accountNumber: '', holderName: currentBank.holderName });
         setIsAddingBank(false);
     };
 
@@ -198,8 +199,8 @@ export default function OnboardingSetupPage() {
                         .filter(f => f.allocation.type === 'BANK' && f.allocation.bankId === bank.id)
                         .reduce((acc, curr) => acc + (curr.balance || 0), 0);
 
-                    // Use declared balance if higher, implies unallocated surplus
-                    const finalBalance = Math.max(bank.initialBalance, totalAllocated);
+                    // Balance is purely sum of allocations
+                    const finalBalance = totalAllocated;
 
                     assets.push({
                         id: `asset_${bank.id}`, // asset_bank_123
@@ -240,20 +241,7 @@ export default function OnboardingSetupPage() {
                     color: f.type === 'OPERASIONAL' ? 'blue' : f.type === 'ZAKAT' ? 'purple' : 'amber'
                 }));
 
-                // Handle Surplus (Allocated vs Real Balance) - Put in Kas Masjid
-                // This is a naive implementation, but safe for wizard
-                const totalDeclaredBank = bankAccounts.reduce((acc, b) => acc + b.initialBalance, 0);
-                const totalAllocatedBank = activeFunds
-                    .filter(f => f.allocation.type === 'BANK')
-                    .reduce((acc, curr) => acc + (curr.balance || 0), 0);
 
-                if (totalDeclaredBank > totalAllocatedBank) {
-                    const surplus = totalDeclaredBank - totalAllocatedBank;
-                    const mapKasMasjid = newPrograms.find(p => p.id === 'kas_masjid');
-                    if (mapKasMasjid) {
-                        mapKasMasjid.balance += surplus;
-                    }
-                }
 
                 localStorage.setItem('sim_programs', JSON.stringify(newPrograms));
 
@@ -332,7 +320,7 @@ export default function OnboardingSetupPage() {
                                                             <div className="text-sm font-bold text-slate-800 dark:text-slate-200">{acc.bankName}</div>
                                                         </div>
                                                         <div className="text-lg font-mono font-bold text-slate-600 dark:text-slate-400">{acc.accountNumber}</div>
-                                                        <div className="text-xs text-slate-400 mt-1">{acc.holderName} • <span className="text-emerald-500 font-bold">Rp {acc.initialBalance.toLocaleString('id-ID')}</span></div>
+                                                        <div className="text-xs text-slate-400 mt-1">{acc.holderName}</div>
                                                     </div>
                                                     <button
                                                         onClick={() => handleRemoveBank(acc.id)}
@@ -392,16 +380,7 @@ export default function OnboardingSetupPage() {
                                                     />
                                                 </div>
 
-                                                <div className="space-y-1.5">
-                                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Saldo Saat Ini (Rp)</label>
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl outline-none text-sm font-bold text-slate-800 dark:text-slate-200 focus:border-emerald-500 transition-colors"
-                                                        placeholder="0"
-                                                        value={currentBank.initialBalance || ''}
-                                                        onChange={(e) => setCurrentBank({ ...currentBank, initialBalance: parseFloat(e.target.value) || 0 })}
-                                                    />
-                                                </div>
+
 
                                                 <button
                                                     onClick={handleAddBank}
@@ -530,15 +509,11 @@ export default function OnboardingSetupPage() {
                                                                 {/* Row 1: Amount */}
                                                                 <div>
                                                                     <label className="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block tracking-wider">Saldo Awal</label>
-                                                                    <div className="relative">
-                                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">Rp</span>
-                                                                        <input
-                                                                            type="number"
+                                                                    <div className="relative" onClick={(e) => e.stopPropagation()}>
+                                                                        <CalculatorInput
+                                                                            value={fund.balance || 0}
+                                                                            onChange={(val) => updateFundData(fund.id, { balance: val })}
                                                                             placeholder="0"
-                                                                            className="w-full py-2.5 pl-8 pr-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300"
-                                                                            value={fund.balance || ''}
-                                                                            onChange={(e) => updateFundData(fund.id, { balance: parseFloat(e.target.value) || 0 })}
-                                                                            onClick={(e) => e.stopPropagation()}
                                                                         />
                                                                     </div>
                                                                 </div>

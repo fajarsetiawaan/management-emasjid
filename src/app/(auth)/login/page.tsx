@@ -148,7 +148,7 @@ export default function LoginPage() {
             <div className="text-center">
                 <p className="text-slate-500 mb-2">Masjid Anda belum terdaftar?</p>
                 <Link
-                    href="/register"
+                    href="/welcome"
                     className="inline-flex items-center justify-center font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-6 py-3 rounded-xl transition-colors"
                 >
                     Daftarkan Masjid Sekarang
