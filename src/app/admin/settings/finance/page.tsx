@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Building2, HeartHandshake, Coins, ShieldCheck, Gift, CheckCircle2, Wallet, Plus, Banknote, Landmark, Save, Edit3, X, CreditCard, PieChart, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Building2, HeartHandshake, Coins, ShieldCheck, Gift, CheckCircle2, Wallet, Plus, Banknote, Landmark, Save, Edit3, X, CreditCard, PieChart, MoreVertical, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
 import { MOCK_BANK_ACCOUNTS, MOCK_PROGRAMS } from '@/lib/mock-data';
 import { BankAccount } from '@/types';
+import { toast } from 'sonner';
 
 // Define Fund Structure
 type FundAllocation = {
@@ -31,13 +32,15 @@ type Fund = {
 export default function ManageFinancePage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false);
-    const [showMenu, setShowMenu] = useState(false);
 
     // Data State
     const [funds, setFunds] = useState<Fund[]>([]);
     const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
     const [customFundName, setCustomFundName] = useState('');
+
+    // UI State
+    const [isAddingNew, setIsAddingNew] = useState(false);
+    const [showMenuId, setShowMenuId] = useState<string | null>(null);
 
     // Edit State
     const [editingFundId, setEditingId] = useState<string | null>(null);
@@ -115,61 +118,10 @@ export default function ManageFinancePage() {
 
     const totalCash = funds.filter(f => f.active).reduce((sum, f) => sum + (f.balance || 0), 0);
 
-    // Handlers
-    const toggleFund = (id: string) => {
-        setFunds(funds.map(f => f.locked ? f : f.id === id ? { ...f, active: !f.active } : f));
-    };
-
-    const updateFundData = (id: string, updates: Partial<Fund>) => {
-        setFunds(funds.map(f => f.id === id ? { ...f, ...updates } : f));
-    };
-
-    const updateFundAllocation = (id: string, type: 'CASH' | 'BANK', bankId?: string) => {
-        let newAllocation: FundAllocation = { type };
-        if (type === 'BANK') newAllocation.bankId = bankId || bankAccounts[0]?.id;
-        setFunds(funds.map(f => f.id === id ? { ...f, allocation: newAllocation } : f));
-    };
-
-    const handleEditDetails = (fund: Fund) => {
-        setEditingId(fund.id);
-        setEditForm({ name: fund.name, desc: fund.desc || '' });
-    };
-
-    const handleSaveFund = () => {
-        if (!editingFundId) return;
-        if (editForm.name) {
-            setFunds(funds.map(f =>
-                f.id === editingFundId
-                    ? { ...f, name: editForm.name, desc: editForm.desc }
-                    : f
-            ));
-        }
-        setEditingId(null);
-    };
-
-    const addCustomFund = () => {
-        if (!customFundName) return;
-        setFunds([
-            ...funds,
-            {
-                id: `custom_${Date.now()}`,
-                name: customFundName,
-                type: 'CUSTOM',
-                active: true,
-                locked: false,
-                icon: Wallet,
-                desc: 'Kategori dana khusus.',
-                balance: 0,
-                allocation: { type: 'CASH' }
-            }
-        ]);
-        setCustomFundName('');
-    };
-
-    const handleSave = () => {
-        setIsSaving(true);
+    // Auto-Save Logic
+    const saveChanges = (updatedFunds: Fund[]) => {
         if (typeof window !== 'undefined') {
-            const activeFunds = funds.filter(f => f.active);
+            const activeFunds = updatedFunds.filter(f => f.active);
             const assets = [];
 
             // Cash
@@ -215,14 +167,90 @@ export default function ManageFinancePage() {
             localStorage.setItem('sim_programs', JSON.stringify(newPrograms));
 
             // Config
-            const configToSave = funds.map(({ icon, ...rest }) => rest);
+            const configToSave = updatedFunds.map(({ icon, ...rest }) => rest);
             localStorage.setItem('sim_fund_config', JSON.stringify(configToSave));
 
-            setTimeout(() => {
-                setIsSaving(false);
-                alert('Success! Finance configuration saved.');
-            }, 800);
+            // Optional: Show toast only for deliberate actions like save/add/delete, not every keystroke
         }
+    };
+
+    // Handlers
+    const toggleFund = (id: string) => {
+        const updated = funds.map(f => f.locked ? f : f.id === id ? { ...f, active: !f.active } : f);
+        setFunds(updated);
+        saveChanges(updated);
+        toast.success(updated.find(f => f.id === id)?.active ? 'Pos diaktifkan' : 'Pos dinonaktifkan', { position: 'bottom-center' });
+    };
+
+    const updateFundData = (id: string, updates: Partial<Fund>) => {
+        const updated = funds.map(f => f.id === id ? { ...f, ...updates } : f);
+        setFunds(updated);
+        saveChanges(updated); // Save on balance update
+    };
+
+    const updateFundAllocation = (id: string, type: 'CASH' | 'BANK', bankId?: string) => {
+        let newAllocation: FundAllocation = { type };
+        if (type === 'BANK') newAllocation.bankId = bankId || bankAccounts[0]?.id;
+
+        const updated = funds.map(f => f.id === id ? { ...f, allocation: newAllocation } : f);
+        setFunds(updated);
+        saveChanges(updated);
+        toast.success('Alokasi dana diperbarui', { position: 'bottom-center' });
+    };
+
+    const handleEditDetails = (fund: Fund) => {
+        setEditingId(fund.id);
+        setEditForm({ name: fund.name, desc: fund.desc || '' });
+        setShowMenuId(null); // Close menu
+    };
+
+    const handleDeleteFund = (id: string) => {
+        if (confirm('Hapus kategori dana ini? Saldo dan riwayat akan hilang.')) {
+            const updated = funds.filter(f => f.id !== id);
+            setFunds(updated);
+            saveChanges(updated);
+            setShowMenuId(null);
+            toast.success('Kategori berhasil dihapus', { position: 'bottom-center' });
+        }
+    };
+
+    const handleSaveFund = () => {
+        if (!editingFundId) return;
+        if (editForm.name) {
+            const updated = funds.map(f =>
+                f.id === editingFundId
+                    ? { ...f, name: editForm.name, desc: editForm.desc }
+                    : f
+            );
+            setFunds(updated);
+            saveChanges(updated);
+            toast.success('Detail pos diperbarui', { position: 'bottom-center' });
+        }
+        setEditingId(null);
+    };
+
+    const addCustomFund = () => {
+        if (!customFundName) return;
+        const newFunds = [
+            ...funds,
+            {
+                id: `custom_${Date.now()}`,
+                name: customFundName,
+                type: 'CUSTOM', // Explicitly cast as the union type
+                active: true,
+                locked: false,
+                icon: Wallet,
+                desc: 'Kategori dana khusus.',
+                balance: 0,
+                allocation: { type: 'CASH' }
+            }
+        ] as Fund[]; // Force cast to match Fund[] type because 'CUSTOM' is valid
+
+        setFunds(newFunds);
+        saveChanges(newFunds);
+        setCustomFundName('');
+        setIsAddingNew(false);
+        toast.success(`Kategori "${customFundName}" ditambahkan`, { position: 'bottom-center' });
     };
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>;
@@ -245,48 +273,6 @@ export default function ManageFinancePage() {
                         <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300">Finance</h1>
                         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wide">Pengaturan Pos & Saldo Keuangan</p>
                     </div>
-                </div>
-
-                <div className="relative">
-                    <button
-                        onClick={() => setShowMenu(!showMenu)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/20 transition-all active:scale-95"
-                    >
-                        <MoreVertical size={20} />
-                    </button>
-
-                    <AnimatePresence>
-                        {showMenu && (
-                            <>
-                                <div
-                                    className="fixed inset-0 z-[60]"
-                                    onClick={() => setShowMenu(false)}
-                                />
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                                    className="absolute right-0 top-12 min-w-[180px] bg-white dark:bg-slate-900 rounded-xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-800 p-1.5 z-[70] overflow-hidden"
-                                >
-                                    <button
-                                        onClick={() => {
-                                            setShowMenu(false);
-                                            handleSave();
-                                        }}
-                                        disabled={isSaving}
-                                        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
-                                    >
-                                        {isSaving ? (
-                                            <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                                        ) : (
-                                            <Save size={16} className="text-emerald-500" />
-                                        )}
-                                        <span>Simpan Perubahan</span>
-                                    </button>
-                                </motion.div>
-                            </>
-                        )}
-                    </AnimatePresence>
                 </div>
             </header>
 
@@ -319,8 +305,12 @@ export default function ManageFinancePage() {
                                 <Wallet size={16} className="text-slate-400" />
                                 Daftar Pos Keuangan
                             </h3>
-                            <button onClick={addCustomFund} className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
-                                + Tambah Baru
+                            <button
+                                onClick={() => setIsAddingNew(true)}
+                                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors flex items-center gap-1 active:scale-95"
+                            >
+                                <Plus size={14} />
+                                Tambah Baru
                             </button>
                         </div>
 
@@ -336,14 +326,14 @@ export default function ManageFinancePage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     className={`
-                                        relative group overflow-hidden transition-all duration-500
+                                        relative group overflow-visible transition-all duration-500
                                         ${fund.active
                                             ? 'rounded-[2rem] bg-white dark:bg-slate-800/80 shadow-xl shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-white/5'
                                             : 'rounded-[1.5rem] bg-white/40 dark:bg-slate-800/30 border border-transparent hover:border-slate-200 dark:hover:border-slate-700'}
                                     `}
                                 >
                                     {/* Glass Highlight */}
-                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 dark:via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 dark:via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
                                     {/* Header Section */}
                                     <div
@@ -375,19 +365,60 @@ export default function ManageFinancePage() {
                                         </div>
 
                                         {/* Actions */}
-                                        <div className="flex items-center">
+                                        <div className="flex items-center z-20">
                                             {!fund.active ? (
                                                 <div className="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-300 dark:text-slate-600 group-hover:border-emerald-400 group-hover:text-emerald-400 transition-all">
                                                     <Plus size={16} />
                                                 </div>
                                             ) : (
                                                 !isEditing ? (
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); handleEditDetails(fund); }}
-                                                        className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/20 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center justify-center transition-all active:scale-95"
-                                                    >
-                                                        <Edit3 size={18} />
-                                                    </button>
+                                                    <div className="relative">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setShowMenuId(showMenuId === fund.id ? null : fund.id);
+                                                            }}
+                                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-active transition-all"
+                                                        >
+                                                            <MoreVertical size={18} />
+                                                        </button>
+
+                                                        {/* Dropdown Menu */}
+                                                        <AnimatePresence>
+                                                            {showMenuId === fund.id && (
+                                                                <>
+                                                                    <div
+                                                                        className="fixed inset-0 z-[60]"
+                                                                        onClick={() => setShowMenuId(null)}
+                                                                    />
+                                                                    <motion.div
+                                                                        initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                                                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                                        exit={{ opacity: 0, scale: 0.95, y: 5 }}
+                                                                        transition={{ duration: 0.1 }}
+                                                                        className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-700 p-1.5 z-[70] overflow-hidden origin-top-right"
+                                                                    >
+                                                                        <button
+                                                                            onClick={() => handleEditDetails(fund)}
+                                                                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                                                                        >
+                                                                            <Edit3 size={14} className="text-slate-400" />
+                                                                            Edit Detail
+                                                                        </button>
+                                                                        {!fund.locked && (
+                                                                            <button
+                                                                                onClick={() => handleDeleteFund(fund.id)}
+                                                                                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                                                                            >
+                                                                                <Trash2 size={14} />
+                                                                                Hapus
+                                                                            </button>
+                                                                        )}
+                                                                    </motion.div>
+                                                                </>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
                                                 ) : (
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); handleSaveFund(); }}
@@ -523,34 +554,64 @@ export default function ManageFinancePage() {
                             );
                         })}
 
-                        {/* Add Custom Fund */}
-                        {customFundName || funds.length < 8 ? (
-                            <div className="mt-8 pt-4 border-t border-dashed border-slate-200 dark:border-slate-800">
-                                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 text-center">Buat Kategori Baru</h3>
-                                <div className="p-1.5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 transition-colors group focus-within:border-emerald-300 dark:focus-within:border-emerald-700 focus-within:bg-emerald-50/10">
-                                    <div className="flex items-center gap-3 p-1">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-focus-within:text-emerald-500 transition-colors">
-                                            <Plus size={20} />
+                        {/* Add Custom Fund - Toggleable Section */}
+                        <AnimatePresence>
+                            {isAddingNew && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-[60] bg-black/20 dark:bg-black/50 backdrop-blur-sm"
+                                        onClick={() => setIsAddingNew(false)}
+                                    />
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        className="fixed inset-0 z-[61] flex items-center justify-center p-4"
+                                    >
+                                        <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-800 p-6 relative overflow-hidden">
+                                            {/* Header */}
+                                            <div className="flex items-center justify-between mb-6">
+                                                <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Buat Kategori Baru</h3>
+                                                <button
+                                                    onClick={() => setIsAddingNew(false)}
+                                                    className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                                >
+                                                    <X size={16} />
+                                                </button>
+                                            </div>
+
+                                            {/* Input Area */}
+                                            <div className="space-y-4">
+                                                <div className="p-2 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 transition-colors group focus-within:border-emerald-500/50 dark:focus-within:border-emerald-500/50 focus-within:bg-emerald-50/10 dark:focus-within:bg-emerald-500/5">
+                                                    <div className="flex items-center gap-3 p-1">
+                                                        <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-focus-within:text-emerald-500 transition-colors">
+                                                            <Plus size={20} />
+                                                        </div>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Nama Kategori..."
+                                                            className="flex-1 bg-transparent text-sm font-bold outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
+                                                            value={customFundName}
+                                                            onChange={(e) => setCustomFundName(e.target.value)}
+                                                            onKeyDown={(e) => e.key === 'Enter' && addCustomFund()}
+                                                            autoFocus
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    onClick={addCustomFund}
+                                                    disabled={!customFundName}
+                                                    className="w-full py-3.5 rounded-xl bg-slate-900 dark:bg-emerald-500 text-white text-sm font-bold disabled:opacity-50 hover:bg-slate-800 dark:hover:bg-emerald-600 transition-all active:scale-[0.98] shadow-lg shadow-slate-900/20 dark:shadow-emerald-500/20"
+                                                >
+                                                    Tambahkan Sekarang
+                                                </button>
+                                            </div>
                                         </div>
-                                        <input
-                                            type="text"
-                                            placeholder="Nama Kategori Baru..."
-                                            className="flex-1 bg-transparent text-sm font-bold outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
-                                            value={customFundName}
-                                            onChange={(e) => setCustomFundName(e.target.value)}
-                                            onKeyDown={(e) => e.key === 'Enter' && addCustomFund()}
-                                        />
-                                        <button
-                                            onClick={addCustomFund}
-                                            disabled={!customFundName}
-                                            className="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold disabled:opacity-20 disabled:scale-95 hover:bg-emerald-600 dark:hover:bg-emerald-400 hover:text-white transition-all transform active:scale-90"
-                                        >
-                                            Tambah
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : null}
+                                    </motion.div>
+                                </>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </div>
             </div>
