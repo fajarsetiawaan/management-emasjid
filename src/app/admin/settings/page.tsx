@@ -184,7 +184,7 @@ export default function SettingsPage() {
                     <Link href="/admin/settings/funds" className="w-full">
                         <SettingsItem
                             icon={Wallet}
-                            label="Pos Keuangan & Anggaran"
+                            label="Manajemen Keuangan"
                             onClick={() => { }}
                         />
                     </Link>

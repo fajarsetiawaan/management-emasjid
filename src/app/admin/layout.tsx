@@ -56,11 +56,11 @@ export default function MobileAppShell({
     return (
         <div className="min-h-screen bg-transparent flex justify-center font-sans tracking-tight">
             {/* Mobile Constraint Container */}
-            <div className="w-full max-w-[480px] bg-white/50 dark:bg-slate-950/50 min-h-screen shadow-2xl relative flex flex-col overflow-hidden transition-colors duration-300 backdrop-blur-3xl border-x border-white/20 dark:border-white/5">
+            <div className="w-full max-w-[480px] bg-slate-50 dark:bg-slate-950 h-screen shadow-2xl relative flex flex-col overflow-hidden transition-colors duration-300 border-x border-white/20 dark:border-white/5">
 
                 {/* Sticky Top Bar (Glassmorphism Premium) - Only on Dashboard Home */}
                 {pathname === '/admin/dashboard' && (
-                    <header className="sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/20 dark:border-white/5 h-16 flex items-center justify-between px-5 transition-all duration-300">
+                    <header className="flex-none z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/20 dark:border-white/5 h-16 flex items-center justify-between px-5 transition-all duration-300 absolute top-0 left-0 right-0">
 
                         {/* Left: Branding */}
                         <div className="flex items-center gap-3">
@@ -88,8 +88,8 @@ export default function MobileAppShell({
                     </header>
                 )}
 
-                {/* Content Area */}
-                <main className="flex-1 pb-24 relative z-0 px-1 overflow-x-hidden">
+                {/* Content Area - Scrollable */}
+                <main className={`flex-1 relative z-0 overflow-y-auto overflow-x-hidden scrollbar-hide ${pathname === '/admin/dashboard' ? 'pt-16' : ''} pb-24`}>
                     {children}
                 </main>
 
@@ -103,7 +103,7 @@ export default function MobileAppShell({
 
                 {/* Smart FAB Menu Items (Radial/Semi-Circle) */}
                 {!pathname?.startsWith('/admin/onboarding') && (
-                    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-[480px] pointer-events-none flex justify-center h-48 items-end">
+                    <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-[480px] pointer-events-none flex justify-center h-48 items-end">
                         <AnimatePresence>
                             {isFabOpen && (
                                 <>
@@ -174,7 +174,7 @@ export default function MobileAppShell({
 
                 {/* Bottom Navigation Dock (Glassmorphism Island) */}
                 {!pathname?.startsWith('/admin/onboarding') && (
-                    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-[420px] z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-1.5 ring-1 ring-white/20 dark:ring-white/5">
+                    <nav className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-[420px] z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-1.5 ring-1 ring-white/20 dark:ring-white/5">
                         <div className="grid grid-cols-5 h-16 items-center px-1 relative">
                             {menuItems.map((item) => {
                                 const isActive = pathname === item.href;

@@ -216,9 +216,13 @@ export default function OnboardingSetupPage() {
                 // Save Assets
                 localStorage.setItem('sim_assets', JSON.stringify(assets));
 
-                // Save QSIS
+                // Save QSIS (Legacy & Modern)
                 if (qrisImage) {
                     localStorage.setItem('sim_qris', qrisImage);
+                    localStorage.setItem('sim_qris_data', JSON.stringify({
+                        url: qrisImage,
+                        name: 'QRIS MASJID'
+                    }));
                 }
 
                 // Save Legacy Bank Format (for other components compatibility)
@@ -244,6 +248,9 @@ export default function OnboardingSetupPage() {
 
 
                 localStorage.setItem('sim_programs', JSON.stringify(newPrograms));
+
+                // Save Fund Config for Re-editing in Settings (Save ALL funds)
+                localStorage.setItem('sim_fund_config', JSON.stringify(funds));
 
                 // Mark Setup as Done
                 localStorage.setItem('setup_completed', 'true');

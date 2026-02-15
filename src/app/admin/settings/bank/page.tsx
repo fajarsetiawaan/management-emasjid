@@ -1,25 +1,144 @@
 // @ts-nocheck
 'use client';
 
-import { ArrowLeft, CreditCard, Plus, Wallet, X, QrCode, Download, Printer, Share2, Building2, Trash2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, Plus, Wallet, X, QrCode, Download, Printer, Share2, Building2, Trash2, Upload, Edit3, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QRCode from 'react-qr-code';
 
 import { MOCK_BANK_ACCOUNTS, MOCK_MOSQUE } from '@/lib/mock-data';
 import { BankAccount } from '@/types';
-import { BankItem } from '@/components/admin/settings/BankItem'; // Adjust import path if needed
+import { BankItem } from '@/components/admin/settings/BankItem';
 
 function QrisSection({ slug }: { slug: string }) {
-    const [qrisUrl, setQrisUrl] = useState<string | null>(null);
+    const [qrisData, setQrisData] = useState<{ url: string | null; name: string }>({ url: null, name: '' });
+    const [isEditing, setIsEditing] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const savedQris = localStorage.getItem('sim_qris_url');
-            if (savedQris) setQrisUrl(savedQris);
+            const savedQris = localStorage.getItem('sim_qris_data');
+            if (savedQris) {
+                setQrisData(JSON.parse(savedQris));
+            } else {
+                setIsEditing(true); // Default to edit mode if no data
+            }
         }
     }, []);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setQrisData(prev => ({ ...prev, url: reader.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSave = () => {
+        if (!qrisData.url) {
+            alert('Mohon upload gambar QRIS terlebih dahulu.');
+            return;
+        }
+        if (!qrisData.name.trim()) {
+            alert('Mohon masukkan nama metode pembayaran (contoh: QRIS Masjid Raya).');
+            return;
+        }
+
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('sim_qris_data', JSON.stringify(qrisData));
+        }
+        setIsEditing(false);
+    };
+
+    if (isEditing) {
+        return (
+            <div className="flex flex-col items-center max-w-md mx-auto w-full">
+                <div className="w-full bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl border border-slate-100 dark:border-slate-800">
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">Setup QRIS Masjid</h3>
+
+                    {/* Upload Area */}
+                    <div
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full aspect-[4/3] border-2 border-dashed border-emerald-500/50 bg-slate-900/50 hover:bg-slate-900/80 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all group mb-6 relative overflow-hidden"
+                    >
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept="image/*"
+                            className="hidden"
+                        />
+
+                        {qrisData.url ? (
+                            <img src={qrisData.url} alt="Preview" className="w-full h-full object-contain p-4" />
+                        ) : (
+                            <>
+                                <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <Upload size={24} className="text-emerald-500" />
+                                </div>
+                                <p className="text-slate-300 font-bold mb-1">Klik untuk upload gambar QRIS</p>
+                                <p className="text-xs text-slate-500">Format: JPG, PNG (Max 2MB)</p>
+                            </>
+                        )}
+
+                        {/* Overlay when hovering with image */}
+                        {qrisData.url && (
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <p className="text-white font-bold flex items-center gap-2"><Edit3 size={16} /> Ganti Gambar</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Name Input */}
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Nama Metode (Cth: QRIS BSI)</label>
+                            <input
+                                type="text"
+                                value={qrisData.name}
+                                onChange={(e) => setQrisData(prev => ({ ...prev, name: e.target.value }))}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-medium placeholder:text-slate-500"
+                                placeholder="Masukkan nama..."
+                            />
+                        </div>
+
+                        <div className="flex gap-3 pt-2">
+                            {/* Only show cancel if we have data saved previously */}
+                            <button
+                                onClick={() => {
+                                    // Reload from storage to discard changes
+                                    const saved = localStorage.getItem('sim_qris_data');
+                                    if (saved) {
+                                        setQrisData(JSON.parse(saved));
+                                        setIsEditing(false);
+                                    } else {
+                                        // If no data saved, maybe clear/reset or stay
+                                        // For now, if no saved data, can't really cancel back to view mode
+                                        if (confirm('Batalkan setup?')) {
+                                            setQrisData({ url: null, name: '' });
+                                        }
+                                    }
+                                }}
+                                className="flex-1 py-3.5 rounded-xl font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="flex-[2] bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 hover:bg-emerald-700 active:scale-95 transition-all"
+                            >
+                                Simpan QRIS
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col items-center">
@@ -39,15 +158,15 @@ function QrisSection({ slug }: { slug: string }) {
                     <p className="text-xs text-slate-500 max-w-[80%] mx-auto">{MOCK_MOSQUE.address}</p>
 
                     {/* QR Area */}
-                    <div className="my-8 p-4 bg-white border-2 border-slate-900 rounded-xl relative">
+                    <div className="my-8 p-4 bg-white border-2 border-slate-900 rounded-xl relative group/qr">
                         {/* Corner Accents */}
                         <div className="absolute -top-1 -left-1 w-4 h-4 border-t-4 border-l-4 border-emerald-600" />
                         <div className="absolute -top-1 -right-1 w-4 h-4 border-t-4 border-r-4 border-emerald-600" />
                         <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-4 border-l-4 border-emerald-600" />
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-4 border-r-4 border-emerald-600" />
 
-                        {qrisUrl ? (
-                            <img src={qrisUrl} alt="QRIS Masjid" className="w-full h-auto object-contain" />
+                        {qrisData.url ? (
+                            <img src={qrisData.url} alt="QRIS Masjid" className="w-full h-auto object-contain max-h-[180px]" />
                         ) : (
                             <QRCode
                                 value={`https://app.fase.id/m/${slug}`}
@@ -57,6 +176,14 @@ function QrisSection({ slug }: { slug: string }) {
                             />
                         )}
                     </div>
+
+                    {/* Payment Method Name */}
+                    {qrisData.name && (
+                        <div className="mb-4 px-4 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-600 uppercase tracking-wide">
+                            {qrisData.name}
+                        </div>
+                    )}
+
 
                     {/* Footer Call to Action */}
                     <h3 className="font-bold text-slate-800 mb-1">Scan untuk Infaq</h3>
@@ -71,7 +198,16 @@ function QrisSection({ slug }: { slug: string }) {
 
             {/* Action Buttons */}
             <div className="w-full max-w-[320px] grid grid-cols-2 gap-3 mb-3">
-                <button className="col-span-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                <button
+                    onClick={() => setIsEditing(true)}
+                    className="col-span-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                    <Edit3 size={18} />
+                    Ubah QRIS
+                </button>
+            </div>
+            <div className="w-full max-w-[320px] grid grid-cols-2 gap-3 mb-3">
+                <button className="col-span-1 bg-white border border-slate-200 text-slate-700 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors">
                     <Share2 size={18} />
                     Share
                 </button>
