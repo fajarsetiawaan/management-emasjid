@@ -89,6 +89,12 @@ export interface Mosque {
     latitude?: number;
     longitude?: number;
     balance: number;
+    // Profile fields
+    establishedYear?: number;
+    jamaahCount?: number;
+    verificationStatus?: 'verified' | 'pending' | 'unverified';
+    activeSince?: string;
+    coverImageUrl?: string;
 }
 
 // ─── User ──────────────────────────────────────────

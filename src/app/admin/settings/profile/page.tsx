@@ -143,9 +143,9 @@ export default function EditProfilePage() {
                     {/* ── Quick Stats ── */}
                     <motion.div {...fadeUp} transition={{ delay: 0.1 }} className="grid grid-cols-3 gap-2">
                         {[
-                            { icon: Users, label: 'Jamaah', value: '~500', color: 'text-blue-500 bg-blue-50 dark:bg-blue-950/40' },
-                            { icon: Clock, label: 'Aktif Sejak', value: 'Jan 2025', color: 'text-amber-500 bg-amber-50 dark:bg-amber-950/40' },
-                            { icon: Shield, label: 'Status', value: 'Verified', color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40' },
+                            { icon: Users, label: 'Jamaah', value: `~${MOCK_MOSQUE.jamaahCount?.toLocaleString('id-ID') || '0'}`, color: 'text-blue-500 bg-blue-50 dark:bg-blue-950/40' },
+                            { icon: Clock, label: 'Aktif Sejak', value: MOCK_MOSQUE.activeSince || '-', color: 'text-amber-500 bg-amber-50 dark:bg-amber-950/40' },
+                            { icon: Shield, label: 'Status', value: MOCK_MOSQUE.verificationStatus === 'verified' ? 'Verified' : MOCK_MOSQUE.verificationStatus === 'pending' ? 'Pending' : 'Unverified', color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40' },
                         ].map((stat) => (
                             <div key={stat.label} className="bg-white/70 dark:bg-slate-800/50 backdrop-blur-md rounded-2xl border border-white/60 dark:border-white/5 p-3 text-center shadow-sm">
                                 <div className={`w-9 h-9 rounded-xl mx-auto mb-1.5 flex items-center justify-center ${stat.color}`}>
@@ -224,6 +224,7 @@ export default function EditProfilePage() {
                                     name="establishedYear"
                                     type="number"
                                     autoComplete="off"
+                                    defaultValue={MOCK_MOSQUE.establishedYear || ''}
                                     className="w-full px-4 py-3 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-700/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all font-medium text-slate-800 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600"
                                     placeholder="Contoh: 1998"
                                 />

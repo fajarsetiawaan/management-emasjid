@@ -38,6 +38,10 @@ export const MOCK_MOSQUES: Mosque[] = [
         latitude: -6.2088,
         longitude: 106.8456,
         balance: 15000000,
+        establishedYear: 1998,
+        jamaahCount: 500,
+        verificationStatus: 'verified',
+        activeSince: 'Jan 2025',
     },
     {
         id: 'm2',
@@ -48,6 +52,10 @@ export const MOCK_MOSQUES: Mosque[] = [
         latitude: -6.5971,
         longitude: 106.8060,
         balance: 25000000,
+        establishedYear: 2005,
+        jamaahCount: 800,
+        verificationStatus: 'verified',
+        activeSince: 'Feb 2025',
     },
     {
         id: 'm3',
@@ -58,6 +66,10 @@ export const MOCK_MOSQUES: Mosque[] = [
         latitude: -6.1702,
         longitude: 106.8314,
         balance: 1500000000,
+        establishedYear: 1978,
+        jamaahCount: 5000,
+        verificationStatus: 'verified',
+        activeSince: 'Jan 2025',
     }
 ];
 
