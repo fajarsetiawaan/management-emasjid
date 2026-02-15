@@ -26,13 +26,13 @@ export default function EventsPage() {
     };
 
     const EventCard = ({ event }: { event: (typeof MOCK_EVENTS)[0] }) => (
-        <motion.div variants={item} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex gap-4 group active:scale-[0.99] transition-transform">
+        <motion.div variants={item} className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex gap-4 group active:scale-[0.99] transition-transform">
             {/* Date Box */}
             <div className={`
         w-16 flex-shrink-0 flex flex-col items-center justify-center rounded-xl border transition-colors
         ${event.status === 'UPCOMING'
-                    ? 'bg-blue-50 border-blue-100 text-blue-600 group-hover:bg-blue-100'
-                    : 'bg-slate-50 border-slate-100 text-slate-400'
+                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30'
+                    : 'bg-slate-50 dark:bg-slate-700/50 border-slate-100 dark:border-slate-600 text-slate-400 dark:text-slate-500'
                 }
       `}>
                 <span className="text-[10px] font-bold uppercase tracking-wider">{event.date.toLocaleString('default', { month: 'short' })}</span>
@@ -42,22 +42,22 @@ export default function EventsPage() {
             {/* Content */}
             <div className="flex-1 min-w-0 py-0.5">
                 <div className="flex items-start justify-between">
-                    <h3 className={`font-bold truncate text-base ${event.status === 'DONE' ? 'text-slate-500 line-through' : 'text-slate-800'}`}>
+                    <h3 className={`font-bold truncate text-base ${event.status === 'DONE' ? 'text-slate-500 dark:text-slate-500 line-through' : 'text-slate-800 dark:text-slate-100'}`}>
                         {event.title}
                     </h3>
                 </div>
 
                 <div className="flex items-center gap-2 mt-1 mb-2">
                     <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide
-                        ${event.category === 'KAJIAN' ? 'bg-purple-50 text-purple-600' : 'bg-orange-50 text-orange-600'}
+                        ${event.category === 'KAJIAN' ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300' : 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-300'}
                     `}>
                         {event.category}
                     </span>
-                    <span className="text-xs text-slate-500 truncate font-medium">{event.ustadz || 'Agenda Internal'}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 truncate font-medium">{event.ustadz || 'Agenda Internal'}</span>
                 </div>
 
-                <div className="flex items-center gap-4 text-xs text-slate-400 font-medium">
-                    <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-0.5 rounded-md">
+                <div className="flex items-center gap-4 text-xs text-slate-400 dark:text-slate-500 font-medium">
+                    <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700/50 px-2 py-0.5 rounded-md">
                         <Clock size={12} />
                         <span>{event.time}</span>
                     </div>
@@ -74,30 +74,30 @@ export default function EventsPage() {
         <div className="space-y-8 p-1">
             <div className="flex items-center justify-between px-1">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Agenda</h1>
-                    <p className="text-slate-500 text-xs font-medium">Jadwal kegiatan masjid</p>
+                    <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Agenda</h1>
+                    <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">Jadwal kegiatan masjid</p>
                 </div>
-                <Link href="/admin/events/new" className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-200 hover:bg-blue-700 hover:scale-105 transition-all">
+                <Link href="/admin/events/new" className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all">
                     <Plus size={20} />
                 </Link>
             </div>
 
             {/* Upcoming Section */}
             <motion.div variants={container} initial="hidden" animate="show">
-                <h2 className="text-xs font-bold text-slate-400 mb-3 px-1 flex items-center gap-2 uppercase tracking-wider">
+                <h2 className="text-xs font-bold text-slate-400 dark:text-slate-500 mb-3 px-1 flex items-center gap-2 uppercase tracking-wider">
                     <Calendar size={14} />
                     Akan Datang ({upcomingEvents.length})
                 </h2>
                 <div className="space-y-4">
                     {upcomingEvents.map(event => <EventCard key={event.id} event={event} />)}
-                    {upcomingEvents.length === 0 && <p className="text-slate-400 text-sm italic px-1">Tidak ada agenda mendatang.</p>}
+                    {upcomingEvents.length === 0 && <p className="text-slate-400 dark:text-slate-500 text-sm italic px-1">Tidak ada agenda mendatang.</p>}
                 </div>
             </motion.div>
 
             {/* Past Section */}
             {pastEvents.length > 0 && (
                 <motion.div variants={container} initial="hidden" animate="show">
-                    <h2 className="text-xs font-bold text-slate-400 mb-3 px-1 flex items-center gap-2 uppercase tracking-wider">
+                    <h2 className="text-xs font-bold text-slate-400 dark:text-slate-500 mb-3 px-1 flex items-center gap-2 uppercase tracking-wider">
                         <CheckCircle2 size={14} />
                         Selesai
                     </h2>

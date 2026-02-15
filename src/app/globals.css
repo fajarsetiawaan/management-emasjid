@@ -1,12 +1,8 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
   --font-plus-jakarta: var(--font-plus-jakarta);
-}
-
-@utility font-sans {
-  font-family: var(--font-plus-jakarta), var(--font-sans);
+  --font-sans: var(--font-plus-jakarta), 'Inter', system-ui, sans-serif;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -24,8 +20,12 @@
     --foreground: 210 40% 98%;
   }
 
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply bg-slate-50 text-slate-900 antialiased font-sans tracking-tight selection:bg-emerald-500/30 selection:text-emerald-900 dark:selection:bg-emerald-500/30 dark:selection:text-emerald-50;
   }
 }
 
