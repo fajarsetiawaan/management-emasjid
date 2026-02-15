@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-plus-jakarta: var(--font-plus-jakarta);
-  --font-sans: var(--font-plus-jakarta), 'Inter', system-ui, sans-serif;
+  --font-outfit: var(--font-outfit);
+  --font-sans: var(--font-outfit), 'Inter', system-ui, sans-serif;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -20,12 +20,24 @@
     --foreground: 210 40% 98%;
   }
 
+  /* Force all elements to inherit font-family by default to ensure Plus Jakarta Sans is used everywhere */
+  *, ::before, ::after {
+    font-family: inherit;
+  }
+
   html {
     @apply scroll-smooth;
+    font-family: var(--font-outfit), 'Inter', system-ui, sans-serif; /* Set at HTML level */
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 antialiased font-sans tracking-tight selection:bg-emerald-500/30 selection:text-emerald-900 dark:selection:bg-emerald-500/30 dark:selection:text-emerald-50;
+    @apply bg-slate-50 text-slate-900 antialiased tracking-tight selection:bg-emerald-500/30 selection:text-emerald-900 dark:selection:bg-emerald-500/30 dark:selection:text-emerald-50;
+    font-family: var(--font-outfit), 'Inter', system-ui, sans-serif; /* Reinforce at Body level */
+  }
+
+  /* Explicitly target inputs and buttons to prevent browser defaults */
+  input, button, textarea, select {
+    font-family: inherit;
   }
 }
 
