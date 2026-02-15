@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -27,6 +27,19 @@ export default function MobileAppShell({
     const pathname = usePathname();
     const [isFabOpen, setIsFabOpen] = useState(false);
 
+    // Protection: Redirect to Onboarding if setup not done
+    // Using window.location.href to ensure full reload if needed, or router.push
+    useEffect(() => {
+        // Skip check if already on onboarding
+        if (pathname?.startsWith('/admin/onboarding')) return;
+
+        // Check LocalStorage
+        const isSetupDone = localStorage.getItem('setup_completed') === 'true';
+        if (!isSetupDone) {
+            window.location.href = '/admin/onboarding';
+        }
+    }, [pathname]);
+
     const menuItems = [
         { name: 'Beranda', href: '/admin/dashboard', icon: LayoutGrid },
         { name: 'Transaksi', href: '/admin/finance', icon: Wallet },
@@ -34,6 +47,8 @@ export default function MobileAppShell({
         { name: 'Agenda', href: '/admin/events', icon: Calendar },
         { name: 'Akun', href: '/admin/settings', icon: User },
     ];
+
+
 
     return (
         <div className="min-h-screen bg-transparent flex justify-center font-sans tracking-tight">
@@ -74,7 +89,7 @@ export default function MobileAppShell({
                 </main>
 
                 {/* Overlay for Smart FAB */}
-                {isFabOpen && (
+                {isFabOpen && !pathname?.startsWith('/admin/onboarding') && (
                     <div
                         className="absolute inset-0 bg-slate-900/60 z-40 backdrop-blur-sm transition-all duration-300"
                         onClick={() => setIsFabOpen(false)}
@@ -82,121 +97,125 @@ export default function MobileAppShell({
                 )}
 
                 {/* Smart FAB Menu Items (Radial/Semi-Circle) */}
-                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-[480px] pointer-events-none flex justify-center h-48 items-end">
-                    <AnimatePresence>
-                        {isFabOpen && (
-                            <>
-                                {/* Item 2: Surat (Right - 20deg) */}
-                                <motion.div
-                                    initial={{ opacity: 0, x: 0, y: 50, scale: 0.5 }}
-                                    animate={{ opacity: 1, x: 70, y: -20, scale: 1 }}
-                                    exit={{ opacity: 0, x: 0, y: 50, scale: 0.5 }}
-                                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
-                                    className="absolute bottom-24 pointer-events-auto"
-                                >
-                                    <Link href="/admin/letters/new" onClick={() => setIsFabOpen(false)}>
-                                        <div className="flex flex-col items-center gap-1 group">
-                                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 text-white flex items-center justify-center shadow-xl shadow-orange-200/50 hover:scale-110 transition-transform">
-                                                <FilePlus size={24} />
+                {!pathname?.startsWith('/admin/onboarding') && (
+                    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-[480px] pointer-events-none flex justify-center h-48 items-end">
+                        <AnimatePresence>
+                            {isFabOpen && (
+                                <>
+                                    {/* Item 2: Surat (Right - 20deg) */}
+                                    <motion.div
+                                        initial={{ opacity: 0, x: 0, y: 50, scale: 0.5 }}
+                                        animate={{ opacity: 1, x: 70, y: -20, scale: 1 }}
+                                        exit={{ opacity: 0, x: 0, y: 50, scale: 0.5 }}
+                                        transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
+                                        className="absolute bottom-24 pointer-events-auto"
+                                    >
+                                        <Link href="/admin/letters/new" onClick={() => setIsFabOpen(false)}>
+                                            <div className="flex flex-col items-center gap-1 group">
+                                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 text-white flex items-center justify-center shadow-xl shadow-orange-200/50 hover:scale-110 transition-transform">
+                                                    <FilePlus size={24} />
+                                                </div>
+                                                <span className="bg-white/90 backdrop-blur-sm text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
+                                                    Surat
+                                                </span>
                                             </div>
-                                            <span className="bg-white/90 backdrop-blur-sm text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-                                                Surat
-                                            </span>
-                                        </div>
-                                    </Link>
-                                </motion.div>
+                                        </Link>
+                                    </motion.div>
 
-                                {/* Item 3: Agenda (Left - 20deg) */}
-                                <motion.div
-                                    initial={{ opacity: 0, x: 0, y: 50, scale: 0.5 }}
-                                    animate={{ opacity: 1, x: -70, y: -20, scale: 1 }}
-                                    exit={{ opacity: 0, x: 0, y: 50, scale: 0.5 }}
-                                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
-                                    className="absolute bottom-24 pointer-events-auto"
-                                >
-                                    <Link href="/admin/events/new" onClick={() => setIsFabOpen(false)}>
-                                        <div className="flex flex-col items-center gap-1 group">
-                                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 text-white flex items-center justify-center shadow-xl shadow-blue-200/50 hover:scale-110 transition-transform">
-                                                <CalendarPlus size={24} />
+                                    {/* Item 3: Agenda (Left - 20deg) */}
+                                    <motion.div
+                                        initial={{ opacity: 0, x: 0, y: 50, scale: 0.5 }}
+                                        animate={{ opacity: 1, x: -70, y: -20, scale: 1 }}
+                                        exit={{ opacity: 0, x: 0, y: 50, scale: 0.5 }}
+                                        transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
+                                        className="absolute bottom-24 pointer-events-auto"
+                                    >
+                                        <Link href="/admin/events/new" onClick={() => setIsFabOpen(false)}>
+                                            <div className="flex flex-col items-center gap-1 group">
+                                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 text-white flex items-center justify-center shadow-xl shadow-blue-200/50 hover:scale-110 transition-transform">
+                                                    <CalendarPlus size={24} />
+                                                </div>
+                                                <span className="bg-white/90 backdrop-blur-sm text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
+                                                    Agenda
+                                                </span>
                                             </div>
-                                            <span className="bg-white/90 backdrop-blur-sm text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-                                                Agenda
-                                            </span>
-                                        </div>
-                                    </Link>
-                                </motion.div>
+                                        </Link>
+                                    </motion.div>
 
-                                {/* Item 1: Finance (Center Top - 90deg) */}
-                                <motion.div
-                                    initial={{ opacity: 0, y: 50, scale: 0.5 }}
-                                    animate={{ opacity: 1, y: -90, scale: 1 }}
-                                    exit={{ opacity: 0, y: 50, scale: 0.5 }}
-                                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0 }}
-                                    className="absolute bottom-16 pointer-events-auto"
-                                >
-                                    <Link href="/admin/finance/new" onClick={() => setIsFabOpen(false)}>
-                                        <div className="flex flex-col items-center gap-1 group">
-                                            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center shadow-2xl shadow-emerald-200/50 hover:scale-110 transition-transform border-4 border-slate-50 dark:border-slate-900">
-                                                <Wallet size={30} />
+                                    {/* Item 1: Finance (Center Top - 90deg) */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 50, scale: 0.5 }}
+                                        animate={{ opacity: 1, y: -90, scale: 1 }}
+                                        exit={{ opacity: 0, y: 50, scale: 0.5 }}
+                                        transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0 }}
+                                        className="absolute bottom-16 pointer-events-auto"
+                                    >
+                                        <Link href="/admin/finance/new" onClick={() => setIsFabOpen(false)}>
+                                            <div className="flex flex-col items-center gap-1 group">
+                                                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center shadow-2xl shadow-emerald-200/50 hover:scale-110 transition-transform border-4 border-slate-50 dark:border-slate-900">
+                                                    <Wallet size={30} />
+                                                </div>
+                                                <span className="bg-white/90 backdrop-blur-sm text-slate-700 text-xs font-bold px-3 py-1 rounded-lg shadow-sm">
+                                                    Catat Kas
+                                                </span>
                                             </div>
-                                            <span className="bg-white/90 backdrop-blur-sm text-slate-700 text-xs font-bold px-3 py-1 rounded-lg shadow-sm">
-                                                Catat Kas
-                                            </span>
-                                        </div>
-                                    </Link>
-                                </motion.div>
-                            </>
-                        )}
-                    </AnimatePresence>
-                </div>
+                                        </Link>
+                                    </motion.div>
+                                </>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                )}
 
                 {/* Bottom Navigation Dock (Glassmorphism Island) */}
-                <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-[420px] z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-1.5 ring-1 ring-white/20 dark:ring-white/5">
-                    <div className="grid grid-cols-5 h-16 items-center px-1 relative">
-                        {menuItems.map((item) => {
-                            const isActive = pathname === item.href;
+                {!pathname?.startsWith('/admin/onboarding') && (
+                    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-[420px] z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-1.5 ring-1 ring-white/20 dark:ring-white/5">
+                        <div className="grid grid-cols-5 h-16 items-center px-1 relative">
+                            {menuItems.map((item) => {
+                                const isActive = pathname === item.href;
 
-                            if (item.isFab) {
+                                if (item.isFab) {
+                                    return (
+                                        <div key={item.name} className="relative flex justify-center h-full items-center -mt-6">
+                                            <button
+                                                onClick={() => setIsFabOpen(!isFabOpen)}
+                                                className={`h-16 w-16 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) border-4 border-slate-50 dark:border-slate-950
+                            ${isFabOpen
+                                                        ? 'bg-slate-800 dark:bg-slate-700 rotate-45 scale-90'
+                                                        : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/40 hover:scale-110 hover:-translate-y-1'
+                                                    }
+                          `}
+                                            >
+                                                <Plus size={32} strokeWidth={3} />
+                                            </button>
+                                        </div>
+                                    );
+                                }
+
                                 return (
-                                    <div key={item.name} className="relative flex justify-center h-full items-center -mt-6">
-                                        <button
-                                            onClick={() => setIsFabOpen(!isFabOpen)}
-                                            className={`h-16 w-16 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) border-4 border-slate-50 dark:border-slate-950
-                        ${isFabOpen
-                                                    ? 'bg-slate-800 dark:bg-slate-700 rotate-45 scale-90'
-                                                    : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/40 hover:scale-110 hover:-translate-y-1'
-                                                }
-                      `}
-                                        >
-                                            <Plus size={32} strokeWidth={3} />
-                                        </button>
-                                    </div>
+                                    <Link
+                                        key={item.name}
+                                        href={item.href}
+                                        className="group flex flex-col items-center justify-center gap-1 h-full w-full relative"
+                                    >
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="nav-indicator"
+                                                className="absolute -bottom-1 w-1 h-1 bg-emerald-500 rounded-full mb-2"
+                                            />
+                                        )}
+                                        <div className={`p-2 rounded-2xl transition-all duration-300 ${isActive ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50/0 -translate-y-1' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`}>
+                                            <item.icon
+                                                size={24}
+                                                className={isActive ? 'stroke-[2.5px] drop-shadow-sm' : 'stroke-[1.5px]'}
+                                            />
+                                        </div>
+                                    </Link>
                                 );
-                            }
-
-                            return (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className="group flex flex-col items-center justify-center gap-1 h-full w-full relative"
-                                >
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="nav-indicator"
-                                            className="absolute -bottom-1 w-1 h-1 bg-emerald-500 rounded-full mb-2"
-                                        />
-                                    )}
-                                    <div className={`p-2 rounded-2xl transition-all duration-300 ${isActive ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50/0 -translate-y-1' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`}>
-                                        <item.icon
-                                            size={24}
-                                            className={isActive ? 'stroke-[2.5px] drop-shadow-sm' : 'stroke-[1.5px]'}
-                                        />
-                                    </div>
-                                </Link>
-                            );
-                        })}
-                    </div>
-                </nav>
+                            })}
+                        </div>
+                    </nav>
+                )}
 
             </div>
         </div>
