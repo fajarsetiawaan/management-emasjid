@@ -181,10 +181,10 @@ export default function SettingsPage() {
                     <Link href="/admin/settings/bank" className="w-full">
                         <SettingsItem icon={Wallet} label="Rekening & QRIS" onClick={() => { }} />
                     </Link>
-                    <Link href="/admin/settings/funds" className="w-full">
+                    <Link href="/admin/settings/finance" className="w-full">
                         <SettingsItem
                             icon={Wallet}
-                            label="Manajemen Keuangan"
+                            label="Finance"
                             onClick={() => { }}
                         />
                     </Link>
