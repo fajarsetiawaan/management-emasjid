@@ -81,6 +81,7 @@ export default function OnboardingSetupPage() {
         { id: 'kas_zakat_fitrah', name: 'Kas Zakat Fitrah', type: 'ZAKAT', active: false, locked: false, icon: Coins, desc: 'Dana zakat fitrah Ramadhan.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
         { id: 'kas_zakat_maal', name: 'Kas Zakat Maal', type: 'ZAKAT', active: false, locked: false, icon: ShieldCheck, desc: 'Dana zakat harta (2.5%).', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
         { id: 'kas_infaq', name: 'Kas Infaq & Sedekah', type: 'SOCIAL', active: false, locked: false, icon: Gift, desc: 'Dana infaq dan sedekah umum.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
+        { id: 'kas_wakaf', name: 'Kas Wakaf', type: 'WAKAF', active: false, locked: false, icon: Landmark, desc: 'Dana wakaf untuk pembangunan & aset masjid.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
     ]);
     const [customFund, setCustomFund] = useState('');
 

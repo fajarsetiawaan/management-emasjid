@@ -19,7 +19,7 @@ type FundAllocation = {
 type Fund = {
     id: string;
     name: string;
-    type: 'OPERASIONAL' | 'SOCIAL' | 'ZAKAT' | 'CUSTOM';
+    type: 'OPERASIONAL' | 'SOCIAL' | 'ZAKAT' | 'WAKAF' | 'CUSTOM';
     active: boolean;
     locked: boolean;
     icon: any; // Lucide Icon
@@ -61,7 +61,19 @@ export default function ManageFundsPage() {
                     ...f,
                     icon: getIconForType(f.id, f.type)
                 }));
-                setFunds(restored);
+
+                // Merge in any new default funds not present in saved config
+                const defaultFunds = [
+                    { id: 'kas_masjid', name: 'Kas Masjid (Operasional)', type: 'OPERASIONAL' as const, active: true, locked: true, icon: Building2, desc: 'Dana operasional umum masjid.', balance: 0, allocation: { type: 'CASH' } },
+                    { id: 'kas_yatim', name: 'Kas Santunan Yatim', type: 'SOCIAL' as const, active: false, locked: false, icon: HeartHandshake, desc: 'Dana khusus untuk anak yatim.', balance: 0, allocation: { type: 'CASH' } },
+                    { id: 'kas_zakat_fitrah', name: 'Kas Zakat Fitrah', type: 'ZAKAT' as const, active: false, locked: false, icon: Coins, desc: 'Dana zakat fitrah Ramadhan.', balance: 0, allocation: { type: 'CASH' } },
+                    { id: 'kas_zakat_maal', name: 'Kas Zakat Maal', type: 'ZAKAT' as const, active: false, locked: false, icon: ShieldCheck, desc: 'Dana zakat harta (2.5%).', balance: 0, allocation: { type: 'CASH' } },
+                    { id: 'kas_infaq', name: 'Kas Infaq & Sedekah', type: 'SOCIAL' as const, active: false, locked: false, icon: Gift, desc: 'Dana infaq dan sedekah umum.', balance: 0, allocation: { type: 'CASH' } },
+                    { id: 'kas_wakaf', name: 'Kas Wakaf', type: 'WAKAF' as const, active: false, locked: false, icon: Landmark, desc: 'Dana wakaf untuk pembangunan & aset masjid.', balance: 0, allocation: { type: 'CASH' } },
+                ];
+                const savedIds = new Set(restored.map((f: any) => f.id));
+                const missing = defaultFunds.filter(d => !savedIds.has(d.id));
+                setFunds([...restored, ...missing]);
             } else {
                 // Default Initial State (Same as Onboarding)
                 setFunds([
@@ -70,6 +82,7 @@ export default function ManageFundsPage() {
                     { id: 'kas_zakat_fitrah', name: 'Kas Zakat Fitrah', type: 'ZAKAT', active: false, locked: false, icon: Coins, desc: 'Dana zakat fitrah Ramadhan.', balance: 0, allocation: { type: 'CASH' } },
                     { id: 'kas_zakat_maal', name: 'Kas Zakat Maal', type: 'ZAKAT', active: false, locked: false, icon: ShieldCheck, desc: 'Dana zakat harta (2.5%).', balance: 0, allocation: { type: 'CASH' } },
                     { id: 'kas_infaq', name: 'Kas Infaq & Sedekah', type: 'SOCIAL', active: false, locked: false, icon: Gift, desc: 'Dana infaq dan sedekah umum.', balance: 0, allocation: { type: 'CASH' } },
+                    { id: 'kas_wakaf', name: 'Kas Wakaf', type: 'WAKAF', active: false, locked: false, icon: Landmark, desc: 'Dana wakaf untuk pembangunan & aset masjid.', balance: 0, allocation: { type: 'CASH' } },
                 ]);
             }
             setIsLoading(false);
@@ -82,6 +95,7 @@ export default function ManageFundsPage() {
         if (id === 'kas_zakat_fitrah') return Coins;
         if (id === 'kas_zakat_maal') return ShieldCheck;
         if (id === 'kas_infaq') return Gift;
+        if (id === 'kas_wakaf') return Landmark;
         return Wallet;
     };
 
