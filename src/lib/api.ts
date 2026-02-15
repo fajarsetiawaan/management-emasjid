@@ -91,22 +91,52 @@ export async function getTransactionsByType(
     throw new Error('API not implemented');
 }
 
-/** Dimension 1: Get Asset Accounts (Physical) */
+/** Dimension 1: Get Asset Accounts (Physical) — localStorage-first */
 export async function getAssetAccounts(): Promise<AssetAccount[]> {
-    if (USE_MOCK) return MOCK_ASSET_ACCOUNTS;
+    if (USE_MOCK) {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('sim_assets');
+            if (saved) return JSON.parse(saved) as AssetAccount[];
+        }
+        return MOCK_ASSET_ACCOUNTS;
+    }
     throw new Error('API not implemented');
 }
 
-/** Dimension 2: Get Programs (Logical) */
+/** Dimension 2: Get Programs (Logical) — localStorage-first */
 export async function getPrograms(): Promise<Program[]> {
-    if (USE_MOCK) return MOCK_PROGRAMS;
+    if (USE_MOCK) {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('sim_programs');
+            if (saved) return JSON.parse(saved) as Program[];
+        }
+        return MOCK_PROGRAMS;
+    }
     throw new Error('API not implemented');
 }
 
-/** Legacy: Get bank accounts (Mapped from AssetAccounts) */
+/** Legacy: Get bank accounts — localStorage-first */
 export async function getBankAccounts(): Promise<BankAccount[]> {
-    if (USE_MOCK) return MOCK_BANK_ACCOUNTS;
+    if (USE_MOCK) {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('sim_bank_accounts');
+            if (saved) return JSON.parse(saved) as BankAccount[];
+        }
+        return MOCK_BANK_ACCOUNTS;
+    }
     throw new Error('API not implemented');
+}
+
+/** Get total balance across all asset accounts (onboarding-aware) */
+export function getTotalBalance(): number {
+    if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('sim_assets');
+        if (saved) {
+            const assets = JSON.parse(saved) as AssetAccount[];
+            return assets.reduce((sum: number, a: AssetAccount) => sum + (a.balance || 0), 0);
+        }
+    }
+    return MOCK_MOSQUE.balance;
 }
 
 // ─── Events ────────────────────────────────────────

@@ -18,9 +18,10 @@ import {
     ArrowUpRight
 } from 'lucide-react';
 import { MOCK_MOSQUE, MOCK_EVENTS } from '@/lib/mock-data';
+import { getTotalBalance } from '@/lib/api';
 
 export default function AdminDashboardPage() {
-    const [displayBalance, setDisplayBalance] = useState(MOCK_MOSQUE.balance);
+    const [displayBalance, setDisplayBalance] = useState(getTotalBalance());
     const isNewUser = displayBalance === 0;
     const nextEvent = isNewUser ? null : MOCK_EVENTS.find(e => e.status === 'UPCOMING');
 

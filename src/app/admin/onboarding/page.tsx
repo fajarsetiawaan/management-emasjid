@@ -169,6 +169,13 @@ export default function OnboardingSetupPage() {
             setIsAddingBank(false); // Close form if open
             setStep(2);
         } else {
+            // Validation: Kas Masjid (Operasional) must have balance > 0
+            const kasMasjid = funds.find(f => f.id === 'kas_masjid');
+            if (!kasMasjid || (kasMasjid.balance || 0) <= 0) {
+                alert('⚠️ Nominal Kas Masjid (Operasional) wajib diisi sebelum menyelesaikan setup.');
+                return;
+            }
+
             // Finish
             setIsLoading(true);
 
