@@ -96,7 +96,11 @@ export async function getAssetAccounts(): Promise<AssetAccount[]> {
     if (USE_MOCK) {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('sim_assets');
-            if (saved) return JSON.parse(saved) as AssetAccount[];
+            if (saved) {
+                const assets = JSON.parse(saved) as AssetAccount[];
+                const total = assets.reduce((s, a) => s + (a.balance || 0), 0);
+                if (total > 0) return assets;
+            }
         }
         return MOCK_ASSET_ACCOUNTS;
     }
@@ -108,7 +112,11 @@ export async function getPrograms(): Promise<Program[]> {
     if (USE_MOCK) {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('sim_programs');
-            if (saved) return JSON.parse(saved) as Program[];
+            if (saved) {
+                const programs = JSON.parse(saved) as Program[];
+                const total = programs.reduce((s, p) => s + (p.balance || 0), 0);
+                if (total > 0) return programs;
+            }
         }
         return MOCK_PROGRAMS;
     }

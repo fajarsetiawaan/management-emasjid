@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
-import { MOCK_BANK_ACCOUNTS } from '@/lib/mock-data';
+import { MOCK_BANK_ACCOUNTS, MOCK_PROGRAMS } from '@/lib/mock-data';
 import { BankAccount } from '@/types';
 
 // Define Fund Structure
@@ -41,6 +41,22 @@ export default function ManageFundsPage() {
     const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
     const [customFundName, setCustomFundName] = useState('');
 
+    /** Build default fund list with balances from MOCK_PROGRAMS */
+    const getDefaultFunds = (): Fund[] => {
+        const defs: Omit<Fund, 'balance'>[] = [
+            { id: 'kas_masjid', name: 'Kas Masjid (Operasional)', type: 'OPERASIONAL', active: true, locked: true, icon: Building2, desc: 'Dana operasional umum masjid.', allocation: { type: 'CASH' } },
+            { id: 'kas_yatim', name: 'Kas Santunan Yatim', type: 'SOCIAL', active: false, locked: false, icon: HeartHandshake, desc: 'Dana khusus untuk anak yatim.', allocation: { type: 'CASH' } },
+            { id: 'kas_zakat_fitrah', name: 'Kas Zakat Fitrah', type: 'ZAKAT', active: false, locked: false, icon: Coins, desc: 'Dana zakat fitrah Ramadhan.', allocation: { type: 'CASH' } },
+            { id: 'kas_zakat_maal', name: 'Kas Zakat Maal', type: 'ZAKAT', active: false, locked: false, icon: ShieldCheck, desc: 'Dana zakat harta (2.5%).', allocation: { type: 'CASH' } },
+            { id: 'kas_infaq', name: 'Kas Infaq & Sedekah', type: 'SOCIAL', active: false, locked: false, icon: Gift, desc: 'Dana infaq dan sedekah umum.', allocation: { type: 'CASH' } },
+            { id: 'kas_wakaf', name: 'Kas Wakaf', type: 'WAKAF', active: false, locked: false, icon: Landmark, desc: 'Dana wakaf untuk pembangunan & aset masjid.', allocation: { type: 'CASH' } },
+        ];
+        return defs.map(d => {
+            const mock = MOCK_PROGRAMS.find(p => p.id === d.id);
+            return { ...d, balance: mock?.balance ?? 0, active: mock ? true : d.active } as Fund;
+        });
+    };
+
     // Load Data
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -63,27 +79,25 @@ export default function ManageFundsPage() {
                 }));
 
                 // Merge in any new default funds not present in saved config
-                const defaultFunds = [
-                    { id: 'kas_masjid', name: 'Kas Masjid (Operasional)', type: 'OPERASIONAL' as const, active: true, locked: true, icon: Building2, desc: 'Dana operasional umum masjid.', balance: 0, allocation: { type: 'CASH' } },
-                    { id: 'kas_yatim', name: 'Kas Santunan Yatim', type: 'SOCIAL' as const, active: false, locked: false, icon: HeartHandshake, desc: 'Dana khusus untuk anak yatim.', balance: 0, allocation: { type: 'CASH' } },
-                    { id: 'kas_zakat_fitrah', name: 'Kas Zakat Fitrah', type: 'ZAKAT' as const, active: false, locked: false, icon: Coins, desc: 'Dana zakat fitrah Ramadhan.', balance: 0, allocation: { type: 'CASH' } },
-                    { id: 'kas_zakat_maal', name: 'Kas Zakat Maal', type: 'ZAKAT' as const, active: false, locked: false, icon: ShieldCheck, desc: 'Dana zakat harta (2.5%).', balance: 0, allocation: { type: 'CASH' } },
-                    { id: 'kas_infaq', name: 'Kas Infaq & Sedekah', type: 'SOCIAL' as const, active: false, locked: false, icon: Gift, desc: 'Dana infaq dan sedekah umum.', balance: 0, allocation: { type: 'CASH' } },
-                    { id: 'kas_wakaf', name: 'Kas Wakaf', type: 'WAKAF' as const, active: false, locked: false, icon: Landmark, desc: 'Dana wakaf untuk pembangunan & aset masjid.', balance: 0, allocation: { type: 'CASH' } },
-                ];
+                const defaultFunds = getDefaultFunds();
                 const savedIds = new Set(restored.map((f: any) => f.id));
                 const missing = defaultFunds.filter(d => !savedIds.has(d.id));
-                setFunds([...restored, ...missing]);
+                const merged = [...restored, ...missing];
+
+                // If all balances are 0 (stale data), populate from MOCK_PROGRAMS
+                const totalBalance = merged.reduce((s: number, f: any) => s + (f.balance || 0), 0);
+                if (totalBalance === 0) {
+                    const enriched = merged.map((f: any) => {
+                        const mockProg = MOCK_PROGRAMS.find(p => p.id === f.id);
+                        return mockProg ? { ...f, balance: mockProg.balance, active: true } : f;
+                    });
+                    setFunds(enriched);
+                } else {
+                    setFunds(merged);
+                }
             } else {
-                // Default Initial State (Same as Onboarding)
-                setFunds([
-                    { id: 'kas_masjid', name: 'Kas Masjid (Operasional)', type: 'OPERASIONAL', active: true, locked: true, icon: Building2, desc: 'Dana operasional umum masjid.', balance: 0, allocation: { type: 'CASH' } },
-                    { id: 'kas_yatim', name: 'Kas Santunan Yatim', type: 'SOCIAL', active: false, locked: false, icon: HeartHandshake, desc: 'Dana khusus untuk anak yatim.', balance: 0, allocation: { type: 'CASH' } },
-                    { id: 'kas_zakat_fitrah', name: 'Kas Zakat Fitrah', type: 'ZAKAT', active: false, locked: false, icon: Coins, desc: 'Dana zakat fitrah Ramadhan.', balance: 0, allocation: { type: 'CASH' } },
-                    { id: 'kas_zakat_maal', name: 'Kas Zakat Maal', type: 'ZAKAT', active: false, locked: false, icon: ShieldCheck, desc: 'Dana zakat harta (2.5%).', balance: 0, allocation: { type: 'CASH' } },
-                    { id: 'kas_infaq', name: 'Kas Infaq & Sedekah', type: 'SOCIAL', active: false, locked: false, icon: Gift, desc: 'Dana infaq dan sedekah umum.', balance: 0, allocation: { type: 'CASH' } },
-                    { id: 'kas_wakaf', name: 'Kas Wakaf', type: 'WAKAF', active: false, locked: false, icon: Landmark, desc: 'Dana wakaf untuk pembangunan & aset masjid.', balance: 0, allocation: { type: 'CASH' } },
-                ]);
+                // Default Initial State with MOCK_PROGRAMS balances
+                setFunds(getDefaultFunds());
             }
             setIsLoading(false);
         }

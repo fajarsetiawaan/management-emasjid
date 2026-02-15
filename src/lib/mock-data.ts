@@ -173,11 +173,19 @@ export const MOCK_PROGRAMS: Program[] = [
         color: 'purple',
     },
     {
-        id: 'kas_pembangunan',
-        name: 'Kas Pembangunan Menara',
+        id: 'kas_zakat_fitrah',
+        name: 'Kas Zakat Fitrah',
         type: 'RESTRICTED',
-        balance: 2000000,
-        description: 'Wakaf khusus pembangunan fisik',
+        balance: 1000000,
+        description: 'Dana zakat fitrah Ramadhan',
+        color: 'indigo',
+    },
+    {
+        id: 'kas_wakaf',
+        name: 'Kas Wakaf',
+        type: 'RESTRICTED',
+        balance: 1000000,
+        description: 'Dana wakaf untuk pembangunan & aset masjid',
         color: 'rose',
     },
 ];
