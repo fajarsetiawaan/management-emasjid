@@ -47,8 +47,8 @@ export interface Program {
     };
 }
 
-export type IncomeCategory = 'INFAQ_JUMAT' | 'ZAKAT_FITRAH' | 'ZAKAT_MAL' | 'WAKAF' | 'DONASI';
-export type ExpenseCategory = 'OPERASIONAL' | 'PEMBANGUNAN' | 'HONOR_PETUGAS' | 'SOSIAL_YATIM';
+export type IncomeCategory = 'INFAQ_JUMAT' | 'INFAQ_UMUM' | 'ZAKAT_FITRAH' | 'ZAKAT_MAL' | 'WAKAF' | 'DONASI';
+export type ExpenseCategory = 'OPERASIONAL' | 'PEMBANGUNAN' | 'HONOR_PETUGAS' | 'SOSIAL_YATIM' | 'SANTUNAN';
 
 export type TransactionCategory = IncomeCategory | ExpenseCategory; // Keep for backward compat or categorization within programs
 
@@ -132,7 +132,7 @@ export interface TeamMember {
 
 // ─── Events ────────────────────────────────────────
 
-export type EventCategory = 'KAJIAN' | 'RAPAT' | 'LAINNYA';
+export type EventCategory = 'KAJIAN' | 'RAPAT' | 'KEGIATAN' | 'LAINNYA';
 export type EventStatus = 'UPCOMING' | 'DONE';
 
 export interface Event {

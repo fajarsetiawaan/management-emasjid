@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -21,9 +21,14 @@ import { MOCK_MOSQUE, MOCK_EVENTS } from '@/lib/mock-data';
 import { getTotalBalance } from '@/lib/api';
 
 export default function AdminDashboardPage() {
-    const [displayBalance, setDisplayBalance] = useState(getTotalBalance());
+    const [displayBalance, setDisplayBalance] = useState(MOCK_MOSQUE.balance);
     const isNewUser = displayBalance === 0;
     const nextEvent = isNewUser ? null : MOCK_EVENTS.find(e => e.status === 'UPCOMING');
+
+    // Load balance from localStorage (onboarding data) on client
+    useEffect(() => {
+        setDisplayBalance(getTotalBalance());
+    }, []);
 
     const formatRupiah = (amount: number) => {
         return new Intl.NumberFormat('id-ID', {

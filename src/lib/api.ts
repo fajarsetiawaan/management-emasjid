@@ -133,7 +133,9 @@ export function getTotalBalance(): number {
         const saved = localStorage.getItem('sim_assets');
         if (saved) {
             const assets = JSON.parse(saved) as AssetAccount[];
-            return assets.reduce((sum: number, a: AssetAccount) => sum + (a.balance || 0), 0);
+            const total = assets.reduce((sum: number, a: AssetAccount) => sum + (a.balance || 0), 0);
+            // If localStorage data has 0 total (stale/incomplete), fall back to mock
+            if (total > 0) return total;
         }
     }
     return MOCK_MOSQUE.balance;
