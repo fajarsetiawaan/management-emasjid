@@ -4,6 +4,8 @@ import {
     Calendar,
     ChevronDown,
     Layers,
+    ChevronRight,
+    ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
@@ -27,6 +29,7 @@ export default function FinanceHeader({
     setCustomDateRange
 }: FinanceHeaderProps) {
     const [showFilterMenu, setShowFilterMenu] = useState(false);
+    const [showCustomPicker, setShowCustomPicker] = useState(false);
     const dateFilterRef = useRef<HTMLDivElement>(null);
 
     // Helpers to convert string dates to Date objects for the picker
@@ -47,6 +50,13 @@ export default function FinanceHeader({
             end: end ? formatDate(end) : ''
         });
     };
+
+    // Reset sub-menu on close
+    useEffect(() => {
+        if (!showFilterMenu) {
+            setTimeout(() => setShowCustomPicker(false), 300);
+        }
+    }, [showFilterMenu]);
 
     // Close on click outside
     useEffect(() => {
@@ -73,19 +83,16 @@ export default function FinanceHeader({
                     <div className="relative" ref={dateFilterRef}>
                         <button
                             onClick={() => setShowFilterMenu(!showFilterMenu)}
-                            className={`h-10 px-4 rounded-full backdrop-blur-md border flex items-center justify-center gap-2 shadow-sm transition-all text-xs font-bold ring-1 ring-inset
+                            className={`h-10 pl-3 pr-2 rounded-full backdrop-blur-md border flex items-center justify-center gap-1 shadow-sm transition-all ring-1 ring-inset relative
                             ${dateFilter !== 'ALL'
                                     ? 'bg-emerald-500 text-white border-emerald-400 ring-emerald-300/30 shadow-emerald-500/20'
                                     : 'bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 ring-transparent'}`}
                         >
-                            <Calendar size={14} className={dateFilter !== 'ALL' ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'} />
-                            <span>
-                                {dateFilter === 'ALL' && 'Semua Tanggal'}
-                                {dateFilter === 'WEEK' && 'Pekan Ini'}
-                                {dateFilter === 'MONTH' && 'Bulan Ini'}
-                                {dateFilter === 'CUSTOM' && 'Custom'}
-                            </span>
-                            <ChevronDown size={14} className={`transition-transform duration-300 ${showFilterMenu ? 'rotate-180' : ''} ${dateFilter !== 'ALL' ? 'text-emerald-100' : 'text-slate-400'}`} />
+                            <Calendar size={18} />
+                            <ChevronDown size={14} className={`opacity-70 transition-transform duration-300 ${showFilterMenu ? 'rotate-180' : ''}`} />
+                            {dateFilter !== 'ALL' && (
+                                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
+                            )}
                         </button>
 
                         <AnimatePresence>
@@ -94,40 +101,77 @@ export default function FinanceHeader({
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute right-0 top-12 w-72 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-2 z-50 origin-top-right ring-1 ring-black/5"
+                                    className="absolute right-0 top-12 w-72 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-2 z-50 origin-top-right ring-1 ring-black/5 overflow-hidden"
                                 >
-                                    <div className="flex flex-col gap-1">
-                                        <button onClick={() => { setDateFilter('WEEK'); setShowFilterMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'WEEK' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'WEEK' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Calendar size={14} /></div>
-                                            Pekan Ini
-                                        </button>
-                                        <button onClick={() => { setDateFilter('MONTH'); setShowFilterMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'MONTH' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'MONTH' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Calendar size={14} /></div>
-                                            Bulan Ini
-                                        </button>
-                                        <button onClick={() => { setDateFilter('ALL'); setShowFilterMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'ALL' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'ALL' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Layers size={14} /></div>
-                                            Semua
-                                        </button>
-
-                                        <div className="border-t border-slate-200 dark:border-slate-700 my-1 pt-2 px-2">
-                                            <p className="text-[10px] uppercase font-bold text-slate-400 mb-2 tracking-wider">Custom Range</p>
-
-                                            {/* Custom Glass Date Picker */}
-                                            <GlassDatePicker
-                                                startDate={startDateObj}
-                                                endDate={endDateObj}
-                                                onChange={handleDateChange}
-                                            />
-
-                                            <button
-                                                onClick={() => { setDateFilter('CUSTOM'); setShowFilterMenu(false); }}
-                                                className="w-full mt-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-bold hover:opacity-90 transition-opacity shadow-lg"
+                                    <AnimatePresence mode="wait" initial={false}>
+                                        {!showCustomPicker ? (
+                                            <motion.div
+                                                key="menu"
+                                                initial={{ x: -20, opacity: 0 }}
+                                                animate={{ x: 0, opacity: 1 }}
+                                                exit={{ x: -20, opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="flex flex-col gap-1"
                                             >
-                                                Terapkan Filter
-                                            </button>
-                                        </div>
-                                    </div>
+                                                <button onClick={() => { setDateFilter('WEEK'); setShowFilterMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'WEEK' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'WEEK' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Calendar size={14} /></div>
+                                                    Pekan Ini
+                                                </button>
+                                                <button onClick={() => { setDateFilter('MONTH'); setShowFilterMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'MONTH' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'MONTH' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Calendar size={14} /></div>
+                                                    Bulan Ini
+                                                </button>
+                                                <button onClick={() => { setDateFilter('ALL'); setShowFilterMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'ALL' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'ALL' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Layers size={14} /></div>
+                                                    Semua
+                                                </button>
+
+                                                <div className="border-t border-slate-200 dark:border-slate-700 my-1 pt-2 px-1">
+                                                    <button
+                                                        onClick={() => setShowCustomPicker(true)}
+                                                        className={`w-full px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center justify-between group hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 ${dateFilter === 'CUSTOM' ? 'bg-slate-100 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700' : ''}`}
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors shadow-sm`}><Calendar size={14} /></div>
+                                                            Custom Range
+                                                        </div>
+                                                        <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </motion.div>
+                                        ) : (
+                                            <motion.div
+                                                key="picker"
+                                                initial={{ x: 20, opacity: 0 }}
+                                                animate={{ x: 0, opacity: 1 }}
+                                                exit={{ x: 20, opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                            >
+                                                <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                                                    <button
+                                                        onClick={() => setShowCustomPicker(false)}
+                                                        className="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 transition-colors"
+                                                    >
+                                                        <ArrowLeft size={16} />
+                                                    </button>
+                                                    <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Pilih Tanggal</span>
+                                                </div>
+
+                                                <GlassDatePicker
+                                                    startDate={startDateObj}
+                                                    endDate={endDateObj}
+                                                    onChange={handleDateChange}
+                                                />
+
+                                                <button
+                                                    onClick={() => { setDateFilter('CUSTOM'); setShowFilterMenu(false); }}
+                                                    className="w-full mt-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-bold hover:opacity-90 transition-opacity shadow-lg"
+                                                >
+                                                    Terapkan Filter
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </motion.div>
                             )}
                         </AnimatePresence>
