@@ -179,18 +179,7 @@ export default function SettingsPage() {
                         />
                     </Link>
                     <Link href="/admin/settings/bank" className="w-full">
-                        <SettingsItem
-                            icon={CreditCard}
-                            label="Rekening Bank"
-                            onClick={() => { }}
-                        />
-                    </Link>
-                    <Link href="/admin/settings/qrcode" className="w-full">
-                        <SettingsItem
-                            icon={QrCode}
-                            label="Kode QR Masjid"
-                            onClick={() => { }}
-                        />
+                        <SettingsItem icon={Wallet} label="Rekening & QRIS" onClick={() => { }} />
                     </Link>
                     <Link href="/admin/settings/funds" className="w-full">
                         <SettingsItem
