@@ -1,4 +1,4 @@
-import TransactionForm from '@/components/TransactionForm';
+import TransactionForm from '@/components/features/finance/TransactionForm';
 
 export default function InputPage() {
     return (

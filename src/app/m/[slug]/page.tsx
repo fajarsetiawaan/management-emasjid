@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { interpolate, useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
 import { ArrowDownLeft, ArrowUpRight, Building2, Calendar, FileText, User, Copy, ChevronRight, TrendingUp, TrendingDown, PieChart, Wallet, ShoppingBag, Zap, HeartHandshake, CircleDollarSign, Wrench } from 'lucide-react';
 import { getMosqueBySlug, getTransactions, getEvents } from '@/lib/api';
-import PrayerWidget from '@/components/public/PrayerWidget';
+import PrayerWidget from '@/components/features/public/PrayerWidget';
 import { getPrayerTimes, PrayerTimes } from '@/lib/prayer-service';
 import { Mosque, Transaction, Event } from '@/types';
 

@@ -2,7 +2,7 @@
 
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import TransactionForm from '@/components/TransactionForm';
+import TransactionForm from '@/components/features/finance/TransactionForm';
 
 export default function NewTransactionPage() {
     return (

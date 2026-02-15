@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { MOCK_MOSQUE, MOCK_USER } from '@/lib/mock-data';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 export default function MobileAppShell({
     children,

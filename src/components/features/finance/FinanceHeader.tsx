@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
-import GlassDatePicker from '@/components/admin/finance/GlassDatePicker';
+import GlassDatePicker from '@/components/features/finance/GlassDatePicker';
 
 export type DateFilterType = 'ALL' | 'WEEK' | 'MONTH' | 'CUSTOM';
 

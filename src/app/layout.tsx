@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Outfit } from 'next/font/google';
 import './globals.css';
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Toaster } from "sonner";
 
 const outfit = Outfit({

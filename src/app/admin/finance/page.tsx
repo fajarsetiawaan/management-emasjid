@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import { TransactionType, Transaction, AssetAccount, Program } from '@/types';
 import { getTransactions, getAssetAccounts, getPrograms, getTotalBalance, getMosque } from '@/lib/api';
-import FinanceHeader, { DateFilterType } from '@/components/admin/finance/FinanceHeader';
-import FinanceHeroCard from '@/components/admin/finance/FinanceHeroCard';
-import FundCards from '@/components/admin/finance/FundCards';
-import FinanceTabs from '@/components/admin/finance/FinanceTabs';
-import TransactionList from '@/components/admin/finance/TransactionList';
+import FinanceHeader, { DateFilterType } from '@/components/features/finance/FinanceHeader';
+import FinanceHeroCard from '@/components/features/finance/FinanceHeroCard';
+import FundCards from '@/components/features/finance/FundCards';
+import FinanceTabs from '@/components/features/finance/FinanceTabs';
+import TransactionList from '@/components/features/finance/TransactionList';
 
 export default function FinancePage() {
     const [activeTab, setActiveTab] = useState<TransactionType>('INCOME');

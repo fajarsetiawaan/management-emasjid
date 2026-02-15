@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { MOCK_MOSQUE } from '@/lib/mock-data';
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
+import SetupWizard from '@/components/features/onboarding/SetupWizard';
 
 // Helper for Bank Options
 const BANK_OPTIONS = [

@@ -25,7 +25,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 
-import { useTheme } from '@/components/ThemeProvider';
+import { useTheme } from '@/components/providers/ThemeProvider';
 
 export default function SettingsPage() {
     const { theme, setTheme } = useTheme();
