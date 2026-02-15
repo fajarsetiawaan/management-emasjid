@@ -15,7 +15,7 @@ import {
     FilePlus,
     Box
 } from 'lucide-react';
-import { MOCK_MOSQUE } from '@/lib/mock-data';
+import { MOCK_MOSQUE, MOCK_USER } from '@/lib/mock-data';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -33,9 +33,12 @@ export default function MobileAppShell({
         // Skip check if already on onboarding
         if (pathname?.startsWith('/admin/onboarding')) return;
 
-        // Check LocalStorage
-        const isSetupDone = localStorage.getItem('setup_completed') === 'true';
-        if (!isSetupDone) {
+        // Check Setup Status (LocalStorage OR Mock Data)
+        // In real app, this would be `user.hasCompletedOnboarding`
+        const isLocalStorageDone = localStorage.getItem('setup_completed') === 'true';
+        const isMockDone = MOCK_USER.setup_completed;
+
+        if (!isLocalStorageDone && !isMockDone) {
             window.location.href = '/admin/onboarding';
         }
     }, [pathname]);

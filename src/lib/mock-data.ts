@@ -73,6 +73,7 @@ export const MOCK_USER: User = {
     mosqueId: 'm1',
     mosqueName: 'Masjid Raya Bintaro',
     plan: 'PREMIUM',
+    setup_completed: false, // Set to false to force Onboarding
     preferences: {
         whatsapp: true,
         email: false,

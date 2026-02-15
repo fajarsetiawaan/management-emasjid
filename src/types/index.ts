@@ -101,6 +101,7 @@ export interface User {
     mosqueId: string;
     mosqueName?: string;
     plan?: string;
+    setup_completed?: boolean; // New flag for Onboarding Logic
     preferences?: NotificationPreferences;
 }
 

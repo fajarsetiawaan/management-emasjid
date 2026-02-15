@@ -57,9 +57,9 @@ export default function SettingsPage() {
     };
 
     const SettingsGroup = ({ title, children }: { title?: string, children: React.ReactNode }) => (
-        <div className="mb-6">
-            {title && <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-4">{title}</h3>}
-            <div className="bg-white dark:bg-slate-900 border-y border-slate-100 dark:border-slate-800 sm:border sm:rounded-2xl overflow-hidden divide-y divide-slate-50 dark:divide-slate-800 transition-colors duration-300">
+        <div className="mb-6 relative z-10">
+            {title && <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-4">{title}</h3>}
+            <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-lg border border-white/40 dark:border-white/5 rounded-2xl overflow-hidden shadow-lg shadow-slate-200/20 dark:shadow-none divide-y divide-white/20 dark:divide-white/5 transition-all">
                 {children}
             </div>
         </div>
@@ -80,35 +80,43 @@ export default function SettingsPage() {
     }) => (
         <button
             onClick={onClick}
-            className={`w-full flex items-center justify-between p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700
-                ${isDestructive ? 'hover:bg-rose-50 dark:hover:bg-rose-900/10' : ''}
+            className={`w-full flex items-center justify-between p-4 px-5 transition-all hover:bg-white/40 dark:hover:bg-white/5 active:scale-[0.99]
+                ${isDestructive ? 'hover:bg-rose-50/50 dark:hover:bg-rose-900/10' : ''}
             `}
         >
-            <div className="flex items-center gap-3.5">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center 
-                    ${isDestructive ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}
+            <div className="flex items-center gap-4">
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm border border-white/20 dark:border-white/5
+                    ${isDestructive
+                        ? 'bg-rose-50/80 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400'
+                        : 'bg-white/60 text-slate-600 dark:bg-slate-800/60 dark:text-slate-400'}
                 `}>
-                    <Icon size={18} />
+                    <Icon size={20} />
                 </div>
-                <span className={`text-sm font-medium ${isDestructive ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-200'}`}>
+                <span className={`text-sm font-bold ${isDestructive ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-200'}`}>
                     {label}
                 </span>
             </div>
-            <div className="flex items-center gap-2">
-                {value && <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{value}</span>}
-                <ChevronRight size={16} className="text-slate-300 dark:text-slate-600" />
+            <div className="flex items-center gap-3">
+                {value && <span className="text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-100/50 dark:bg-slate-800/50 px-2 py-1 rounded-lg border border-white/20 dark:border-white/5">{value}</span>}
+                <ChevronRight size={18} className="text-slate-300 dark:text-slate-600" />
             </div>
         </button>
     );
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 transition-colors duration-300">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 transition-colors duration-300 relative overflow-hidden">
+
+            {/* Background Gradients */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none fixed">
+                <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-emerald-400/10 dark:bg-emerald-600/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-400/10 dark:bg-blue-600/5 rounded-full blur-[100px]" />
+            </div>
 
             {/* A. Profile Header */}
-            <header className="bg-white dark:bg-slate-900 px-6 pt-8 pb-8 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 sticky top-0 z-40 transition-colors duration-300">
+            <header className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl px-6 pt-8 pb-8 flex items-center justify-between border-b border-white/20 dark:border-white/5 sticky top-0 z-40 transition-all duration-300">
                 <div className="flex items-center gap-4">
                     <div className="relative">
-                        <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-white dark:border-slate-700 shadow-md overflow-hidden flex items-center justify-center text-slate-400 dark:text-slate-500">
+                        <div className="w-16 h-16 rounded-full bg-slate-100/50 dark:bg-slate-800/50 border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden flex items-center justify-center text-slate-400 dark:text-slate-500">
                             <User size={32} />
                         </div>
                         <div className="absolute -bottom-1 -right-1 bg-amber-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white dark:border-slate-900 flex items-center gap-0.5 shadow-sm">
@@ -293,11 +301,11 @@ export default function SettingsPage() {
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 relative z-10 shadow-2xl ring-1 ring-slate-900/5 dark:ring-slate-700"
+                            className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl w-full max-w-sm rounded-3xl p-6 relative z-10 shadow-2xl ring-1 ring-white/20 dark:ring-white/10"
                         >
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Pilih Tampilan</h3>
-                                <button onClick={() => setShowThemeModal(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+                                <button onClick={() => setShowThemeModal(false)} className="p-2 bg-slate-100/50 dark:bg-slate-800/50 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
                                     <X size={20} />
                                 </button>
                             </div>
@@ -348,7 +356,7 @@ export default function SettingsPage() {
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 relative z-10 text-center shadow-2xl ring-1 ring-slate-900/5 dark:ring-slate-700"
+                            className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl w-full max-w-sm rounded-3xl p-6 relative z-10 text-center shadow-2xl ring-1 ring-white/20 dark:ring-white/10"
                         >
                             <div className="w-16 h-16 bg-rose-50 dark:bg-rose-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500 dark:text-rose-400">
                                 <LogOut size={32} />
