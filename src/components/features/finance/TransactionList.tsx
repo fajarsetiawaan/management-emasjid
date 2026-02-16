@@ -1,14 +1,14 @@
 import { Search } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Transaction, Program } from '@/types';
+import { Transaction, Fund } from '@/types';
 import TransactionCard from './TransactionCard';
 
 interface TransactionListProps {
     transactions: Transaction[];
-    programs: Program[];
+    funds: Fund[];
 }
 
-export default function TransactionList({ transactions, programs }: TransactionListProps) {
+export default function TransactionList({ transactions, funds }: TransactionListProps) {
     // Group transactions by date for sticky headers
     const groupedTransactions = transactions.reduce((groups, transaction) => {
         const dateObj = new Date(transaction.date);
@@ -26,7 +26,7 @@ export default function TransactionList({ transactions, programs }: TransactionL
         return groups;
     }, {} as Record<string, Transaction[]>);
 
-    const getProgramName = (id: string) => programs.find(p => p.id === id)?.name || 'Umum';
+    const getFundName = (id: string) => funds.find(f => f.id === id)?.name || 'Umum';
 
     if (transactions.length === 0) {
         return (
@@ -63,7 +63,7 @@ export default function TransactionList({ transactions, programs }: TransactionL
                             >
                                 <TransactionCard
                                     transaction={t}
-                                    programName={getProgramName(t.programId)}
+                                    programName={getFundName(t.fundId)}
                                 />
                             </motion.div>
                         ))}

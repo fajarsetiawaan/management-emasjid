@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Transaction, Program } from '@/types';
-import { getTransactions, getPrograms, getTotalBalance, getAssetAccounts } from '@/lib/api';
+import { Transaction, Fund } from '@/types';
+import { getTransactions, getFunds, getTotalBalance, getAssetAccounts } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReportsHeader from '@/components/features/reports/ReportsHeader';
 import SummaryCard from '@/components/features/reports/SummaryCard';
@@ -18,7 +18,7 @@ export default function ReportsPage() {
 
     // Data State
     const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [programs, setPrograms] = useState<Program[]>([]);
+    const [funds, setFunds] = useState<Fund[]>([]);
     const [netBalance, setNetBalance] = useState(0);
     const [loading, setLoading] = useState(true);
 
@@ -27,11 +27,11 @@ export default function ReportsPage() {
             try {
                 const [txData, progData] = await Promise.all([
                     getTransactions(),
-                    getPrograms(),
+                    getFunds(),
                     getAssetAccounts() // Ensure assets are loaded for total balance
                 ]);
                 setTransactions(txData);
-                setPrograms(progData);
+                setFunds(progData);
                 // Calculate Net Balance (Total Assets)
                 setNetBalance(getTotalBalance());
             } catch (error) {

@@ -36,7 +36,7 @@ export const FUND_CATEGORIES = [
 
 export type FundCategoryType = typeof FUND_CATEGORIES[number]['id'];
 
-import { Fund } from '@/types/finance';
+import { Fund } from '@/types';
 
 export const DEFAULT_FUNDS: Fund[] = [
     // --- OPERASIONAL ---
@@ -47,9 +47,10 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: true,
         locked: true,
         icon: Building2,
-        desc: 'Dana utama operasional masjid.',
+        description: 'Dana utama operasional masjid.',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'emerald'
     },
     {
         id: 'infaq_jumat',
@@ -58,9 +59,10 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: false,
         locked: false,
         icon: Gift,
-        desc: 'Penerimaan kotak amal Jumat.',
+        description: 'Penerimaan kotak amal Jumat.',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'emerald'
     },
     {
         id: 'petty_cash',
@@ -69,9 +71,10 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: false,
         locked: false,
         icon: Calculator,
-        desc: 'Kas kecil untuk pengeluaran harian.',
+        description: 'Kas kecil untuk pengeluaran harian.',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'emerald'
     },
     {
         id: 'sedekah_umum',
@@ -80,9 +83,10 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: false,
         locked: false,
         icon: HeartHandshake,
-        desc: 'Sedekah sukarela dari jamaah.',
+        description: 'Sedekah sukarela dari jamaah.',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'emerald'
     },
 
     // --- ZAKAT ---
@@ -93,9 +97,10 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: false,
         locked: false,
         icon: Coins,
-        desc: 'Kewajiban zakat Ramadhan.',
+        description: 'Kewajiban zakat Ramadhan.',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'indigo'
     },
     {
         id: 'zakat_maal',
@@ -104,9 +109,10 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: false,
         locked: false,
         icon: ShieldCheck,
-        desc: 'Zakat harta (2.5%).',
+        description: 'Zakat harta (2.5%).',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'indigo'
     },
     {
         id: 'fidyah',
@@ -115,9 +121,10 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: false,
         locked: false,
         icon: Beef, // Using Beef as placeholder for food/feeding
-        desc: 'Pengganti puasa bagi yang berhalangan.',
+        description: 'Pengganti puasa bagi yang berhalangan.',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'indigo'
     },
 
     // --- WAKAF ---
@@ -128,9 +135,10 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: false,
         locked: false,
         icon: Briefcase,
-        desc: 'Wakaf yang dikelola untuk hasil usaha.',
+        description: 'Wakaf yang dikelola untuk hasil usaha.',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'blue'
     },
     {
         id: 'wakaf_bangunan',
@@ -139,9 +147,10 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: false,
         locked: false,
         icon: Landmark,
-        desc: 'Wakaf untuk fisik bangunan/tanah.',
+        description: 'Wakaf untuk fisik bangunan/tanah.',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'blue'
     },
 
     // --- SOSIAL ---
@@ -152,9 +161,10 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: false,
         locked: false,
         icon: GraduationCap,
-        desc: 'Dana pendidikan & santunan yatim.',
+        description: 'Dana pendidikan & santunan yatim.',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'rose'
     },
     {
         id: 'qurban',
@@ -163,9 +173,10 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: false,
         locked: false,
         icon: Beef,
-        desc: 'Penerimaan dana hewan qurban.',
+        description: 'Penerimaan dana hewan qurban.',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'rose'
     },
     {
         id: 'bencana',
@@ -174,8 +185,9 @@ export const DEFAULT_FUNDS: Fund[] = [
         active: false,
         locked: false,
         icon: Tent,
-        desc: 'Bantuan kemanusiaan & bencana alam.',
+        description: 'Bantuan kemanusiaan & bencana alam.',
         balance: 0,
-        allocation: { type: 'CASH' }
+        allocation: { type: 'CASH' },
+        color: 'rose'
     }
 ];

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TransactionType, Transaction, AssetAccount, Program } from '@/types';
-import { getTransactions, getAssetAccounts, getPrograms, getTotalBalance, getMosque } from '@/lib/api';
+import { TransactionType, Transaction, AssetAccount, Fund } from '@/types';
+import { getTransactions, getAssetAccounts, getFunds, getTotalBalance, getMosque } from '@/lib/api';
 import FinanceHeader, { DateFilterType } from '@/components/features/finance/FinanceHeader';
 import FinanceHeroCard from '@/components/features/finance/FinanceHeroCard';
 import FinanceQuickActions from '@/components/features/finance/FinanceQuickActions';
@@ -16,12 +16,12 @@ export default function FinancePage() {
     // Filters State
     const [dateFilter, setDateFilter] = useState<DateFilterType>('MONTH');
     const [customDateRange, setCustomDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
-    const [selectedProgramId, setSelectedProgramId] = useState<string>('ALL');
+    const [selectedFundId, setSelectedFundId] = useState<string>('ALL');
 
     // Data State
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [accounts, setAccounts] = useState<AssetAccount[]>([]);
-    const [programs, setPrograms] = useState<Program[]>([]);
+    const [funds, setFunds] = useState<Fund[]>([]);
     const [totalBalance, setTotalBalance] = useState(0);
     const [mosqueName, setMosqueName] = useState('Masjid');
     const [loading, setLoading] = useState(true);
@@ -32,12 +32,12 @@ export default function FinancePage() {
                 const [txData, accData, progData, mosqueData] = await Promise.all([
                     getTransactions(),
                     getAssetAccounts(),
-                    getPrograms(),
+                    getFunds(),
                     getMosque()
                 ]);
                 setTransactions(txData);
                 setAccounts(accData);
-                setPrograms(progData);
+                setFunds(progData);
                 setTotalBalance(getTotalBalance());
                 setMosqueName(mosqueData.name);
             } catch (error) {
@@ -91,8 +91,8 @@ export default function FinancePage() {
         }
 
         // Program/Wallet Filter
-        if (selectedProgramId !== 'ALL') {
-            filtered = filtered.filter(t => t.programId === selectedProgramId);
+        if (selectedFundId !== 'ALL') {
+            filtered = filtered.filter(t => t.fundId === selectedFundId);
         }
 
         return filtered.sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -124,8 +124,8 @@ export default function FinancePage() {
         }
 
         // Program Filter
-        if (selectedProgramId !== 'ALL') {
-            all = all.filter(t => t.programId === selectedProgramId);
+        if (selectedFundId !== 'ALL') {
+            all = all.filter(t => t.fundId === selectedFundId);
         }
 
         return all;
@@ -154,9 +154,9 @@ export default function FinancePage() {
                 setDateFilter={setDateFilter}
                 customDateRange={customDateRange}
                 setCustomDateRange={setCustomDateRange}
-                programs={programs}
-                selectedProgramId={selectedProgramId}
-                setSelectedProgramId={setSelectedProgramId}
+                funds={funds}
+                selectedFundId={selectedFundId}
+                setSelectedFundId={setSelectedFundId}
             />
 
             <main className="px-4 pt-4 relative z-10">
@@ -167,7 +167,7 @@ export default function FinancePage() {
 
                 <FinanceQuickActions />
 
-                <FundCards programs={programs} />
+                <FundCards funds={funds} />
 
                 {/* Sticky Tabs & Full Width List */}
                 <FinanceTabs
@@ -178,7 +178,7 @@ export default function FinancePage() {
                 <div className="min-h-[400px]">
                     <TransactionList
                         transactions={filteredTransactions}
-                        programs={programs}
+                        funds={funds}
                     />
                 </div>
             </main>

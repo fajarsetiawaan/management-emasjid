@@ -22,7 +22,7 @@ import type {
     LegalMenuItem,
     TeamMember,
     AssetAccount,
-    Program,
+    Fund,
 } from '@/types';
 
 import {
@@ -40,7 +40,7 @@ import {
     MOCK_INVENTORY,
     MOCK_DONORS,
     MOCK_ASSET_ACCOUNTS,
-    MOCK_PROGRAMS,
+    MOCK_FUNDS,
 } from './mock-data';
 
 // ─── Toggle: set to false when backend is ready ───
@@ -107,28 +107,28 @@ export async function getAssetAccounts(): Promise<AssetAccount[]> {
     throw new Error('API not implemented');
 }
 
-/** Dimension 2: Get Programs (Logical) — localStorage-first */
-export async function getPrograms(): Promise<Program[]> {
+/** Dimension 2: Get Funds (Logical) — localStorage-first */
+export async function getFunds(): Promise<Fund[]> {
     if (USE_MOCK) {
         if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('sim_programs');
+            const saved = localStorage.getItem('sim_funds');
             if (saved) {
-                let programs = JSON.parse(saved) as Program[];
+                let funds = JSON.parse(saved) as Fund[];
 
-                // Migration: Fix Program Name if old one exists (Kas Masjid)
-                const kasMasjid = programs.find(p => p.id === 'kas_masjid');
+                // Migration: Fix Fund Name if old one exists (Kas Masjid)
+                const kasMasjid = funds.find(f => f.id === 'kas_masjid');
                 if (kasMasjid && kasMasjid.name.includes('(Operasional)')) {
-                    programs = programs.map(p =>
-                        p.id === 'kas_masjid' ? { ...p, name: 'Kas Masjid' } : p
+                    funds = funds.map(f =>
+                        f.id === 'kas_masjid' ? { ...f, name: 'Kas Masjid' } : f
                     );
-                    localStorage.setItem('sim_programs', JSON.stringify(programs));
+                    localStorage.setItem('sim_funds', JSON.stringify(funds));
                 }
 
-                const total = programs.reduce((s, p) => s + (p.balance || 0), 0);
-                if (total > 0) return programs;
+                const total = funds.reduce((s, f) => s + (f.balance || 0), 0);
+                if (total > 0) return funds;
             }
         }
-        return MOCK_PROGRAMS;
+        return MOCK_FUNDS;
     }
     throw new Error('API not implemented');
 }

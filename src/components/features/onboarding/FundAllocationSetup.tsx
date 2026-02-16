@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, Banknote, Landmark, Calculator, AlertCircle, ChevronDown, Coins } from 'lucide-react';
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
 import { FUND_CATEGORIES } from '@/lib/constants/finance';
-import { Fund, BankAccount } from '@/types/finance';
+import { Fund, BankAccount } from '@/types';
 
 interface FundAllocationSetupProps {
     funds: Fund[];
@@ -53,7 +53,7 @@ export default function FundAllocationSetup({
                         {/* List of Funds in this Category */}
                         <div className="grid gap-4">
                             {categoryFunds.map((fund) => {
-                                const isAllocationBank = fund.allocation.type === 'BANK';
+                                const isAllocationBank = fund.allocation?.type === 'BANK';
                                 const Icon = fund.icon;
 
                                 return (
@@ -138,7 +138,7 @@ export default function FundAllocationSetup({
                                                                         {bankAccounts.length > 0 ? (
                                                                             <select
                                                                                 className="w-full h-full min-h-[40px] px-3 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900/50 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500"
-                                                                                value={fund.allocation.bankId}
+                                                                                value={fund.allocation?.bankId || ''}
                                                                                 onChange={(e) => onUpdateFundAllocation(fund.id, 'BANK', e.target.value)}
                                                                                 onClick={(e) => e.stopPropagation()}
                                                                             >

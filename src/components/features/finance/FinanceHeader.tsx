@@ -12,7 +12,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import GlassDatePicker from '@/components/features/finance/GlassDatePicker';
-import { Program } from '@/types';
+import { Fund } from '@/types';
 import { FilterDropdown, FilterTrigger, FilterContent, FilterItem, FilterActionButton } from '@/components/shared/FilterDropdown';
 
 export type DateFilterType = 'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'YEAR' | 'CUSTOM';
@@ -23,9 +23,9 @@ interface FinanceHeaderProps {
     setDateFilter: (filter: DateFilterType) => void;
     customDateRange: { start: string; end: string };
     setCustomDateRange: (range: { start: string; end: string }) => void;
-    programs: Program[];
-    selectedProgramId: string;
-    setSelectedProgramId: (id: string) => void;
+    funds: Fund[];
+    selectedFundId: string;
+    setSelectedFundId: (id: string) => void;
 }
 
 export default function FinanceHeader({
@@ -34,9 +34,9 @@ export default function FinanceHeader({
     setDateFilter,
     customDateRange,
     setCustomDateRange,
-    programs,
-    selectedProgramId,
-    setSelectedProgramId
+    funds,
+    selectedFundId,
+    setSelectedFundId
 }: FinanceHeaderProps) {
     const [showCustomPicker, setShowCustomPicker] = useState(false);
 
@@ -146,8 +146,8 @@ export default function FinanceHeader({
                     <FilterDropdown>
                         <FilterTrigger
                             icon={<SlidersHorizontal size={18} />}
-                            isActive={selectedProgramId !== 'ALL'}
-                            indicator={selectedProgramId !== 'ALL' && (
+                            isActive={selectedFundId !== 'ALL'}
+                            indicator={selectedFundId !== 'ALL' && (
                                 <span className="absolute top-1 right-1 w-2 h-2 bg-emerald-400 border-2 border-white dark:border-slate-900 rounded-full"></span>
                             )}
                         >
@@ -155,22 +155,22 @@ export default function FinanceHeader({
                                 <h4 className="px-3 py-2 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Filter Dompet</h4>
                                 <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto custom-scrollbar">
                                     <FilterItem
-                                        onClick={() => setSelectedProgramId('ALL')}
-                                        isSelected={selectedProgramId === 'ALL'}
-                                        icon={<Check size={14} className={selectedProgramId === 'ALL' ? '' : 'invisible'} />}
+                                        onClick={() => setSelectedFundId('ALL')}
+                                        isSelected={selectedFundId === 'ALL'}
+                                        icon={<Check size={14} className={selectedFundId === 'ALL' ? '' : 'invisible'} />}
                                     >
                                         Semua Dompet
                                     </FilterItem>
 
-                                    {programs.map((program) => (
+                                    {funds.map((fund) => (
                                         <FilterItem
-                                            key={program.id}
-                                            onClick={() => setSelectedProgramId(program.id)}
-                                            isSelected={selectedProgramId === program.id}
+                                            key={fund.id}
+                                            onClick={() => setSelectedFundId(fund.id)}
+                                            isSelected={selectedFundId === fund.id}
                                             icon={<Layers size={14} />}
                                         >
-                                            <span>{program.name}</span>
-                                            {selectedProgramId === program.id && <Check size={14} />}
+                                            <span>{fund.name}</span>
+                                            {selectedFundId === fund.id && <Check size={14} />}
                                         </FilterItem>
                                     ))}
                                 </div>

@@ -4,22 +4,21 @@ import { useState, useEffect } from 'react';
 import {
     ArrowDown,
     ArrowUp,
-    Calendar,
     Check,
     Save,
     Wallet,
     Layers,
     PenLine,
-    CreditCard,
     Landmark
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
     TransactionType,
     AssetAccount,
-    Program
+    Fund
 } from '@/types';
-import { getAssetAccounts, getPrograms } from '@/lib/api';
+import { getAssetAccounts, getFunds } from '@/lib/api';
+import { FUND_CATEGORIES } from '@/lib/constants/finance';
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
 import { useSearchParams } from 'next/navigation';
 import SingleDateGlassPicker from './SingleDateGlassPicker';
@@ -30,33 +29,32 @@ export default function TransactionForm() {
 
     const [type, setType] = useState<TransactionType>(initialType);
     const [amount, setAmount] = useState<number>(0);
-    // Ensure date is kept as Date object internally if possible, or convert
-    // The previous code used string 'YYYY-MM-DD'. Let's switch to Date object for better component compat
     const [date, setDate] = useState<Date>(new Date());
     const [description, setDescription] = useState('');
 
     // 2D Accounting State
     const [accountId, setAccountId] = useState('');
-    const [programId, setProgramId] = useState('');
+    const [fundId, setFundId] = useState('');
 
     // Data Source
     const [accounts, setAccounts] = useState<AssetAccount[]>([]);
-    const [programs, setPrograms] = useState<Program[]>([]);
+    const [funds, setFunds] = useState<Fund[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [accData, progData] = await Promise.all([
+                const [accData, fundData] = await Promise.all([
                     getAssetAccounts(),
-                    getPrograms()
+                    getFunds()
                 ]);
                 setAccounts(accData);
-                setPrograms(progData);
+                setFunds(fundData);
 
                 // Set defaults if available
                 if (accData.length > 0) setAccountId(accData[0].id);
-                if (progData.length > 0) setProgramId(progData[0].id);
+                // Don't auto-set fundId to force user selection, or set the first one
+                // if (fundData.length > 0) setFundId(fundData[0].id);
             } finally {
                 setLoading(false);
             }
@@ -77,17 +75,18 @@ export default function TransactionForm() {
             amount,
             type,
             accountId,   // Dimension 1: Where
-            programId,   // Dimension 2: What for
+            fundId,      // Dimension 2: What for
             date,        // Already a Date object
             description,
         };
 
         console.log('Transaction Submitted:', JSON.stringify(payload, null, 2));
-        alert(`Data transaksi berhasil disimpan!\n\n${type === 'INCOME' ? 'Masuk ke' : 'Keluar dari'}: ${accounts.find(a => a.id === accountId)?.name}\nUntuk Program: ${programs.find(p => p.id === programId)?.name}`);
+        alert(`Data transaksi berhasil disimpan!\n\n${type === 'INCOME' ? 'Masuk ke' : 'Keluar dari'}: ${accounts.find(a => a.id === accountId)?.name}\nUntuk Pos: ${funds.find(f => f.id === fundId)?.name}`);
 
-        // Reset Logic could go here or redirect
+        // Reset Logic
         setAmount(0);
         setDescription('');
+        setFundId('');
     };
 
     const formatRp = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
@@ -210,38 +209,56 @@ export default function TransactionForm() {
                         </div>
                     </motion.div>
 
-                    {/* 3. Program Selector (Category Dompet) */}
-                    <motion.div variants={itemVariant} className="space-y-4 px-4">
+                    {/* 3. Fund Selector (Category Dompet) - GROUPED */}
+                    <motion.div variants={itemVariant} className="space-y-6 px-4">
                         <div className="flex items-center gap-2">
                             <div className={`p-2 rounded-full ${type === 'INCOME' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
                                 <Layers size={18} />
                             </div>
                             <h3 className="font-bold text-slate-700 dark:text-slate-300">
-                                {type === 'INCOME' ? 'Kategori Dompet (Alokasi)' : 'Beban Dompet Program'}
+                                {type === 'INCOME' ? 'Kategori Dompet (Alokasi)' : 'Beban Dompet Pos'}
                             </h3>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            {programs.map((prog) => {
-                                const isSelected = programId === prog.id;
-                                const activeClass = type === 'INCOME'
-                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-200'
-                                    : 'bg-rose-600 text-white border-rose-600 shadow-lg shadow-rose-200';
-                                const inactiveClass = 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700';
+                        <div className="space-y-6">
+                            {FUND_CATEGORIES.map((cat) => {
+                                const categoryFunds = funds.filter(f => f.type === cat.id);
+                                if (categoryFunds.length === 0) return null;
 
                                 return (
-                                    <button
-                                        key={prog.id}
-                                        type="button"
-                                        onClick={() => setProgramId(prog.id)}
-                                        className={`
-                                            p-4 rounded-xl border text-sm font-bold transition-all duration-200 flex flex-col items-center justify-center gap-2 text-center h-24
-                                            ${isSelected ? activeClass : inactiveClass}
-                                        `}
-                                    >
-                                        <Layers size={20} className={isSelected ? 'text-white' : 'text-slate-400'} />
-                                        <span className="line-clamp-2">{prog.name}</span>
-                                    </button>
+                                    <div key={cat.id} className="space-y-3">
+                                        <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">
+                                            <span className={`w-2 h-2 rounded-full bg-${cat.color}-500`} />
+                                            {cat.label}
+                                        </div>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                            {categoryFunds.map((fund) => {
+                                                const isSelected = fundId === fund.id;
+                                                const activeClass = type === 'INCOME'
+                                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-200'
+                                                    : 'bg-rose-600 text-white border-rose-600 shadow-lg shadow-rose-200';
+                                                const inactiveClass = 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700';
+
+                                                return (
+                                                    <button
+                                                        key={fund.id}
+                                                        type="button"
+                                                        onClick={() => setFundId(fund.id)}
+                                                        className={`
+                                                            p-4 rounded-xl border text-sm font-bold transition-all duration-200 flex flex-col items-center justify-center gap-2 text-center h-24
+                                                            ${isSelected ? activeClass : inactiveClass}
+                                                        `}
+                                                    >
+                                                        {/* Icon Placeholder or Initials */}
+                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${isSelected ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                                                            {fund.name.substring(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <span className="line-clamp-2 text-xs">{fund.name}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
                                 );
                             })}
                         </div>
@@ -250,7 +267,7 @@ export default function TransactionForm() {
                     {/* 4. Details (Date & Desc) */}
                     <motion.div variants={itemVariant} className="space-y-4 px-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Date Picker - REPLACED */}
+                            {/* Date Picker */}
                             <div className="md:col-span-1 z-20 relative">
                                 <SingleDateGlassPicker
                                     date={date}
@@ -278,7 +295,7 @@ export default function TransactionForm() {
                         </div>
                     </motion.div>
 
-                    {/* 5. Submit Button (Sticky Style to ensure visibility) */}
+                    {/* 5. Submit Button */}
                     <motion.div
                         variants={itemVariant}
                         className="sticky bottom-4 px-4 z-40"
@@ -286,10 +303,10 @@ export default function TransactionForm() {
                         <div className="absolute inset-x-0 bottom-[-20px] h-24 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none -z-10" />
                         <button
                             type="submit"
-                            disabled={amount <= 0 || !accountId || !programId}
+                            disabled={amount <= 0 || !accountId || !fundId}
                             className={`
                                 w-full py-4 rounded-xl font-bold text-lg text-white flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl transition-all active:scale-[0.98] ring-4 ring-white dark:ring-slate-950
-                                ${amount <= 0 || !accountId || !programId
+                                ${amount <= 0 || !accountId || !fundId
                                     ? 'bg-slate-300 dark:bg-slate-800 cursor-not-allowed text-slate-500'
                                     : (type === 'INCOME' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/30' : 'bg-rose-600 hover:bg-rose-500 shadow-rose-500/30')
                                 }

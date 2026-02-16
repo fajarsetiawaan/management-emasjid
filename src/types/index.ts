@@ -15,7 +15,7 @@ export type Role = 'OWNER' | 'ADMIN';
 // ─── Finance: 2D Fund Accounting Core ──────────────
 
 export type AssetType = 'CASH' | 'BANK' | 'EWALLET';
-export type ProgramType = 'UNRESTRICTED' | 'RESTRICTED';
+export type FundCategory = 'OPERASIONAL' | 'ZAKAT' | 'WAKAF' | 'SOSIAL' | 'CUSTOM';
 export type TransactionType = 'INCOME' | 'EXPENSE' | 'TRANSFER'; // Added TRANSFER
 
 /**
@@ -32,25 +32,30 @@ export interface AssetAccount {
 }
 
 /**
- * Dimension 2: What is the money for? (Logical/Program)
+ * Dimension 2: What is the money for? (Logical/Fund - formerly Program)
  */
-export interface Program {
+export type FundAllocation = {
+    type: 'CASH' | 'BANK';
+    bankId?: string;
+};
+
+export interface Fund {
     id: string;
     name: string; // e.g. "Operasional", "Yatim", "Pembangunan"
-    type: ProgramType;
+    type: FundCategory;
     balance: number;
     description?: string;
     color: string; // UI Color
-    allocation?: {
-        type: 'CASH' | 'BANK';
-        bankId?: string;
-    };
+    active?: boolean;
+    locked?: boolean;
+    icon?: any;
+    allocation?: FundAllocation;
 }
 
 export type IncomeCategory = 'INFAQ_JUMAT' | 'INFAQ_UMUM' | 'ZAKAT_FITRAH' | 'ZAKAT_MAL' | 'WAKAF' | 'DONASI';
 export type ExpenseCategory = 'OPERASIONAL' | 'PEMBANGUNAN' | 'HONOR_PETUGAS' | 'SOSIAL_YATIM' | 'SANTUNAN';
 
-export type TransactionCategory = IncomeCategory | ExpenseCategory; // Keep for backward compat or categorization within programs
+export type TransactionCategory = IncomeCategory | ExpenseCategory; // Keep for backward compat or categorization within funds
 
 export interface Transaction {
     id: string;
@@ -60,7 +65,7 @@ export interface Transaction {
 
     // 2D Accounting Links
     accountId: string; // Physical Account (Where)
-    programId: string; // Logical Program (For What)
+    fundId: string;    // Logical Fund (For What) - formerly programId
 
     description: string;
     status: 'COMPLETED' | 'PENDING';

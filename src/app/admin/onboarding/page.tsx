@@ -45,7 +45,7 @@ const BANK_OPTIONS = [
 
 
 import { DEFAULT_FUNDS, FUND_CATEGORIES, FundCategoryType } from '@/lib/constants/finance';
-import { Fund, BankAccount, FundAllocation } from '@/types/finance';
+import { Fund, BankAccount, FundAllocation, FundCategory } from '@/types';
 import FundAllocationSetup from '@/components/features/onboarding/FundAllocationSetup';
 
 export default function OnboardingSetupPage() {
@@ -138,7 +138,7 @@ export default function OnboardingSetupPage() {
         setIsCategoryModalOpen(true);
     };
 
-    const confirmAddFund = (category: FundCategoryType) => {
+    const confirmAddFund = (category: FundCategory) => {
         if (!pendingFundName) return;
 
         setFunds([
@@ -150,9 +150,10 @@ export default function OnboardingSetupPage() {
                 active: true,
                 locked: false,
                 icon: Wallet,
-                desc: 'Kategori dana khusus.',
+                description: 'Kategori dana khusus.',
                 balance: 0,
-                allocation: { type: 'CASH' }
+                allocation: { type: 'CASH' },
+                color: 'slate'
             }
         ]);
 
@@ -191,7 +192,7 @@ export default function OnboardingSetupPage() {
 
                 // Cash Asset (Sum of all funds allocated to CASH)
                 const totalCash = activeFunds
-                    .filter(f => f.allocation.type === 'CASH')
+                    .filter(f => f.allocation?.type === 'CASH')
                     .reduce((acc, curr) => acc + (curr.balance || 0), 0);
 
                 assets.push({
@@ -207,7 +208,7 @@ export default function OnboardingSetupPage() {
                 bankAccounts.forEach(bank => {
                     // Check if sum of funds matches declared balance
                     const totalAllocated = activeFunds
-                        .filter(f => f.allocation.type === 'BANK' && f.allocation.bankId === bank.id)
+                        .filter(f => f.allocation?.type === 'BANK' && f.allocation?.bankId === bank.id)
                         .reduce((acc, curr) => acc + (curr.balance || 0), 0);
 
                     // Balance is purely sum of allocations
@@ -252,13 +253,13 @@ export default function OnboardingSetupPage() {
                     name: f.name,
                     type: f.type === 'OPERASIONAL' ? 'UNRESTRICTED' : 'RESTRICTED',
                     balance: f.balance || 0,
-                    description: f.desc,
+                    description: f.description,
                     color: f.type === 'OPERASIONAL' ? 'blue' : f.type === 'ZAKAT' ? 'purple' : 'amber'
                 }));
 
 
 
-                localStorage.setItem('sim_programs', JSON.stringify(newPrograms));
+                localStorage.setItem('sim_funds', JSON.stringify(activeFunds));
 
                 // Save Fund Config for Re-editing in Settings (Save ALL funds)
                 localStorage.setItem('sim_fund_config', JSON.stringify(funds));
