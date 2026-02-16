@@ -167,6 +167,7 @@ export default function TransactionForm() {
             const updatedAccounts = await getAssetAccounts();
             setAccounts(updatedAccounts);
             alert('Transaksi berhasil disimpan!');
+            router.push('/admin/finance');
 
             // Reset
             setAmount('');
@@ -235,15 +236,12 @@ export default function TransactionForm() {
         <div className="max-w-md mx-auto min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-white pb-32">
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-4 sticky top-0 bg-slate-50/80 dark:bg-black/80 backdrop-blur-xl z-50 relative">
-                <button
-                    onClick={() => router.back()}
-                    className="p-2 -ml-2 rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
-                >
-                    <ChevronLeft size={24} />
+            <div className="bg-white dark:bg-[#1C1C1E] p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 sticky top-0 z-50">
+                <button onClick={() => router.back()} className="text-slate-400">
+                    <X size={24} />
                 </button>
-                <h1 className="text-lg font-bold absolute left-1/2 -translate-x-1/2">Tambah Transaksi</h1>
-                <div className="w-8" />
+                <h1 className="text-[17px] font-semibold text-slate-900 dark:text-white">Transaksi Baru</h1>
+                <div className="w-6" /> {/* Spacer to center title */}
             </div>
 
             {/* Segmented Control */}
@@ -506,23 +504,23 @@ export default function TransactionForm() {
                     </ListRow>
                 </div>
 
-                <button className="w-full py-4 rounded-[14px] bg-[#1C1C1E] dark:bg-slate-800 border border-slate-800 dark:border-slate-700 text-emerald-500 font-medium text-[17px]">
+                <button className="w-full py-2 text-emerald-500 font-medium text-[15px] hover:text-emerald-600 transition-colors">
                     Tambah Detail Lainnya
                 </button>
             </div>
 
             {/* Sticky Save Button */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-50/90 dark:bg-black/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-50/90 dark:bg-black/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-50">
                 <div className="max-w-md mx-auto">
                     <button
                         onClick={handleSubmit}
-                        className="w-full py-3.5 rounded-full bg-slate-400/20 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 font-semibold text-[17px] hover:bg-emerald-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={submitting}
+                        className="w-full py-4 rounded-full font-bold text-[17px] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-white shadow-lg"
                         style={{
-                            backgroundColor: (amount && accountId && (type !== 'TRANSFER' || targetAccountId) && (type !== 'EXPENSE' || expenseCategory)) ? '#10B981' : undefined,
-                            color: (amount && accountId && (type !== 'TRANSFER' || targetAccountId) && (type !== 'EXPENSE' || expenseCategory)) ? 'white' : undefined,
+                            backgroundColor: (amount && accountId && fundId && (type !== 'TRANSFER' || targetFundId) && (type !== 'EXPENSE' || expenseCategory)) ? '#10B981' : '#cbd5e1',
                         }}
                     >
-                        Simpan
+                        {submitting ? 'Menyimpan...' : 'Simpan Transaksi'}
                     </button>
                 </div>
             </div>

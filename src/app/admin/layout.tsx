@@ -89,12 +89,12 @@ export default function MobileAppShell({
                 )}
 
                 {/* Content Area - Scrollable */}
-                <main className={`flex-1 relative z-0 overflow-y-auto overflow-x-hidden scrollbar-hide ${pathname === '/admin/dashboard' ? 'pt-16' : ''} pb-24`}>
+                <main className={`flex-1 relative z-0 overflow-y-auto overflow-x-hidden scrollbar-hide ${pathname === '/admin/dashboard' ? 'pt-16' : ''} ${pathname === '/admin/finance/new' ? 'pb-0' : 'pb-24'}`}>
                     {children}
                 </main>
 
                 {/* Overlay for Smart FAB */}
-                {isFabOpen && !pathname?.startsWith('/admin/onboarding') && (
+                {isFabOpen && !pathname?.startsWith('/admin/onboarding') && pathname !== '/admin/finance/new' && (
                     <div
                         className="absolute inset-0 bg-slate-900/60 z-40 backdrop-blur-sm transition-all duration-300"
                         onClick={() => setIsFabOpen(false)}
@@ -102,7 +102,7 @@ export default function MobileAppShell({
                 )}
 
                 {/* Smart FAB Menu Items (Radial/Semi-Circle) */}
-                {!pathname?.startsWith('/admin/onboarding') && (
+                {!pathname?.startsWith('/admin/onboarding') && pathname !== '/admin/finance/new' && (
                     <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-[480px] pointer-events-none flex justify-center h-48 items-end">
                         <AnimatePresence>
                             {isFabOpen && (
@@ -173,7 +173,7 @@ export default function MobileAppShell({
                 )}
 
                 {/* Bottom Navigation Dock (Glassmorphism Island) */}
-                {!pathname?.startsWith('/admin/onboarding') && (
+                {!pathname?.startsWith('/admin/onboarding') && pathname !== '/admin/finance/new' && (
                     <nav className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-[420px] z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-1.5 ring-1 ring-white/20 dark:ring-white/5">
                         <div className="grid grid-cols-5 h-16 items-center px-1 relative">
                             {menuItems.map((item) => {
