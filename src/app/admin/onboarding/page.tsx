@@ -26,6 +26,7 @@ import {
 
     X
 } from 'lucide-react';
+import BankItem from '@/components/features/settings/BankItem';
 import { MOCK_MOSQUE } from '@/lib/mock-data';
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
 import SetupWizard from '@/components/features/onboarding/SetupWizard';
@@ -342,24 +343,12 @@ export default function OnboardingSetupPage() {
                                         <div className="space-y-3">
                                             <h3 className="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wider">Rekening Tersimpan</h3>
                                             {bankAccounts.map((acc, idx) => (
-                                                <div key={acc.id} className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 relative group flex items-start justify-between">
-                                                    <div>
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <div className="text-sm font-bold text-slate-800 dark:text-slate-200">{acc.bankName}</div>
-                                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 font-bold border border-slate-200 dark:border-slate-600 uppercase tracking-wide">
-                                                                {acc.allocation}
-                                                            </span>
-                                                        </div>
-                                                        <div className="text-lg font-mono font-bold text-slate-600 dark:text-slate-400">{acc.accountNumber}</div>
-                                                        <div className="text-xs text-slate-400 mt-1">{acc.holderName}</div>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => handleRemoveBank(acc.id)}
-                                                        className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
+                                                <BankItem
+                                                    key={acc.id}
+                                                    bank={acc}
+                                                    onDelete={(id) => handleRemoveBank(id)}
+                                                    onEdit={() => { }} // No edit in onboarding
+                                                />
                                             ))}
                                         </div>
                                     )}

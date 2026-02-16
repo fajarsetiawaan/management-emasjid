@@ -76,7 +76,7 @@ export interface BankAccount { // Legacy, to be replaced by AssetAccount in UI
     accountNumber: string;
     holderName: string;
     allocation?: string;
-    color: string;
+    color?: string;
 }
 
 // ─── Mosque ────────────────────────────────────────

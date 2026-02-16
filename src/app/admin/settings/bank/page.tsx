@@ -11,6 +11,7 @@ import { BankAccount } from '@/types';
 import BankItem from '@/components/features/settings/BankItem';
 import { toast } from 'sonner';
 
+// Force HMR update
 function QrisSection({ slug }: { slug: string }) {
     const [qrisData, setQrisData] = useState<{ url: string | null; name: string }>({ url: null, name: '' });
     const [isEditing, setIsEditing] = useState(false);
