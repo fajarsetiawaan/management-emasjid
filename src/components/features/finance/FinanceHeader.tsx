@@ -14,7 +14,7 @@ import { useState, useRef, useEffect } from 'react';
 import GlassDatePicker from '@/components/features/finance/GlassDatePicker';
 import { Program } from '@/types';
 
-export type DateFilterType = 'ALL' | 'WEEK' | 'MONTH' | 'CUSTOM';
+export type DateFilterType = 'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'YEAR' | 'CUSTOM';
 
 interface FinanceHeaderProps {
     mosqueName: string;
@@ -126,6 +126,10 @@ export default function FinanceHeader({
                                                 transition={{ duration: 0.2 }}
                                                 className="flex flex-col gap-1"
                                             >
+                                                <button onClick={() => { setDateFilter('TODAY'); setShowDateMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'TODAY' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'TODAY' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Calendar size={14} /></div>
+                                                    Hari Ini
+                                                </button>
                                                 <button onClick={() => { setDateFilter('WEEK'); setShowDateMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'WEEK' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'WEEK' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Calendar size={14} /></div>
                                                     Pekan Ini
@@ -133,6 +137,10 @@ export default function FinanceHeader({
                                                 <button onClick={() => { setDateFilter('MONTH'); setShowDateMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'MONTH' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'MONTH' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Calendar size={14} /></div>
                                                     Bulan Ini
+                                                </button>
+                                                <button onClick={() => { setDateFilter('YEAR'); setShowDateMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'YEAR' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'YEAR' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Calendar size={14} /></div>
+                                                    Tahun Ini
                                                 </button>
                                                 <button onClick={() => { setDateFilter('ALL'); setShowDateMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'ALL' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'ALL' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Layers size={14} /></div>

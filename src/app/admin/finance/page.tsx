@@ -58,6 +58,11 @@ export default function FinancePage() {
         const startOfDay = (d: Date) => new Date(d.setHours(0, 0, 0, 0));
 
         switch (dateFilter) {
+            case 'TODAY':
+                const today = startOfDay(now);
+                const endOfToday = new Date(now.setHours(23, 59, 59, 999));
+                filtered = filtered.filter(t => t.date >= today && t.date <= endOfToday);
+                break;
             case 'WEEK':
                 const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
                 filtered = filtered.filter(t => t.date >= startOfDay(firstDayOfWeek));
@@ -65,6 +70,10 @@ export default function FinancePage() {
             case 'MONTH':
                 const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
                 filtered = filtered.filter(t => t.date >= firstDayOfMonth);
+                break;
+            case 'YEAR':
+                const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
+                filtered = filtered.filter(t => t.date >= firstDayOfYear);
                 break;
             case 'CUSTOM':
                 if (customDateRange.start) {
