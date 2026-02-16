@@ -2,44 +2,58 @@
 
 import { useState, useEffect } from 'react';
 import {
-    ArrowDown,
-    ArrowUp,
-    Check,
-    Save,
+    ChevronRight,
+    ChevronLeft,
+    Calendar,
     Wallet,
-    Layers,
-    PenLine,
-    Landmark
+    Landmark,
+    Smartphone,
+    AlignLeft,
+    X,
+    Check,
+    ArrowRightLeft
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     TransactionType,
     AssetAccount,
     Fund
 } from '@/types';
-import { getAssetAccounts, getFunds } from '@/lib/api';
+import { getAssetAccounts, getFunds, saveTransaction } from '@/lib/api';
 import { FUND_CATEGORIES } from '@/lib/constants/finance';
-import { CalculatorInput } from '@/components/ui/CalculatorInput';
-import { useSearchParams } from 'next/navigation';
-import SingleDateGlassPicker from './SingleDateGlassPicker';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
+import { ListRow } from '@/components/ui/ListRow';
+import SingleDatePicker from './SingleDatePicker';
 
 export default function TransactionForm() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const initialType = (searchParams.get('type') as TransactionType) || 'INCOME';
 
     const [type, setType] = useState<TransactionType>(initialType);
-    const [amount, setAmount] = useState<number>(0);
+    const [amount, setAmount] = useState<string>(''); // String for easier input handling
     const [date, setDate] = useState<Date>(new Date());
     const [description, setDescription] = useState('');
 
     // 2D Accounting State
     const [accountId, setAccountId] = useState('');
+    const [targetAccountId, setTargetAccountId] = useState(''); // For Transfer
     const [fundId, setFundId] = useState('');
+
+    // UI State
+    const [isAccountOpen, setIsAccountOpen] = useState(false);
+    const [isTargetAccountOpen, setIsTargetAccountOpen] = useState(false);
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+    const [isNoteOpen, setIsNoteOpen] = useState(false);
+    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
     // Data Source
     const [accounts, setAccounts] = useState<AssetAccount[]>([]);
     const [funds, setFunds] = useState<Fund[]>([]);
     const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -51,10 +65,7 @@ export default function TransactionForm() {
                 setAccounts(accData);
                 setFunds(fundData);
 
-                // Set defaults if available
                 if (accData.length > 0) setAccountId(accData[0].id);
-                // Don't auto-set fundId to force user selection, or set the first one
-                // if (fundData.length > 0) setFundId(fundData[0].id);
             } finally {
                 setLoading(false);
             }
@@ -62,262 +73,312 @@ export default function TransactionForm() {
         loadData();
     }, []);
 
-    // Update type if URL param changes
     useEffect(() => {
         const typeParam = searchParams.get('type') as TransactionType;
         if (typeParam) setType(typeParam);
     }, [searchParams]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
+        if (submitting) return;
+
+        const numAmount = parseInt(amount.replace(/\./g, '') || '0');
+
+        if (numAmount <= 0) {
+            alert('Nominal harus lebih dari 0.');
+            return;
+        }
+
+        if (!accountId) {
+            alert('Harap pilih akun sumber.');
+            return;
+        }
+
+        if (type === 'TRANSFER' && !targetAccountId) {
+            alert('Harap pilih akun tujuan untuk mutasi.');
+            return;
+        }
 
         const payload = {
-            amount,
+            amount: numAmount,
             type,
-            accountId,   // Dimension 1: Where
-            fundId,      // Dimension 2: What for
-            date,        // Already a Date object
-            description,
+            accountId,
+            fundId: type === 'TRANSFER' ? (funds[0]?.id || 'transfer-fund') : fundId,
+            transferTargetAccountId: type === 'TRANSFER' ? targetAccountId : undefined,
+            date,
+            description: description || (type === 'TRANSFER' ? 'Mutasi Saldo' : '-'),
         };
 
-        console.log('Transaction Submitted:', JSON.stringify(payload, null, 2));
-        alert(`Data transaksi berhasil disimpan!\n\n${type === 'INCOME' ? 'Masuk ke' : 'Keluar dari'}: ${accounts.find(a => a.id === accountId)?.name}\nUntuk Pos: ${funds.find(f => f.id === fundId)?.name}`);
+        try {
+            setSubmitting(true);
+            await saveTransaction(payload);
+            const updatedAccounts = await getAssetAccounts();
+            setAccounts(updatedAccounts);
+            alert('Transaksi berhasil disimpan!');
 
-        // Reset Logic
-        setAmount(0);
-        setDescription('');
-        setFundId('');
+            // Reset
+            setAmount('');
+            setDescription('');
+            setFundId('');
+            if (type === 'TRANSFER') setTargetAccountId('');
+
+            // Close all drawers
+            setIsAccountOpen(false);
+            setIsTargetAccountOpen(false);
+            setIsCategoryOpen(false);
+            setIsNoteOpen(false);
+
+        } catch (error) {
+            console.error('Failed to save transaction', error);
+            alert('Gagal menyimpan transaksi.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
-    const formatRp = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
-
-    // Variants for animation
-    const container = {
-        hidden: { opacity: 0 },
-        show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value.replace(/\D/g, '');
+        if (val) {
+            setAmount(parseInt(val).toLocaleString('id-ID'));
+        } else {
+            setAmount('');
+        }
     };
 
-    const itemVariant = {
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0 }
+    const getSelectedAccountName = (id: string) => accounts.find(a => a.id === id)?.name || 'Pilih Akun';
+    const getSelectedFundName = (id: string) => funds.find(f => f.id === id)?.name || 'Pilih Kategori';
+
+    // Helper to get Icon
+    const getAccountIcon = (type: string) => {
+        switch (type) {
+            case 'BANK': return <Landmark size={18} />;
+            case 'EWALLET': return <Smartphone size={18} />;
+            default: return <Wallet size={18} />;
+        }
+    };
+
+    // Helper to get Fund Color
+    const getFundColor = (id: string) => {
+        const fund = funds.find(f => f.id === id);
+        if (!fund) return 'bg-slate-200';
+        switch (fund.type) {
+            case 'OPERASIONAL': return 'bg-blue-500';
+            case 'ZAKAT': return 'bg-emerald-500';
+            case 'WAKAF': return 'bg-purple-500';
+            case 'SOSIAL': return 'bg-orange-500';
+            default: return 'bg-slate-500';
+        }
     };
 
     return (
-        <div className="max-w-2xl mx-auto pb-32">
-            {/* Header / Type Switcher */}
-            <div className="flex justify-center mb-8">
-                <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full flex items-center relative">
-                    <motion.div
-                        className={`absolute h-[calc(100%-12px)] top-1.5 rounded-full shadow-sm transition-colors duration-300 ${type === 'INCOME' ? 'bg-white dark:bg-slate-700' : 'bg-white dark:bg-slate-700'}`}
-                        initial={false}
-                        animate={{
-                            x: type === 'INCOME' ? '0%' : '100%',
-                            width: '50%'
-                        }}
+        <div className="max-w-md mx-auto min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-white pb-32">
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-4 sticky top-0 bg-slate-50/80 dark:bg-black/80 backdrop-blur-xl z-50">
+                <button onClick={() => router.back()} className="text-slate-500 dark:text-slate-400 font-medium text-lg">
+                    Batal
+                </button>
+                <h1 className="text-lg font-bold">Tambah Transaksi</h1>
+                <div className="w-[60px]" /> {/* Spacer */}
+            </div>
+
+            {/* Segmented Control */}
+            <div className="px-4 mb-6">
+                <div className="bg-slate-200 dark:bg-slate-900 p-1 rounded-[14px] flex">
+                    {(['EXPENSE', 'INCOME', 'TRANSFER'] as TransactionType[]).map((t) => {
+                        const isActive = type === t;
+                        let label = '';
+                        if (t === 'EXPENSE') label = 'Pengeluaran';
+                        if (t === 'INCOME') label = 'Pemasukan';
+                        if (t === 'TRANSFER') label = 'Mutasi';
+
+                        return (
+                            <button
+                                key={t}
+                                onClick={() => setType(t)}
+                                className={`flex-1 py-1.5 text-[13px] font-semibold rounded-[10px] transition-all duration-200 ${isActive
+                                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                                    }`}
+                            >
+                                {label}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Form Group */}
+            <div className="px-4 space-y-6">
+
+                {/* 1. Source Account & Amount Group */}
+                <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+                    {/* Account Selector */}
+                    <ListRow
+                        icon={accountId ? getAccountIcon(accounts.find(a => a.id === accountId)?.type || 'CASH') : <Wallet size={18} />}
+                        label={getSelectedAccountName(accountId)}
+                        isOpen={isAccountOpen}
+                        onClick={() => setIsAccountOpen(!isAccountOpen)}
+                        iconClassName={accountId ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300' : undefined}
+                    >
+                        {accounts.map(acc => (
+                            <button
+                                key={acc.id}
+                                onClick={() => { setAccountId(acc.id); setIsAccountOpen(false); }}
+                                className="w-full flex items-center justify-between p-4 pl-[60px] hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"
+                            >
+                                <span className="text-[15px]">{acc.name}</span>
+                                {accountId === acc.id && <Check size={16} className="text-blue-500" />}
+                            </button>
+                        ))}
+                    </ListRow>
+
+                    {/* Amount Input */}
+                    <div className="px-4 py-3 flex items-center gap-4">
+                        <span className="text-slate-500 font-medium text-[17px]">IDR</span>
+                        <input
+                            type="text"
+                            value={amount}
+                            onChange={handleAmountChange}
+                            placeholder="0"
+                            className="w-full bg-transparent text-3xl font-semibold placeholder:text-slate-600 focus:outline-none text-slate-900 dark:text-white"
+                            autoFocus
+                        />
+                    </div>
+                </div>
+
+                {/* 2. Target Account (Only for Transfer) */}
+                {type === 'TRANSFER' && (
+                    <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden">
+                        <ListRow
+                            icon={<ArrowRightLeft size={18} />}
+                            label={targetAccountId ? getSelectedAccountName(targetAccountId) : 'Pilih Akun Tujuan'}
+                            isOpen={isTargetAccountOpen}
+                            onClick={() => setIsTargetAccountOpen(!isTargetAccountOpen)}
+                            iconClassName={targetAccountId ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300' : undefined}
+                            className={!targetAccountId ? 'text-slate-400' : ''}
+                        >
+                            {accounts.filter(a => a.id !== accountId).length === 0 ? (
+                                <div className="p-4 text-center text-slate-500 text-sm">Tidak ada akun lain tersedia</div>
+                            ) : (
+                                accounts.filter(a => a.id !== accountId).map(acc => (
+                                    <button
+                                        key={acc.id}
+                                        onClick={() => { setTargetAccountId(acc.id); setIsTargetAccountOpen(false); }}
+                                        className="w-full flex items-center justify-between p-4 pl-[60px] hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"
+                                    >
+                                        <span className="text-[15px]">{acc.name}</span>
+                                        {targetAccountId === acc.id && <Check size={16} className="text-blue-500" />}
+                                    </button>
+                                ))
+                            )}
+                        </ListRow>
+                    </div>
+                )}
+
+
+                {/* 3. Category (Hidden for Transfer) */}
+                {type !== 'TRANSFER' && (
+                    <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden">
+                        <ListRow
+                            icon={fundId && <span className="text-white text-xs font-bold">{getSelectedFundName(fundId).substring(0, 2).toUpperCase()}</span>}
+                            label={fundId ? getSelectedFundName(fundId) : 'Pilih Kategori'}
+                            isOpen={isCategoryOpen}
+                            onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                            iconClassName={fundId ? getFundColor(fundId) : 'bg-slate-200 dark:bg-slate-700'}
+                            className={!fundId ? 'text-slate-400' : ''}
+                        >
+                            <div className="p-2 space-y-4">
+                                {FUND_CATEGORIES.map(cat => {
+                                    const catFunds = funds.filter(f => f.type === cat.id);
+                                    if (catFunds.length === 0) return null;
+                                    return (
+                                        <div key={cat.id}>
+                                            <div className="px-4 py-1 text-xs font-bold text-slate-400 uppercase tracking-widest">{cat.label}</div>
+                                            {catFunds.map(fund => (
+                                                <button
+                                                    key={fund.id}
+                                                    onClick={() => { setFundId(fund.id); setIsCategoryOpen(false); }}
+                                                    className="w-full flex items-center justify-between p-3 pl-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-2 h-2 rounded-full bg-${cat.color}-500`} />
+                                                        <span className="text-[15px]">{fund.name}</span>
+                                                    </div>
+                                                    {fundId === fund.id && <Check size={16} className="text-blue-500" />}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </ListRow>
+                    </div>
+                )}
+
+                {/* 4. Details Group */}
+                <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+                    {/* Note */}
+                    <ListRow
+                        icon={<AlignLeft size={20} />}
+                        label={
+                            isNoteOpen ? (
+                                <input
+                                    type="text"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    placeholder="Tambah catatan"
+                                    className="w-full bg-transparent font-medium text-[17px] focus:outline-none text-slate-900 dark:text-white"
+                                    autoFocus
+                                    onBlur={() => !description && setIsNoteOpen(false)}
+                                />
+                            ) : (
+                                <span className={!description ? 'text-slate-400' : ''}>
+                                    {description || 'Catatan'}
+                                </span>
+                            )
+                        }
+                        onClick={() => setIsNoteOpen(true)}
+                        showChevron={!isNoteOpen && !description}
                     />
-                    <button
-                        onClick={() => setType('INCOME')}
-                        className={`relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-colors flex items-center gap-2 ${type === 'INCOME' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 hover:text-slate-700'}`}
+
+                    {/* Date */}
+                    <ListRow
+                        icon={<Calendar size={20} />}
+                        label={format(date, 'EEEE, dd MMMM yyyy', { locale: id })}
+                        isOpen={isDatePickerOpen}
+                        onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
                     >
-                        <ArrowDown size={16} strokeWidth={3} />
-                        Pemasukan
-                    </button>
+                        <SingleDatePicker
+                            date={date}
+                            onChange={(newDate) => {
+                                setDate(newDate);
+                                setIsDatePickerOpen(false);
+                            }}
+                        />
+                    </ListRow>
+                </div>
+
+                <button className="w-full py-4 rounded-[14px] bg-[#1C1C1E] dark:bg-slate-800 border border-slate-800 dark:border-slate-700 text-emerald-500 font-medium text-[17px]">
+                    Tambah Detail Lainnya
+                </button>
+            </div>
+
+            {/* Sticky Save Button */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-50/90 dark:bg-black/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800">
+                <div className="max-w-md mx-auto">
                     <button
-                        onClick={() => setType('EXPENSE')}
-                        className={`relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-colors flex items-center gap-2 ${type === 'EXPENSE' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 hover:text-slate-700'}`}
+                        onClick={handleSubmit}
+                        className="w-full py-3.5 rounded-full bg-slate-400/20 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 font-semibold text-[17px] hover:bg-emerald-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                            backgroundColor: (amount && (accountId) && (type !== 'TRANSFER' || targetAccountId)) ? '#10B981' : undefined,
+                            color: (amount && (accountId) && (type !== 'TRANSFER' || targetAccountId)) ? 'white' : undefined,
+                        }}
                     >
-                        <ArrowUp size={16} strokeWidth={3} />
-                        Pengeluaran
+                        Simpan
                     </button>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit}>
-                <motion.div
-                    variants={container}
-                    initial="hidden"
-                    animate="show"
-                    className="space-y-8"
-                >
-                    {/* 1. Hero Amount Input */}
-                    <motion.div variants={itemVariant} className="text-center relative">
-                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">
-                            Nominal {type === 'INCOME' ? 'Masuk' : 'Keluar'}
-                        </label>
-                        <div className="relative inline-block">
-                            <CalculatorInput
-                                label=""
-                                value={amount}
-                                onChange={setAmount}
-                                placeholder="0"
-                                className={`text-5xl sm:text-7xl font-bold bg-transparent border-none text-center p-0 focus:ring-0 w-full placeholder:text-slate-200 dark:placeholder:text-slate-700 ${type === 'INCOME' ? 'text-slate-900 dark:text-white' : 'text-slate-900 dark:text-white'}`}
-                            />
-                            {/* Decorative Underline */}
-                            <div className={`h-1.5 w-full rounded-full mt-2 mx-auto max-w-[200px] ${type === 'INCOME' ? 'bg-emerald-500/30' : 'bg-rose-500/30'}`} />
-                        </div>
-                    </motion.div>
-
-                    {/* 2. Account Selector (Rekening / Tunai) */}
-                    <motion.div variants={itemVariant} className="space-y-4">
-                        <div className="flex items-center gap-2 px-4">
-                            <div className={`p-2 rounded-full ${type === 'INCOME' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
-                                <Wallet size={18} />
-                            </div>
-                            <h3 className="font-bold text-slate-700 dark:text-slate-300">
-                                {type === 'INCOME' ? 'Masuk ke Rekening' : 'Ambil dari Sumber Dana'}
-                            </h3>
-                        </div>
-
-                        <div className="flex gap-4 overflow-x-auto pb-4 px-4 snap-x hide-scrollbar">
-                            {accounts.map((acc) => {
-                                const isSelected = accountId === acc.id;
-                                const colors = type === 'INCOME'
-                                    ? (isSelected ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20 ring-2 ring-emerald-500 ring-offset-2' : 'border-slate-200 bg-white hover:border-emerald-300')
-                                    : (isSelected ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-900/20 ring-2 ring-rose-500 ring-offset-2' : 'border-slate-200 bg-white hover:border-rose-300');
-
-                                return (
-                                    <button
-                                        key={acc.id}
-                                        type="button"
-                                        onClick={() => setAccountId(acc.id)}
-                                        className={`
-                                            flex-shrink-0 w-48 p-5 rounded-2xl border transition-all duration-200 text-left relative group snap-center
-                                            ${colors} dark:border-slate-800 dark:bg-slate-900/50
-                                        `}
-                                    >
-                                        <div className="flex justify-between items-start mb-3">
-                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${acc.type === 'BANK' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}>
-                                                {acc.type === 'BANK' ? <Landmark size={20} /> : <Wallet size={20} />}
-                                            </div>
-                                            {isSelected && (
-                                                <div className={`p-1 rounded-full ${type === 'INCOME' ? 'bg-emerald-500' : 'bg-rose-500'} text-white`}>
-                                                    <Check size={12} strokeWidth={4} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <p className="font-bold text-slate-800 dark:text-white mb-0.5">{acc.name}</p>
-                                        <p className="text-xs text-slate-500 font-medium">{acc.type === 'BANK' ? acc.accountNumber || 'Rekening Bank' : 'Kas Tunai'}</p>
-
-                                        {/* Optional: Show Balance */}
-                                        <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/50">
-                                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Saldo Saat Ini</p>
-                                            <p className="text-sm font-bold text-slate-600 dark:text-slate-400">{formatRp(acc.balance)}</p>
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </motion.div>
-
-                    {/* 3. Fund Selector (Category Dompet) - GROUPED */}
-                    <motion.div variants={itemVariant} className="space-y-6 px-4">
-                        <div className="flex items-center gap-2">
-                            <div className={`p-2 rounded-full ${type === 'INCOME' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
-                                <Layers size={18} />
-                            </div>
-                            <h3 className="font-bold text-slate-700 dark:text-slate-300">
-                                {type === 'INCOME' ? 'Kategori Dompet (Alokasi)' : 'Beban Dompet Pos'}
-                            </h3>
-                        </div>
-
-                        <div className="space-y-6">
-                            {FUND_CATEGORIES.map((cat) => {
-                                const categoryFunds = funds.filter(f => f.type === cat.id);
-                                if (categoryFunds.length === 0) return null;
-
-                                return (
-                                    <div key={cat.id} className="space-y-3">
-                                        <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">
-                                            <span className={`w-2 h-2 rounded-full bg-${cat.color}-500`} />
-                                            {cat.label}
-                                        </div>
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                            {categoryFunds.map((fund) => {
-                                                const isSelected = fundId === fund.id;
-                                                const activeClass = type === 'INCOME'
-                                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-200'
-                                                    : 'bg-rose-600 text-white border-rose-600 shadow-lg shadow-rose-200';
-                                                const inactiveClass = 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700';
-
-                                                return (
-                                                    <button
-                                                        key={fund.id}
-                                                        type="button"
-                                                        onClick={() => setFundId(fund.id)}
-                                                        className={`
-                                                            p-4 rounded-xl border text-sm font-bold transition-all duration-200 flex flex-col items-center justify-center gap-2 text-center h-24
-                                                            ${isSelected ? activeClass : inactiveClass}
-                                                        `}
-                                                    >
-                                                        {/* Icon Placeholder or Initials */}
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${isSelected ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}>
-                                                            {fund.name.substring(0, 2).toUpperCase()}
-                                                        </div>
-                                                        <span className="line-clamp-2 text-xs">{fund.name}</span>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </motion.div>
-
-                    {/* 4. Details (Date & Desc) */}
-                    <motion.div variants={itemVariant} className="space-y-4 px-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Date Picker */}
-                            <div className="md:col-span-1 z-20 relative">
-                                <SingleDateGlassPicker
-                                    date={date}
-                                    onChange={setDate}
-                                    label="Tanggal Transaksi"
-                                />
-                            </div>
-
-                            {/* Description */}
-                            <div className="md:col-span-2">
-                                <label className="block text-xs font-bold uppercase text-slate-400 mb-2">Keterangan</label>
-                                <div className="relative group">
-                                    <div className="absolute top-3 left-3 flex items-center pointer-events-none">
-                                        <PenLine size={18} className="text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                                    </div>
-                                    <textarea
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                        placeholder="Contoh: Kotak Amal Jumat, Bayar Listrik..."
-                                        rows={2}
-                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all font-medium text-slate-700 dark:text-white resize-none"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {/* 5. Submit Button */}
-                    <motion.div
-                        variants={itemVariant}
-                        className="sticky bottom-4 px-4 z-40"
-                    >
-                        <div className="absolute inset-x-0 bottom-[-20px] h-24 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none -z-10" />
-                        <button
-                            type="submit"
-                            disabled={amount <= 0 || !accountId || !fundId}
-                            className={`
-                                w-full py-4 rounded-xl font-bold text-lg text-white flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl transition-all active:scale-[0.98] ring-4 ring-white dark:ring-slate-950
-                                ${amount <= 0 || !accountId || !fundId
-                                    ? 'bg-slate-300 dark:bg-slate-800 cursor-not-allowed text-slate-500'
-                                    : (type === 'INCOME' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/30' : 'bg-rose-600 hover:bg-rose-500 shadow-rose-500/30')
-                                }
-                            `}
-                        >
-                            <Save size={20} strokeWidth={3} />
-                            {type === 'INCOME' ? 'Simpan Pemasukan' : 'Simpan Pengeluaran'}
-                        </button>
-                    </motion.div>
-                </motion.div>
-            </form>
         </div>
     );
 }

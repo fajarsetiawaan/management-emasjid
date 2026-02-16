@@ -64,7 +64,8 @@ export interface Transaction {
     type: TransactionType;
 
     // 2D Accounting Links
-    accountId: string; // Physical Account (Where)
+    accountId: string; // Physical Account (Where) - Source for Transfer
+    transferTargetAccountId?: string; // Destination for Transfer
     fundId: string;    // Logical Fund (For What) - formerly programId
 
     description: string;

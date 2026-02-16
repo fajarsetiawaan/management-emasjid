@@ -13,7 +13,8 @@ import {
     Hammer,
     Users,
     HeartHandshake,
-    Wallet
+    Wallet,
+    ArrowLeftRight
 } from 'lucide-react';
 
 interface TransactionCardProps {
@@ -47,6 +48,12 @@ const getCategoryIcon = (category?: TransactionCategory) => {
         default:
             return <Wallet size={20} className="text-slate-600 dark:text-slate-400" />;
     }
+}
+
+
+const getTransactionIcon = (type: string, category?: TransactionCategory) => {
+    if (type === 'TRANSFER') return <ArrowLeftRight size={20} className="text-blue-600 dark:text-blue-400" />;
+    return getCategoryIcon(category);
 };
 
 const getCategoryColor = (category?: TransactionCategory) => {
@@ -72,11 +79,18 @@ const getCategoryColor = (category?: TransactionCategory) => {
         default:
             return 'bg-slate-100 dark:bg-slate-800';
     }
+}
+
+
+const getTransactionColor = (type: string, category?: TransactionCategory) => {
+    if (type === 'TRANSFER') return 'bg-blue-100 dark:bg-blue-500/20';
+    return getCategoryColor(category);
 };
 
 export default function TransactionCard({ transaction, programName }: TransactionCardProps) {
     const isIncome = transaction.type === 'INCOME';
-    const formattedCategory = formatCategory(transaction.category);
+    const isTransfer = transaction.type === 'TRANSFER';
+    const formattedCategory = isTransfer ? 'Mutasi Saldo' : formatCategory(transaction.category);
 
     const getCleanDescription = (desc: string) => {
         if (!desc) return 'Transaksi Tanpa Nama';
@@ -94,8 +108,8 @@ export default function TransactionCard({ transaction, programName }: Transactio
         <div className="group flex items-center gap-4 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 shadow-sm hover:shadow-md transition-all border border-white/50 dark:border-slate-800/50 hover:bg-white/90 dark:hover:bg-slate-800/80">
 
             {/* 1. Icon Box */}
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${getCategoryColor(transaction.category)}`}>
-                {getCategoryIcon(transaction.category)}
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${getTransactionColor(transaction.type, transaction.category)}`}>
+                {getTransactionIcon(transaction.type, transaction.category)}
             </div>
 
             {/* 2. Middle Info */}
@@ -110,8 +124,8 @@ export default function TransactionCard({ transaction, programName }: Transactio
 
             {/* 3. Right Info (Amount) */}
             <div className="text-right flex-shrink-0">
-                <p className={`font-extrabold text-[15px] tracking-tight ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-200'}`}>
-                    {isIncome ? '+' : '-'} {formatRupiah(transaction.amount).replace(/,00$/, '').replace('Rp', '')}
+                <p className={`font-extrabold text-[15px] tracking-tight ${isTransfer ? 'text-blue-600 dark:text-blue-400' : (isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-200')}`}>
+                    {isTransfer ? '⇄' : (isIncome ? '+' : '-')} {formatRupiah(transaction.amount).replace(/,00$/, '').replace('Rp', '')}
                 </p>
                 <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md inline-block">
                     {programName}

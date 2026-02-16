@@ -79,7 +79,13 @@ export async function getCurrentUser(): Promise<User> {
 
 /** Get all transactions */
 export async function getTransactions(): Promise<Transaction[]> {
-    if (USE_MOCK) return MOCK_TRANSACTIONS;
+    if (USE_MOCK) {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('sim_transactions');
+            if (saved) return JSON.parse(saved) as Transaction[];
+        }
+        return MOCK_TRANSACTIONS;
+    }
     throw new Error('API not implemented');
 }
 
@@ -87,8 +93,62 @@ export async function getTransactions(): Promise<Transaction[]> {
 export async function getTransactionsByType(
     type: 'INCOME' | 'EXPENSE'
 ): Promise<Transaction[]> {
-    if (USE_MOCK) return MOCK_TRANSACTIONS.filter((t) => t.type === type);
-    throw new Error('API not implemented');
+    const all = await getTransactions();
+    return all.filter((t) => t.type === type);
+}
+
+/**
+ * Save new transaction & update account balances (Mock Logic)
+ */
+export async function saveTransaction(payload: Omit<Transaction, 'id' | 'status'>): Promise<Transaction> {
+    if (!USE_MOCK) throw new Error('API not implemented');
+
+    // 1. Create Transaction Object
+    const newTransaction: Transaction = {
+        id: crypto.randomUUID(),
+        status: 'COMPLETED',
+        ...payload
+    };
+
+    if (typeof window !== 'undefined') {
+        // 2. Load Existing Data
+        const savedTransactions = localStorage.getItem('sim_transactions');
+        const transactions = savedTransactions ? JSON.parse(savedTransactions) : MOCK_TRANSACTIONS;
+
+        // 3. Save Transaction
+        const updatedTransactions = [newTransaction, ...transactions];
+        localStorage.setItem('sim_transactions', JSON.stringify(updatedTransactions));
+
+        // 4. Update Balances (sim_assets)
+        const savedAssets = localStorage.getItem('sim_assets');
+        let assets = savedAssets ? JSON.parse(savedAssets) : MOCK_ASSET_ACCOUNTS;
+
+        if (payload.type === 'INCOME') {
+            assets = assets.map((a: AssetAccount) =>
+                a.id === payload.accountId ? { ...a, balance: (a.balance || 0) + payload.amount } : a
+            );
+        } else if (payload.type === 'EXPENSE') {
+            assets = assets.map((a: AssetAccount) =>
+                a.id === payload.accountId ? { ...a, balance: (a.balance || 0) - payload.amount } : a
+            );
+        } else if (payload.type === 'TRANSFER' && payload.transferTargetAccountId) {
+            // Transfer: Source Debit, Target Credit
+            assets = assets.map((a: AssetAccount) => {
+                if (a.id === payload.accountId) return { ...a, balance: (a.balance || 0) - payload.amount };
+                if (a.id === payload.transferTargetAccountId) return { ...a, balance: (a.balance || 0) + payload.amount };
+                return a;
+            });
+        }
+
+        localStorage.setItem('sim_assets', JSON.stringify(assets));
+
+        // Dispatch event to update UI in real-time if components listen to storage
+        window.dispatchEvent(new Event('storage'));
+
+        return newTransaction;
+    }
+
+    return newTransaction;
 }
 
 /** Dimension 1: Get Asset Accounts (Physical) — localStorage-first */
