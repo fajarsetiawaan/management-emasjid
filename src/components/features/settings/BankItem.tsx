@@ -64,7 +64,7 @@ export default function BankItem({ bank, onDelete, onEdit }: BankItemProps) {
                         Nomor Rekening
                     </p>
                     <div className="flex items-center gap-2">
-                        <p className="text-xl font-mono font-bold text-slate-700 dark:text-slate-200 tracking-wider">
+                        <p className="text-xl font-bold text-slate-700 dark:text-slate-200 tracking-tight tabular-nums">
                             {bank.accountNumber}
                         </p>
                     </div>

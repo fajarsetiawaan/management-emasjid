@@ -40,7 +40,6 @@ export default function ManageFinancePage() {
 
     // UI State
     const [isAddingNew, setIsAddingNew] = useState(false);
-    const [showMenuId, setShowMenuId] = useState<string | null>(null);
 
     // Edit State
     const [editingFundId, setEditingId] = useState<string | null>(null);
@@ -203,7 +202,6 @@ export default function ManageFinancePage() {
     const handleEditDetails = (fund: Fund) => {
         setEditingId(fund.id);
         setEditForm({ name: fund.name, desc: fund.desc || '' });
-        setShowMenuId(null); // Close menu
     };
 
     const handleDeleteFund = (id: string) => {
@@ -211,7 +209,6 @@ export default function ManageFinancePage() {
             const updated = funds.filter(f => f.id !== id);
             setFunds(updated);
             saveChanges(updated);
-            setShowMenuId(null);
             toast.success('Kategori berhasil dihapus', { position: 'bottom-center' });
         }
     };
@@ -292,8 +289,8 @@ export default function ManageFinancePage() {
                                 <PieChart size={12} className="text-emerald-300" />
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Total Alokasi Dana</span>
                             </div>
-                            <h2 className="text-5xl font-extrabold tracking-tight mb-2 tabular-nums">
-                                <span className="text-emerald-400 text-3xl align-top mr-1">Rp</span>
+                            <h2 className="text-4xl font-extrabold tracking-tight mb-2 tabular-nums">
+                                <span className="text-emerald-400 text-2xl align-top mr-1">Rp</span>
                                 {totalCash.toLocaleString('id-ID')}
                             </h2>
                             <p className="text-slate-300 text-sm font-medium">dari {funds.filter(f => f.active).length} pos aktif</p>
@@ -373,61 +370,22 @@ export default function ManageFinancePage() {
                                                     <Plus size={16} />
                                                 </div>
                                             ) : (
-                                                !isEditing ? (
-                                                    <div className="relative">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setShowMenuId(showMenuId === fund.id ? null : fund.id);
-                                                            }}
-                                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-active transition-all"
-                                                        >
-                                                            <MoreVertical size={18} />
-                                                        </button>
-
-                                                        {/* Dropdown Menu */}
-                                                        <AnimatePresence>
-                                                            {showMenuId === fund.id && (
-                                                                <>
-                                                                    <div
-                                                                        className="fixed inset-0 z-[60]"
-                                                                        onClick={() => setShowMenuId(null)}
-                                                                    />
-                                                                    <motion.div
-                                                                        initial={{ opacity: 0, scale: 0.95, y: 5 }}
-                                                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                                        exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                                                                        transition={{ duration: 0.1 }}
-                                                                        className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-700 p-1.5 z-[70] overflow-hidden origin-top-right"
-                                                                    >
-                                                                        <button
-                                                                            onClick={() => handleEditDetails(fund)}
-                                                                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                                                                        >
-                                                                            <Edit3 size={14} className="text-slate-400" />
-                                                                            Edit Detail
-                                                                        </button>
-                                                                        {!fund.locked && (
-                                                                            <button
-                                                                                onClick={() => handleDeleteFund(fund.id)}
-                                                                                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                                                            >
-                                                                                <Trash2 size={14} />
-                                                                                Hapus
-                                                                            </button>
-                                                                        )}
-                                                                    </motion.div>
-                                                                </>
-                                                            )}
-                                                        </AnimatePresence>
-                                                    </div>
-                                                ) : (
+                                                isEditing ? (
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); handleSaveFund(); }}
                                                         className="w-10 h-10 rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
                                                     >
                                                         <CheckCircle2 size={20} />
                                                     </button>
+                                                ) : (
+                                                    !fund.locked && (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleDeleteFund(fund.id); }}
+                                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    )
                                                 )
                                             )}
                                         </div>
@@ -524,25 +482,37 @@ export default function ManageFinancePage() {
                                                     <div className="px-5 pb-5 mt-[-5px]">
                                                         <div
                                                             onClick={() => handleEditDetails(fund)}
-                                                            className="relative overflow-hidden p-0.5 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-800"
+                                                            className="relative overflow-hidden p-[1px] rounded-[1.5rem] bg-gradient-to-br from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
                                                         >
-                                                            <div className="relative bg-white dark:bg-slate-800 rounded-[14px] p-4 flex justify-between items-center group/card cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                                                <div>
-                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                            <div className="relative bg-white dark:bg-slate-900 rounded-[23px] p-5 flex justify-between items-end group/card cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-300">
+                                                                <div className="space-y-1">
+                                                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-2 flex items-center gap-2">
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                                                                         Saldo Saat Ini
                                                                     </p>
-                                                                    <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight font-mono">
-                                                                        Rp {(fund.balance || 0).toLocaleString('id-ID')}
-                                                                    </p>
+                                                                    <div className="flex items-baseline gap-1">
+                                                                        <span className="text-sm font-extrabold text-slate-400 leading-none">Rp</span>
+                                                                        <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight tabular-nums leading-none">
+                                                                            {(fund.balance || 0).toLocaleString('id-ID')}
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
+
                                                                 <div className="text-right">
-                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Disimpan Di</p>
-                                                                    <div className="flex items-center justify-end gap-2 text-xs font-bold bg-slate-100 dark:bg-slate-900/50 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                                                                        {isAllocationBank ? <Landmark size={14} className="text-blue-500" /> : <Banknote size={14} className="text-emerald-500" />}
-                                                                        {isAllocationBank
-                                                                            ? (bankAccounts.find(b => b.id === fund.allocation.bankId)?.bankName || 'Bank')
-                                                                            : 'Tunai'}
+                                                                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 text-[11px] font-bold text-slate-600 dark:text-slate-300 shadow-sm group-hover/card:bg-white dark:group-hover/card:bg-slate-700 transition-colors duration-300">
+                                                                        {isAllocationBank ? (
+                                                                            <>
+                                                                                <Landmark size={12} className="text-blue-500" />
+                                                                                <span className="truncate max-w-[100px]">
+                                                                                    {bankAccounts.find(b => b.id === fund.allocation.bankId)?.bankName || 'Bank'}
+                                                                                </span>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <Banknote size={12} className="text-emerald-500" />
+                                                                                <span>Tunai</span>
+                                                                            </>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -617,6 +587,6 @@ export default function ManageFinancePage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

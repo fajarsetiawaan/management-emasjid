@@ -70,7 +70,7 @@ export function CalculatorInput({ value, onChange, label, placeholder, className
                     readOnly
                     value={value ? formatNumber(value.toString()) : ''}
                     placeholder={placeholder || "0"}
-                    className="w-full py-3.5 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl outline-none text-lg font-bold font-mono text-slate-800 dark:text-slate-200 focus:border-emerald-500 hover:border-emerald-300 transition-all placeholder:text-slate-300 cursor-pointer caret-transparent"
+                    className="w-full py-3.5 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl outline-none text-lg font-bold text-slate-800 dark:text-slate-200 focus:border-emerald-500 hover:border-emerald-300 transition-all placeholder:text-slate-300 cursor-pointer caret-transparent tabular-nums"
                 />
             </div>
 
