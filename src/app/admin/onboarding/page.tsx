@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef } from 'react';
@@ -8,6 +9,7 @@ import {
     Building2,
     CheckCircle2,
     ChevronRight,
+    ChevronDown,
     HeartHandshake,
     Coins,
     ShieldCheck,
@@ -41,19 +43,10 @@ const BANK_OPTIONS = [
     { id: 'other', name: 'Bank Lainnya', color: 'bg-slate-500' },
 ];
 
-type BankAccount = {
-    id: string;
-    bankName: string;
-    accountNumber: string;
-    holderName: string;
-    allocation: string;
-    // initialBalance removed, calculated from funds
-};
 
-type FundAllocation = {
-    type: 'CASH' | 'BANK';
-    bankId?: string; // If type is BANK
-};
+import { DEFAULT_FUNDS, FUND_CATEGORIES, FundCategoryType } from '@/lib/constants/finance';
+import { Fund, BankAccount, FundAllocation } from '@/types/finance';
+import FundAllocationSetup from '@/components/features/onboarding/FundAllocationSetup';
 
 export default function OnboardingSetupPage() {
     const router = useRouter();
@@ -80,15 +73,10 @@ export default function OnboardingSetupPage() {
 
     // ─── Step 2 State ────────────────────────────────────────────────
 
-    const [funds, setFunds] = useState([
-        { id: 'kas_masjid', name: 'Kas Masjid', type: 'OPERASIONAL', active: true, locked: true, icon: Building2, desc: 'Dana operasional umum masjid.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
-        { id: 'kas_yatim', name: 'Kas Santunan Yatim', type: 'SOCIAL', active: false, locked: false, icon: HeartHandshake, desc: 'Dana khusus untuk anak yatim.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
-        { id: 'kas_zakat_fitrah', name: 'Kas Zakat Fitrah', type: 'ZAKAT', active: false, locked: false, icon: Coins, desc: 'Dana zakat fitrah Ramadhan.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
-        { id: 'kas_zakat_maal', name: 'Kas Zakat Maal', type: 'ZAKAT', active: false, locked: false, icon: ShieldCheck, desc: 'Dana zakat harta (2.5%).', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
-        { id: 'kas_infaq', name: 'Kas Infaq & Sedekah', type: 'SOCIAL', active: false, locked: false, icon: Gift, desc: 'Dana infaq dan sedekah umum.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
-        { id: 'kas_wakaf', name: 'Kas Wakaf', type: 'WAKAF', active: false, locked: false, icon: Landmark, desc: 'Dana wakaf untuk pembangunan & aset masjid.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
-    ]);
+    const [funds, setFunds] = useState<Fund[]>(DEFAULT_FUNDS);
     const [customFund, setCustomFund] = useState('');
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [pendingFundName, setPendingFundName] = useState('');
 
     // ─── Handlers: Step 1 ────────────────────────────────────────────
 
@@ -96,7 +84,7 @@ export default function OnboardingSetupPage() {
         if (!currentBank.bankName || !currentBank.accountNumber || !currentBank.holderName) return;
 
         const newBank: BankAccount = {
-            id: `bank_${Date.now()}`,
+            id: `bank_${Date.now()} `,
             ...currentBank
         };
 
@@ -144,14 +132,21 @@ export default function OnboardingSetupPage() {
         setFunds(funds.map(f => f.id === id ? { ...f, allocation: newAllocation } : f));
     };
 
-    const addCustomFund = () => {
+    const initiateAddFund = () => {
         if (!customFund) return;
+        setPendingFundName(customFund);
+        setIsCategoryModalOpen(true);
+    };
+
+    const confirmAddFund = (category: FundCategoryType) => {
+        if (!pendingFundName) return;
+
         setFunds([
             ...funds,
             {
                 id: `custom_${Date.now()}`,
-                name: customFund,
-                type: 'CUSTOM',
+                name: pendingFundName,
+                type: category,
                 active: true,
                 locked: false,
                 icon: Wallet,
@@ -160,7 +155,10 @@ export default function OnboardingSetupPage() {
                 allocation: { type: 'CASH' }
             }
         ]);
+
         setCustomFund('');
+        setPendingFundName('');
+        setIsCategoryModalOpen(false);
     };
 
     // ─── Navigation ──────────────────────────────────────────────────
@@ -216,12 +214,12 @@ export default function OnboardingSetupPage() {
                     const finalBalance = totalAllocated;
 
                     assets.push({
-                        id: `asset_${bank.id}`, // asset_bank_123
+                        id: `asset_${bank.id} `, // asset_bank_123
                         name: bank.bankName,
                         type: 'BANK',
                         balance: finalBalance,
                         accountNumber: bank.accountNumber,
-                        description: `A.n ${bank.holderName}`,
+                        description: `A.n ${bank.holderName} `,
                         color: BANK_OPTIONS.find(opt => opt.name === bank.bankName)?.color?.replace('bg-', '') || 'blue-600'
                     });
                 });
@@ -303,8 +301,8 @@ export default function OnboardingSetupPage() {
 
                     {/* Visual Stepper */}
                     <div className="flex items-center gap-2">
-                        <div className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${step === 1 ? 'bg-emerald-500' : 'bg-emerald-200 dark:bg-emerald-900/40'}`} />
-                        <div className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${step === 2 ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'}`} />
+                        <div className={`flex - 1 h - 1.5 rounded - full transition - all duration - 500 ${step === 1 ? 'bg-emerald-500' : 'bg-emerald-200 dark:bg-emerald-900/40'} `} />
+                        <div className={`flex - 1 h - 1.5 rounded - full transition - all duration - 500 ${step === 2 ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'} `} />
                     </div>
                 </div>
 
@@ -493,139 +491,98 @@ export default function OnboardingSetupPage() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    {funds.map((fund) => {
-                                        const isAllocationBank = fund.allocation.type === 'BANK';
+                                    <FundAllocationSetup
+                                        funds={funds}
+                                        bankAccounts={bankAccounts}
+                                        onToggleFund={toggleFund}
+                                        onUpdateFundData={(id, updates) => updateFundData(id, updates)}
+                                        onUpdateFundAllocation={updateFundAllocation}
+                                    />
 
-                                        return (
-                                            <motion.div
-                                                layout
-                                                key={fund.id}
-                                                className={`
-                                                    relative rounded-3xl border transition-all overflow-visible group
-                                                    ${fund.active
-                                                        ? 'bg-white dark:bg-slate-800 border-emerald-500 ring-2 ring-emerald-500/10 shadow-lg shadow-emerald-500/5'
-                                                        : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                                    }
-                                                `}
-                                            >
-                                                {/* Card Header (Toggle) */}
-                                                <div
-                                                    onClick={() => toggleFund(fund.id)}
-                                                    className="p-5 flex items-center gap-4 cursor-pointer"
-                                                >
-                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${fund.active ? 'bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-600 dark:text-emerald-400 shadow-inner' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-400 grayscale'}`}>
-                                                        <fund.icon size={22} strokeWidth={2} />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2 mb-0.5">
-                                                            <h4 className={`text-base font-bold truncate ${fund.active ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
-                                                                {fund.name}
-                                                            </h4>
-                                                            {fund.locked && <span className="text-[9px] bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-slate-200 dark:border-slate-600">Wajib</span>}
-                                                        </div>
-                                                        <p className="text-xs text-slate-400 truncate">{fund.desc}</p>
-                                                    </div>
-                                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${fund.active ? 'border-emerald-500 bg-emerald-500 scale-110' : 'border-slate-300 dark:border-slate-600 group-hover:border-emerald-300'}`}>
-                                                        {fund.active && <CheckCircle2 size={14} className="text-white" strokeWidth={3} />}
-                                                    </div>
-                                                </div>
-
-                                                {/* Expanded Content (Inputs) */}
-                                                <AnimatePresence>
-                                                    {fund.active && (
-                                                        <motion.div
-                                                            initial={{ height: 0, opacity: 0 }}
-                                                            animate={{ height: 'auto', opacity: 1 }}
-                                                            exit={{ height: 0, opacity: 0 }}
-                                                            className="bg-slate-50/50 dark:bg-slate-900/30 border-t border-dashed border-emerald-100/50 dark:border-slate-700"
-                                                        >
-                                                            <div className="p-5 pt-3 grid grid-cols-1 gap-4">
-                                                                {/* Row 1: Amount */}
-                                                                <div>
-                                                                    <label className="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block tracking-wider">Saldo Awal</label>
-                                                                    <div className="relative" onClick={(e) => e.stopPropagation()}>
-                                                                        <CalculatorInput
-                                                                            value={fund.balance || 0}
-                                                                            onChange={(val) => updateFundData(fund.id, { balance: val })}
-                                                                            placeholder="0"
-                                                                        />
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Row 2: Location Switcher + Bank Select */}
-                                                                <div>
-                                                                    <label className="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block tracking-wider">Disimpan Di</label>
-
-                                                                    <div className="flex gap-2">
-                                                                        <div className="flex bg-slate-200 dark:bg-slate-700 p-1 rounded-xl flex-shrink-0">
-                                                                            <button
-                                                                                onClick={(e) => { e.stopPropagation(); updateFundAllocation(fund.id, 'CASH'); }}
-                                                                                className={`w-20 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-bold transition-all ${!isAllocationBank ? 'bg-white dark:bg-slate-600 shadow-sm text-emerald-600 dark:text-emerald-400' : 'text-slate-500 hover:text-slate-700'}`}
-                                                                            >
-                                                                                <Banknote size={14} /> Tunai
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={(e) => { e.stopPropagation(); updateFundAllocation(fund.id, 'BANK'); }}
-                                                                                className={`w-20 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-bold transition-all ${isAllocationBank ? 'bg-white dark:bg-slate-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-700'}`}
-                                                                            >
-                                                                                <Landmark size={14} /> Bank
-                                                                            </button>
-                                                                        </div>
-
-                                                                        {/* If Bank Selected, show Dropdown of Available Banks */}
-                                                                        {isAllocationBank && (
-                                                                            <div className="flex-1">
-                                                                                {bankAccounts.length > 0 ? (
-                                                                                    <select
-                                                                                        className="w-full h-full min-h-[40px] px-3 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900/50 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500"
-                                                                                        value={fund.allocation.bankId}
-                                                                                        onChange={(e) => updateFundAllocation(fund.id, 'BANK', e.target.value)}
-                                                                                        onClick={(e) => e.stopPropagation()}
-                                                                                    >
-                                                                                        {bankAccounts.map(b => (
-                                                                                            <option key={b.id} value={b.id}>{b.bankName} - {b.accountNumber}</option>
-                                                                                        ))}
-                                                                                    </select>
-                                                                                ) : (
-                                                                                    <div className="h-full flex items-center px-3 text-[10px] text-red-500 bg-red-50 rounded-xl border border-red-100">
-                                                                                        Belum ada rekening!
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                            </motion.div>
-                                        );
-                                    })}
-
-                                    {/* Add Custom Fund */}
+                                    {/* Add Custom Fund Input */}
                                     <div className="p-1 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors mt-6 group">
-                                        <div className="flex items-center gap-2 p-2">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition-colors">
+                                        <div className="flex items-center gap-3 p-2">
+                                            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition-colors shrink-0">
                                                 <Plus size={20} />
                                             </div>
+
                                             <input
                                                 type="text"
                                                 placeholder="Buat nama dompet baru..."
-                                                className="flex-1 bg-transparent text-sm outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 font-bold"
+                                                className="flex-1 bg-transparent text-sm outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 font-bold px-2"
                                                 value={customFund}
                                                 onChange={(e) => setCustomFund(e.target.value)}
-                                                onKeyDown={(e) => e.key === 'Enter' && addCustomFund()}
+                                                onKeyDown={(e) => e.key === 'Enter' && initiateAddFund()}
                                             />
+
                                             <button
-                                                onClick={addCustomFund}
+                                                onClick={initiateAddFund}
                                                 disabled={!customFund}
-                                                className="px-4 py-2 rounded-xl bg-slate-800 dark:bg-slate-700 text-white text-xs font-bold disabled:opacity-20 hover:bg-emerald-600 transition-colors"
+                                                className="px-4 py-2.5 rounded-xl bg-slate-800 dark:bg-slate-700 text-white text-xs font-bold disabled:opacity-20 hover:scale-105 active:scale-95 transition-all shadow-md shadow-slate-800/20"
                                             >
-                                                Tambah
+                                                Lanjut
                                             </button>
                                         </div>
                                     </div>
+
+                                    {/* Category Selection Modal */}
+                                    <AnimatePresence>
+                                        {isCategoryModalOpen && (
+                                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                                                <motion.div
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                    className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                                                    onClick={() => setIsCategoryModalOpen(false)}
+                                                />
+                                                <motion.div
+                                                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                                    className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden"
+                                                >
+                                                    <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                                                        <h3 className="text-lg font-bold text-slate-800 dark:text-white">Pilih Kategori Dana</h3>
+                                                        <button onClick={() => setIsCategoryModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors">
+                                                            <X size={20} className="text-slate-400" />
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="p-6 space-y-4">
+                                                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                                                            Dompet <span className="font-bold text-slate-800 dark:text-white">{pendingFundName}</span> termasuk dalam kategori apa?
+                                                        </p>
+
+                                                        <div className="grid grid-cols-1 gap-3">
+                                                            {FUND_CATEGORIES.filter(c => c.id !== 'CUSTOM').map((category) => (
+                                                                <button
+                                                                    key={category.id}
+                                                                    onClick={() => confirmAddFund(category.id)}
+                                                                    className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all group text-left"
+                                                                >
+                                                                    <div className={`w - 10 h - 10 rounded - xl flex items - center justify - center text - lg font - bold shrink - 0
+                                                                        ${category.id === 'OPERASIONAL' ? 'bg-emerald-100 text-emerald-600' : ''}
+                                                                        ${category.id === 'ZAKAT' ? 'bg-indigo-100 text-indigo-600' : ''}
+                                                                        ${category.id === 'WAKAF' ? 'bg-blue-100 text-blue-600' : ''}
+                                                                        ${category.id === 'SOSIAL' ? 'bg-rose-100 text-rose-600' : ''}
+`}>
+                                                                        {category.id.charAt(0)}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="font-bold text-slate-800 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                                                            {category.label}
+                                                                        </div>
+                                                                        <div className="text-xs text-slate-400">{category.description}</div>
+                                                                    </div>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            </div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             </motion.div>
                         )}
