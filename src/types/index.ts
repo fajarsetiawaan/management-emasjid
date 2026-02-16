@@ -75,6 +75,7 @@ export interface BankAccount { // Legacy, to be replaced by AssetAccount in UI
     bankName: string;
     accountNumber: string;
     holderName: string;
+    allocation?: string;
     color: string;
 }
 

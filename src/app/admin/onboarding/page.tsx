@@ -22,6 +22,7 @@ import {
     Upload,
     CreditCard,
     Image as ImageIcon,
+    AlertTriangle,
 
     X
 } from 'lucide-react';
@@ -44,6 +45,7 @@ type BankAccount = {
     bankName: string;
     accountNumber: string;
     holderName: string;
+    allocation: string;
     // initialBalance removed, calculated from funds
 };
 
@@ -68,6 +70,7 @@ export default function OnboardingSetupPage() {
         bankName: '',
         accountNumber: '',
         holderName: MOCK_MOSQUE.name,
+        allocation: 'Operasional',
     });
 
     // QRIS State
@@ -98,7 +101,7 @@ export default function OnboardingSetupPage() {
 
         setBankAccounts([...bankAccounts, newBank]);
         // Reset form but keep holder name for convenience
-        setCurrentBank({ bankName: '', accountNumber: '', holderName: currentBank.holderName });
+        setCurrentBank({ bankName: '', accountNumber: '', holderName: currentBank.holderName, allocation: 'Operasional' });
         setIsAddingBank(false);
     };
 
@@ -318,10 +321,19 @@ export default function OnboardingSetupPage() {
                                     <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-emerald-500 dark:text-emerald-400 shadow-sm border border-emerald-100 dark:border-emerald-800/50 rotate-3">
                                         <Wallet size={40} strokeWidth={1.5} />
                                     </div>
-                                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 leading-tight">Rekening & QRIS</h2>
+                                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 leading-tight">SetUp Rekening</h2>
                                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 px-4 leading-relaxed">
                                         Tambahkan rekening bank masjid dan kode QRIS untuk memudahkan donasi digital.
                                     </p>
+
+                                    <div className="mx-4 mt-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex items-start gap-3 text-left">
+                                        <div className="p-1.5 bg-amber-100 dark:bg-amber-800 rounded-full text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
+                                            <AlertTriangle size={14} strokeWidth={2.5} />
+                                        </div>
+                                        <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed font-bold">
+                                            Sangat disarankan pisahkan rekening untuk transparansi dan kemudahan audit.
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-6">
@@ -334,6 +346,9 @@ export default function OnboardingSetupPage() {
                                                     <div>
                                                         <div className="flex items-center gap-2 mb-1">
                                                             <div className="text-sm font-bold text-slate-800 dark:text-slate-200">{acc.bankName}</div>
+                                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 font-bold border border-slate-200 dark:border-slate-600 uppercase tracking-wide">
+                                                                {acc.allocation}
+                                                            </span>
                                                         </div>
                                                         <div className="text-lg font-mono font-bold text-slate-600 dark:text-slate-400">{acc.accountNumber}</div>
                                                         <div className="text-xs text-slate-400 mt-1">{acc.holderName}</div>
@@ -394,6 +409,20 @@ export default function OnboardingSetupPage() {
                                                         value={currentBank.holderName}
                                                         onChange={(e) => setCurrentBank({ ...currentBank, holderName: e.target.value })}
                                                     />
+                                                </div>
+
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Peruntukan</label>
+                                                    <select
+                                                        className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl outline-none text-sm font-bold text-slate-800 dark:text-slate-200 focus:border-emerald-500 transition-colors"
+                                                        value={currentBank.allocation}
+                                                        onChange={(e) => setCurrentBank({ ...currentBank, allocation: e.target.value })}
+                                                    >
+                                                        <option value="Operasional">Operasional</option>
+                                                        <option value="Yatim-Dhuafa">Yatim-Dhuafa</option>
+                                                        <option value="Zakat">Zakat</option>
+                                                        <option value="Wakaf">Wakaf</option>
+                                                    </select>
                                                 </div>
 
 

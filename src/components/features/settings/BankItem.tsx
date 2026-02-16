@@ -1,5 +1,5 @@
 
-import { Landmark, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { BankAccount } from '@/types'; // Assuming BankAccount type exists or I need to define it locally if not
 
 interface BankItemProps {
@@ -13,13 +13,15 @@ export default function BankItem({ bank, onDelete, onEdit }: BankItemProps) {
         <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 relative group flex items-start justify-between hover:border-emerald-500/50 transition-colors">
             <div className="flex-1 cursor-pointer" onClick={() => onEdit(bank)}>
                 <div className="flex items-center gap-2 mb-1">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                        <Landmark size={14} />
-                    </div>
                     <div className="text-sm font-bold text-slate-800 dark:text-slate-200">{bank.bankName}</div>
+                    {bank.allocation && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 font-bold border border-slate-200 dark:border-slate-600 uppercase tracking-wide">
+                            {bank.allocation}
+                        </span>
+                    )}
                 </div>
-                <div className="text-lg font-mono font-bold text-slate-600 dark:text-slate-400 ml-10 tracking-widest">{bank.accountNumber}</div>
-                <div className="text-xs text-slate-400 mt-1 ml-10 font-medium uppercase tracking-wider">{bank.holderName}</div>
+                <div className="text-lg font-mono font-bold text-slate-600 dark:text-slate-400 tracking-widest">{bank.accountNumber}</div>
+                <div className="text-xs text-slate-400 mt-1 font-medium uppercase tracking-wider">{bank.holderName}</div>
             </div>
             <button
                 onClick={(e) => {

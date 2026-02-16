@@ -251,7 +251,8 @@ export default function BankAccountsPage() {
     const [formData, setFormData] = useState({
         bankName: 'Bank Syariah Indonesia (BSI)',
         accountNumber: '',
-        holderName: ''
+        holderName: '',
+        allocation: 'Operasional'
     });
 
     const handleDelete = (id: string, bank: string) => {
@@ -276,7 +277,7 @@ export default function BankAccountsPage() {
             // Edit Mode
             newAccounts = accounts.map(acc =>
                 acc.id === editingId
-                    ? { ...acc, bankName: formData.bankName, accountNumber: formData.accountNumber, holderName: formData.holderName }
+                    ? { ...acc, bankName: formData.bankName, accountNumber: formData.accountNumber, holderName: formData.holderName, allocation: formData.allocation }
                     : acc
             );
         } else {
@@ -286,6 +287,7 @@ export default function BankAccountsPage() {
                 bankName: formData.bankName,
                 accountNumber: formData.accountNumber,
                 holderName: formData.holderName,
+                allocation: formData.allocation,
                 color: 'bg-slate-900', // Default color, unused by BankItem
             };
             newAccounts = [...accounts, newAccount];
@@ -302,7 +304,8 @@ export default function BankAccountsPage() {
         setFormData({
             bankName: 'Bank Syariah Indonesia (BSI)',
             accountNumber: '',
-            holderName: ''
+            holderName: '',
+            allocation: 'Operasional'
         });
         toast.success(editingId ? 'Rekening berhasil diupdate!' : 'Rekening baru ditambahkan!');
     };
@@ -312,10 +315,13 @@ export default function BankAccountsPage() {
         setFormData({
             bankName: account.bankName,
             accountNumber: account.accountNumber,
-            holderName: account.holderName
+            holderName: account.holderName,
+            allocation: account.allocation || 'Operasional'
         });
         setIsAddOpen(true);
     };
+
+
 
     return (
         <div className="flex flex-col h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden relative font-sans text-slate-900 dark:text-slate-100 selection:bg-emerald-500/30">
@@ -409,7 +415,8 @@ export default function BankAccountsPage() {
                                             setFormData({
                                                 bankName: 'Bank Syariah Indonesia (BSI)',
                                                 accountNumber: '',
-                                                holderName: ''
+                                                holderName: '',
+                                                allocation: 'Operasional'
                                             });
                                             setIsAddOpen(true);
                                         }}
@@ -513,6 +520,26 @@ export default function BankAccountsPage() {
                                         className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
                                         placeholder="Contoh: DKM Masjid Raya"
                                     />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="allocation" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Peruntukan</label>
+                                    <div className="relative">
+                                        <select
+                                            id="allocation"
+                                            value={formData.allocation}
+                                            onChange={(e) => setFormData({ ...formData, allocation: e.target.value })}
+                                            className="w-full appearance-none px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                                        >
+                                            <option value="Operasional">Operasional</option>
+                                            <option value="Yatim-Dhuafa">Yatim-Dhuafa</option>
+                                            <option value="Zakat">Zakat</option>
+                                            <option value="Wakaf">Wakaf</option>
+                                        </select>
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <button

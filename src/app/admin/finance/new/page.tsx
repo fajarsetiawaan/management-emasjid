@@ -12,12 +12,7 @@ export default function NewTransactionPage() {
                 <span className="font-bold">Kembali</span>
             </Link>
 
-            <div className="mb-6">
-                <h1 className="text-xl font-bold text-slate-800">Catat Transaksi Baru</h1>
-                <p className="text-slate-500 text-sm">Masukkan detail pemasukan atau pengeluaran kas masjid.</p>
-            </div>
-
             <TransactionForm />
-        </div>
+        </div >
     );
 }
