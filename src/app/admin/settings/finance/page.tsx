@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
 import { MOCK_BANK_ACCOUNTS, MOCK_FUNDS } from '@/lib/mock-data';
-import { FUND_CATEGORIES } from '@/lib/constants/finance';
+import { FUND_CATEGORIES, DEFAULT_FUNDS } from '@/lib/constants/finance';
 import { BankAccount, Fund, FundAllocation, FundCategory } from '@/types';
 import { toast } from 'sonner';
 
@@ -34,16 +34,7 @@ export default function ManageFinancePage() {
 
     /** Build default fund list */
     const getDefaultFunds = (): Fund[] => {
-        // Using types from imported definition
-        const defs: Omit<Fund, 'balance'>[] = [
-            { id: 'kas_masjid', name: 'Kas Masjid', type: 'OPERASIONAL', active: true, locked: true, icon: Building2, description: 'Dana operasional umum masjid.', allocation: { type: 'CASH' }, color: 'blue' },
-            { id: 'kas_yatim', name: 'Kas Santunan Yatim', type: 'SOSIAL', active: false, locked: false, icon: HeartHandshake, description: 'Dana khusus untuk anak yatim.', allocation: { type: 'CASH' }, color: 'amber' },
-            { id: 'kas_zakat_fitrah', name: 'Kas Zakat Fitrah', type: 'ZAKAT', active: false, locked: false, icon: Coins, description: 'Dana zakat fitrah Ramadhan.', allocation: { type: 'CASH' }, color: 'indigo' },
-            { id: 'kas_zakat_maal', name: 'Kas Zakat Maal', type: 'ZAKAT', active: false, locked: false, icon: ShieldCheck, description: 'Dana zakat harta (2.5%).', allocation: { type: 'CASH' }, color: 'purple' },
-            { id: 'kas_infaq', name: 'Kas Infaq & Sedekah', type: 'OPERASIONAL', active: false, locked: false, icon: Gift, description: 'Dana infaq dan sedekah umum.', allocation: { type: 'CASH' }, color: 'emerald' },
-            { id: 'kas_wakaf', name: 'Kas Wakaf', type: 'WAKAF', active: false, locked: false, icon: Landmark, description: 'Dana wakaf untuk pembangunan & aset masjid.', allocation: { type: 'CASH' }, color: 'rose' },
-        ];
-        return defs.map(d => {
+        return DEFAULT_FUNDS.map(d => {
             const mock = MOCK_FUNDS.find(p => p.id === d.id);
             return { ...d, balance: mock?.balance ?? 0, active: mock ? true : d.active } as Fund;
         });
@@ -136,7 +127,7 @@ export default function ManageFinancePage() {
         const updated = funds.map(f => f.locked ? f : f.id === id ? { ...f, active: !f.active } : f);
         setFunds(updated);
         saveChanges(updated);
-        toast.success(updated.find(f => f.id === id)?.active ? 'Pos diaktifkan' : 'Pos dinonaktifkan', { position: 'bottom-center' });
+        toast.success(updated.find(f => f.id === id)?.active ? 'Akun diaktifkan' : 'Akun dinonaktifkan', { position: 'bottom-center' });
     };
 
     const updateFundData = (id: string, updates: Partial<Fund>) => {
@@ -179,7 +170,7 @@ export default function ManageFinancePage() {
             );
             setFunds(updated);
             saveChanges(updated);
-            toast.success('Detail pos diperbarui', { position: 'bottom-center' });
+            toast.success('Detail akun diperbarui', { position: 'bottom-center' });
         }
         setEditingId(null);
     };
@@ -240,7 +231,7 @@ export default function ManageFinancePage() {
                     </Link>
                     <div>
                         <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300">Finance</h1>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wide">Pengaturan Pos & Saldo Keuangan</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wide">Pengaturan Akun & Saldo Keuangan</p>
                     </div>
                 </div>
             </header>
@@ -263,7 +254,7 @@ export default function ManageFinancePage() {
                                 <span className="text-emerald-400 text-2xl align-top mr-1">Rp</span>
                                 {totalCash.toLocaleString('id-ID')}
                             </h2>
-                            <p className="text-slate-300 text-sm font-medium">dari {funds.filter(f => f.active).length} pos aktif</p>
+                            <p className="text-slate-300 text-sm font-medium">dari {funds.filter(f => f.active).length} akun aktif</p>
                         </div>
                     </div>
 
@@ -272,7 +263,7 @@ export default function ManageFinancePage() {
                         <div className="flex items-center justify-between px-2">
                             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <Wallet size={16} className="text-slate-400" />
-                                Daftar Pos Keuangan
+                                Manage Akun
                             </h3>
                             <button
                                 onClick={() => setIsAddingNew(true)}
@@ -375,13 +366,13 @@ export default function ManageFinancePage() {
                                                         <div className="space-y-5">
                                                             {/* Name & Desc */}
                                                             <div className="space-y-2">
-                                                                <label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">Detail Pos</label>
+                                                                <label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">Detail Akun</label>
                                                                 <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-2 shadow-sm focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500 transition-all">
                                                                     <input
                                                                         value={editForm.name}
                                                                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                                                                         className="w-full px-3 py-2 text-sm font-bold bg-transparent text-slate-900 dark:text-white placeholder:text-slate-300 focus:outline-none border-b border-slate-100 dark:border-slate-700 mb-1"
-                                                                        placeholder="Nama Pos"
+                                                                        placeholder="Nama Akun"
                                                                     />
                                                                     <input
                                                                         value={editForm.description}
