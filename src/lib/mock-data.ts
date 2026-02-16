@@ -100,7 +100,7 @@ export const MOCK_USER: User = {
 export const MOCK_ASSET_ACCOUNTS: AssetAccount[] = [
     {
         id: 'asset_cash',
-        name: 'Kas Tunai',
+        name: 'Uang Tunai',
         type: 'CASH',
         balance: 7500000,
         description: 'Uang tunai di brankas masjid',

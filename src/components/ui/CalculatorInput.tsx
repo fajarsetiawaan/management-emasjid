@@ -9,9 +9,10 @@ interface CalculatorInputProps {
     label?: string;
     placeholder?: string;
     className?: string;
+    inputClassName?: string;
 }
 
-export function CalculatorInput({ value, onChange, label, placeholder, className }: CalculatorInputProps) {
+export function CalculatorInput({ value, onChange, label, placeholder, className, inputClassName }: CalculatorInputProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [displayValue, setDisplayValue] = useState(value.toString());
 
@@ -52,6 +53,8 @@ export function CalculatorInput({ value, onChange, label, placeholder, className
         onChange(isNaN(num) ? 0 : num);
     };
 
+    const defaultInputClass = "w-full py-3.5 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl outline-none text-lg font-bold text-slate-800 dark:text-slate-200 focus:border-emerald-500 hover:border-emerald-300 transition-all placeholder:text-slate-300";
+
     return (
         <div className={className}>
             {label && (
@@ -70,7 +73,7 @@ export function CalculatorInput({ value, onChange, label, placeholder, className
                     readOnly
                     value={value ? formatNumber(value.toString()) : ''}
                     placeholder={placeholder || "0"}
-                    className="w-full py-3.5 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl outline-none text-lg font-bold text-slate-800 dark:text-slate-200 focus:border-emerald-500 hover:border-emerald-300 transition-all placeholder:text-slate-300 cursor-pointer caret-transparent tabular-nums"
+                    className={`${inputClassName || defaultInputClass} cursor-pointer caret-transparent tabular-nums outline-none`}
                 />
             </div>
 

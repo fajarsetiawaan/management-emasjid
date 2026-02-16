@@ -26,6 +26,7 @@ import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { ListRow } from '@/components/ui/ListRow';
 import SingleDatePicker from './SingleDatePicker';
+import { CalculatorInput } from '@/components/ui/CalculatorInput';
 
 export default function TransactionForm() {
     const searchParams = useSearchParams();
@@ -173,12 +174,15 @@ export default function TransactionForm() {
         <div className="max-w-md mx-auto min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-white pb-32">
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-4 sticky top-0 bg-slate-50/80 dark:bg-black/80 backdrop-blur-xl z-50">
-                <button onClick={() => router.back()} className="text-slate-500 dark:text-slate-400 font-medium text-lg">
-                    Batal
+            <div className="flex items-center justify-between px-4 py-4 sticky top-0 bg-slate-50/80 dark:bg-black/80 backdrop-blur-xl z-50 relative">
+                <button
+                    onClick={() => router.back()}
+                    className="p-2 -ml-2 rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
+                >
+                    <ChevronLeft size={24} />
                 </button>
-                <h1 className="text-lg font-bold">Tambah Transaksi</h1>
-                <div className="w-[60px]" /> {/* Spacer */}
+                <h1 className="text-lg font-bold absolute left-1/2 -translate-x-1/2">Tambah Transaksi</h1>
+                <div className="w-8" />
             </div>
 
             {/* Segmented Control */}
@@ -235,13 +239,12 @@ export default function TransactionForm() {
                     {/* Amount Input */}
                     <div className="px-4 py-3 flex items-center gap-4">
                         <span className="text-slate-500 font-medium text-[17px]">IDR</span>
-                        <input
-                            type="text"
-                            value={amount}
-                            onChange={handleAmountChange}
+                        <CalculatorInput
+                            value={amount ? parseInt(amount.replace(/\./g, '')) : 0}
+                            onChange={(val) => setAmount(val === 0 ? '' : val.toLocaleString('id-ID'))}
                             placeholder="0"
-                            className="w-full bg-transparent text-3xl font-semibold placeholder:text-slate-600 focus:outline-none text-slate-900 dark:text-white"
-                            autoFocus
+                            inputClassName="w-full bg-transparent text-3xl font-semibold placeholder:text-slate-600 focus:outline-none text-slate-900 dark:text-white text-left"
+                            className="w-full"
                         />
                     </div>
                 </div>
