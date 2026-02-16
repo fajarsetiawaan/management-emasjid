@@ -55,7 +55,7 @@ export interface Fund {
 export type IncomeCategory = 'INFAQ_JUMAT' | 'INFAQ_UMUM' | 'ZAKAT_FITRAH' | 'ZAKAT_MAL' | 'WAKAF' | 'DONASI';
 export type ExpenseCategory = 'OPERASIONAL' | 'PEMBANGUNAN' | 'HONOR_PETUGAS' | 'SOSIAL_YATIM' | 'SANTUNAN';
 
-export type TransactionCategory = IncomeCategory | ExpenseCategory; // Keep for backward compat or categorization within funds
+export type TransactionCategory = string; // IncomeCategory | ExpenseCategory; // Keep for backward compat or categorization within funds
 
 export interface Transaction {
     id: string;

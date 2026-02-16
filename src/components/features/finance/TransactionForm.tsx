@@ -11,7 +11,9 @@ import {
     AlignLeft,
     X,
     Check,
-    ArrowRightLeft
+    ArrowRightLeft,
+    Tags,
+    User
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -27,6 +29,20 @@ import { id } from 'date-fns/locale';
 import { ListRow } from '@/components/ui/ListRow';
 import SingleDatePicker from './SingleDatePicker';
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
+
+const EXPENSE_PURPOSES = [
+    'Honor Ustadz/Petugas',
+    'Listrik & Air',
+    'Kebersihan & Keamanan',
+    'Maintenance Aset',
+    'Santunan',
+    'Operasional Lainnya'
+];
+
+const INCOME_CATEGORIES = [
+    'Dari (Donatur/Sumber)',
+    'Informasi'
+];
 
 export default function TransactionForm() {
     const searchParams = useSearchParams();
@@ -49,6 +65,13 @@ export default function TransactionForm() {
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [isNoteOpen, setIsNoteOpen] = useState(false);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+
+    const [expenseCategory, setExpenseCategory] = useState('');
+    const [isExpenseCategoryOpen, setIsExpenseCategoryOpen] = useState(false);
+
+    // Income Specific
+    const [incomeCategory, setIncomeCategory] = useState('');
+    const [isIncomeCategoryOpen, setIsIncomeCategoryOpen] = useState(false);
 
     // Data Source
     const [accounts, setAccounts] = useState<AssetAccount[]>([]);
@@ -99,6 +122,16 @@ export default function TransactionForm() {
             return;
         }
 
+        if (type === 'EXPENSE' && !expenseCategory) {
+            alert('Harap pilih keperluan (kategori) pengeluaran.');
+            return;
+        }
+
+        const selectedFund = funds.find(f => f.id === fundId);
+        const category = type === 'EXPENSE'
+            ? expenseCategory
+            : (type === 'INCOME' ? (incomeCategory || selectedFund?.type || 'INCOME') : 'TRANSFER');
+
         const payload = {
             amount: numAmount,
             type,
@@ -107,6 +140,7 @@ export default function TransactionForm() {
             transferTargetAccountId: type === 'TRANSFER' ? targetAccountId : undefined,
             date,
             description: description || (type === 'TRANSFER' ? 'Mutasi Saldo' : '-'),
+            category
         };
 
         try {
@@ -120,6 +154,8 @@ export default function TransactionForm() {
             setAmount('');
             setDescription('');
             setFundId('');
+            setExpenseCategory('');
+            setIncomeCategory('');
             if (type === 'TRANSFER') setTargetAccountId('');
 
             // Close all drawers
@@ -127,6 +163,8 @@ export default function TransactionForm() {
             setIsTargetAccountOpen(false);
             setIsCategoryOpen(false);
             setIsNoteOpen(false);
+            setIsExpenseCategoryOpen(false);
+            setIsIncomeCategoryOpen(false);
 
         } catch (error) {
             console.error('Failed to save transaction', error);
@@ -279,12 +317,12 @@ export default function TransactionForm() {
                 )}
 
 
-                {/* 3. Category (Hidden for Transfer) */}
+                {/* 3. Category / Fund Source */}
                 {type !== 'TRANSFER' && (
                     <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden">
                         <ListRow
                             icon={fundId && <span className="text-white text-xs font-bold">{getSelectedFundName(fundId).substring(0, 2).toUpperCase()}</span>}
-                            label={fundId ? getSelectedFundName(fundId) : 'Pilih Kategori'}
+                            label={fundId ? getSelectedFundName(fundId) : (type === 'EXPENSE' ? 'Sumber Dana' : 'Pilih Kategori')}
                             isOpen={isCategoryOpen}
                             onClick={() => setIsCategoryOpen(!isCategoryOpen)}
                             iconClassName={fundId ? getFundColor(fundId) : 'bg-slate-200 dark:bg-slate-700'}
@@ -318,8 +356,55 @@ export default function TransactionForm() {
                     </div>
                 )}
 
+                {/* 3b. Expense Purpose (Only for Expense) */}
+                {type === 'EXPENSE' && (
+                    <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden">
+                        <ListRow
+                            icon={<Tags size={20} />}
+                            label={expenseCategory || 'Untuk Keperluan'}
+                            isOpen={isExpenseCategoryOpen}
+                            onClick={() => setIsExpenseCategoryOpen(!isExpenseCategoryOpen)}
+                            className={!expenseCategory ? 'text-slate-400' : ''}
+                        >
+                            {EXPENSE_PURPOSES.map((purpose) => (
+                                <button
+                                    key={purpose}
+                                    onClick={() => { setExpenseCategory(purpose); setIsExpenseCategoryOpen(false); }}
+                                    className="w-full flex items-center justify-between p-4 pl-[60px] hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"
+                                >
+                                    <span className="text-[15px]">{purpose}</span>
+                                    {expenseCategory === purpose && <Check size={16} className="text-blue-500" />}
+                                </button>
+                            ))}
+                        </ListRow>
+                    </div>
+                )}
+
                 {/* 4. Details Group */}
                 <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+
+                    {/* Income Category / Informasi Dana */}
+                    {type === 'INCOME' && (
+                        <ListRow
+                            icon={<Tags size={20} />}
+                            label={incomeCategory || 'Informasi Dana'}
+                            isOpen={isIncomeCategoryOpen}
+                            onClick={() => setIsIncomeCategoryOpen(!isIncomeCategoryOpen)}
+                            className={!incomeCategory ? 'text-slate-400' : ''}
+                        >
+                            {INCOME_CATEGORIES.map((cat) => (
+                                <button
+                                    key={cat}
+                                    onClick={() => { setIncomeCategory(cat); setIsIncomeCategoryOpen(false); }}
+                                    className="w-full flex items-center justify-between p-4 pl-[60px] hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"
+                                >
+                                    <span className="text-[15px]">{cat}</span>
+                                    {incomeCategory === cat && <Check size={16} className="text-blue-500" />}
+                                </button>
+                            ))}
+                        </ListRow>
+                    )}
+
                     {/* Note */}
                     <ListRow
                         icon={<AlignLeft size={20} />}
@@ -373,8 +458,8 @@ export default function TransactionForm() {
                         onClick={handleSubmit}
                         className="w-full py-3.5 rounded-full bg-slate-400/20 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 font-semibold text-[17px] hover:bg-emerald-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{
-                            backgroundColor: (amount && (accountId) && (type !== 'TRANSFER' || targetAccountId)) ? '#10B981' : undefined,
-                            color: (amount && (accountId) && (type !== 'TRANSFER' || targetAccountId)) ? 'white' : undefined,
+                            backgroundColor: (amount && accountId && (type !== 'TRANSFER' || targetAccountId) && (type !== 'EXPENSE' || expenseCategory)) ? '#10B981' : undefined,
+                            color: (amount && accountId && (type !== 'TRANSFER' || targetAccountId) && (type !== 'EXPENSE' || expenseCategory)) ? 'white' : undefined,
                         }}
                     >
                         Simpan

@@ -157,7 +157,15 @@ export async function getAssetAccounts(): Promise<AssetAccount[]> {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('sim_assets');
             if (saved) {
-                const assets = JSON.parse(saved) as AssetAccount[];
+                let assets = JSON.parse(saved) as AssetAccount[];
+
+                // MIGRATION: Rename Kas Tunai -> Uang Tunai
+                const cash = assets.find(a => a.id === 'asset_cash');
+                if (cash && cash.name === 'Kas Tunai') {
+                    assets = assets.map(a => a.id === 'asset_cash' ? { ...a, name: 'Uang Tunai' } : a);
+                    localStorage.setItem('sim_assets', JSON.stringify(assets));
+                }
+
                 const total = assets.reduce((s, a) => s + (a.balance || 0), 0);
                 if (total > 0) return assets;
             }
