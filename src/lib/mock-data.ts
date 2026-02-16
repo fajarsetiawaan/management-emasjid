@@ -161,7 +161,7 @@ export const MOCK_FUNDS: Fund[] = [
     {
         id: 'kas_infaq',
         name: 'Kas Infaq & Sedekah',
-        type: 'SOSIAL',
+        type: 'OPERASIONAL',
         balance: 8000000,
         description: 'Dana infaq dan sedekah umum',
         color: 'emerald',

@@ -40,7 +40,7 @@ export default function ManageFinancePage() {
             { id: 'kas_yatim', name: 'Kas Santunan Yatim', type: 'SOSIAL', active: false, locked: false, icon: HeartHandshake, description: 'Dana khusus untuk anak yatim.', allocation: { type: 'CASH' }, color: 'amber' },
             { id: 'kas_zakat_fitrah', name: 'Kas Zakat Fitrah', type: 'ZAKAT', active: false, locked: false, icon: Coins, description: 'Dana zakat fitrah Ramadhan.', allocation: { type: 'CASH' }, color: 'indigo' },
             { id: 'kas_zakat_maal', name: 'Kas Zakat Maal', type: 'ZAKAT', active: false, locked: false, icon: ShieldCheck, description: 'Dana zakat harta (2.5%).', allocation: { type: 'CASH' }, color: 'purple' },
-            { id: 'kas_infaq', name: 'Kas Infaq & Sedekah', type: 'SOSIAL', active: false, locked: false, icon: Gift, description: 'Dana infaq dan sedekah umum.', allocation: { type: 'CASH' }, color: 'emerald' },
+            { id: 'kas_infaq', name: 'Kas Infaq & Sedekah', type: 'OPERASIONAL', active: false, locked: false, icon: Gift, description: 'Dana infaq dan sedekah umum.', allocation: { type: 'CASH' }, color: 'emerald' },
             { id: 'kas_wakaf', name: 'Kas Wakaf', type: 'WAKAF', active: false, locked: false, icon: Landmark, description: 'Dana wakaf untuk pembangunan & aset masjid.', allocation: { type: 'CASH' }, color: 'rose' },
         ];
         return defs.map(d => {

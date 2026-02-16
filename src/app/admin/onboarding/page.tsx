@@ -562,14 +562,6 @@ export default function OnboardingSetupPage() {
                                                                     onClick={() => confirmAddFund(category.id)}
                                                                     className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all group text-left"
                                                                 >
-                                                                    <div className={`w - 10 h - 10 rounded - xl flex items - center justify - center text - lg font - bold shrink - 0
-                                                                        ${category.id === 'OPERASIONAL' ? 'bg-emerald-100 text-emerald-600' : ''}
-                                                                        ${category.id === 'ZAKAT' ? 'bg-indigo-100 text-indigo-600' : ''}
-                                                                        ${category.id === 'WAKAF' ? 'bg-blue-100 text-blue-600' : ''}
-                                                                        ${category.id === 'SOSIAL' ? 'bg-rose-100 text-rose-600' : ''}
-`}>
-                                                                        {category.id.charAt(0)}
-                                                                    </div>
                                                                     <div>
                                                                         <div className="font-bold text-slate-800 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                                                                             {category.label}

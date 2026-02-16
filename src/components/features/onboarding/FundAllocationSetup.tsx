@@ -83,7 +83,7 @@ export default function FundAllocationSetup({
                                                     </h4>
                                                     {fund.locked && <span className="text-[9px] bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-slate-200 dark:border-slate-600">Wajib</span>}
                                                 </div>
-                                                <p className="text-xs text-slate-400 truncate">{fund.desc}</p>
+                                                <p className="text-xs text-slate-400 truncate">{fund.description}</p>
                                             </div>
                                             <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${fund.active ? 'border-emerald-500 bg-emerald-500 scale-110' : 'border-slate-300 dark:border-slate-600 group-hover:border-emerald-300'}`}>
                                                 {fund.active && <CheckCircle2 size={14} className="text-white" strokeWidth={3} />}
