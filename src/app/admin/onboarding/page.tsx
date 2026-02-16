@@ -77,7 +77,7 @@ export default function OnboardingSetupPage() {
     // ─── Step 2 State ────────────────────────────────────────────────
 
     const [funds, setFunds] = useState([
-        { id: 'kas_masjid', name: 'Kas Masjid (Operasional)', type: 'OPERASIONAL', active: true, locked: true, icon: Building2, desc: 'Dana operasional umum masjid.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
+        { id: 'kas_masjid', name: 'Kas Masjid', type: 'OPERASIONAL', active: true, locked: true, icon: Building2, desc: 'Dana operasional umum masjid.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
         { id: 'kas_yatim', name: 'Kas Santunan Yatim', type: 'SOCIAL', active: false, locked: false, icon: HeartHandshake, desc: 'Dana khusus untuk anak yatim.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
         { id: 'kas_zakat_fitrah', name: 'Kas Zakat Fitrah', type: 'ZAKAT', active: false, locked: false, icon: Coins, desc: 'Dana zakat fitrah Ramadhan.', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
         { id: 'kas_zakat_maal', name: 'Kas Zakat Maal', type: 'ZAKAT', active: false, locked: false, icon: ShieldCheck, desc: 'Dana zakat harta (2.5%).', balance: 0, allocation: { type: 'CASH' } as FundAllocation },
@@ -171,10 +171,10 @@ export default function OnboardingSetupPage() {
             setIsAddingBank(false); // Close form if open
             setStep(2);
         } else {
-            // Validation: Kas Masjid (Operasional) must have balance > 0
+            // Validation: Kas Masjid must have balance > 0
             const kasMasjid = funds.find(f => f.id === 'kas_masjid');
             if (!kasMasjid || (kasMasjid.balance || 0) <= 0) {
-                alert('⚠️ Nominal Kas Masjid (Operasional) wajib diisi sebelum menyelesaikan setup.');
+                alert('⚠️ Nominal Kas Masjid wajib diisi sebelum menyelesaikan setup.');
                 return;
             }
 

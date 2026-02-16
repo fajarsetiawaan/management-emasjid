@@ -113,7 +113,17 @@ export async function getPrograms(): Promise<Program[]> {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('sim_programs');
             if (saved) {
-                const programs = JSON.parse(saved) as Program[];
+                let programs = JSON.parse(saved) as Program[];
+
+                // Migration: Fix Program Name if old one exists (Kas Masjid)
+                const kasMasjid = programs.find(p => p.id === 'kas_masjid');
+                if (kasMasjid && kasMasjid.name.includes('(Operasional)')) {
+                    programs = programs.map(p =>
+                        p.id === 'kas_masjid' ? { ...p, name: 'Kas Masjid' } : p
+                    );
+                    localStorage.setItem('sim_programs', JSON.stringify(programs));
+                }
+
                 const total = programs.reduce((s, p) => s + (p.balance || 0), 0);
                 if (total > 0) return programs;
             }

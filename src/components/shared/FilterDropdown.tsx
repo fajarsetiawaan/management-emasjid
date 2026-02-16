@@ -21,18 +21,24 @@ export function useFilterDropdown() {
 interface FilterDropdownProps {
     children: React.ReactNode;
     className?: string;
+    onOpenChange?: (isOpen: boolean) => void;
 }
 
-export function FilterDropdown({ children, className = '' }: FilterDropdownProps) {
+export function FilterDropdown({ children, className = '', onOpenChange }: FilterDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const close = () => setIsOpen(false);
+    const handleOpenChange = (value: boolean) => {
+        setIsOpen(value);
+        onOpenChange?.(value);
+    };
+
+    const close = () => handleOpenChange(false);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                close();
+                handleOpenChange(false);
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -42,7 +48,7 @@ export function FilterDropdown({ children, className = '' }: FilterDropdownProps
     }, []);
 
     return (
-        <FilterDropdownContext.Provider value={{ isOpen, setIsOpen, close }}>
+        <FilterDropdownContext.Provider value={{ isOpen, setIsOpen: handleOpenChange, close }}>
             <div className={`relative ${className}`} ref={containerRef}>
                 {children}
             </div>
@@ -66,25 +72,30 @@ export function FilterTrigger({
     isActive,
     className = '',
     showChevron = true,
-    indicator
+    indicator,
+    children
 }: FilterTriggerProps) {
     const { isOpen, setIsOpen } = useFilterDropdown();
 
     return (
-        <button
-            onClick={() => setIsOpen(!isOpen)}
-            className={`h-10 pl-3 pr-2 rounded-full backdrop-blur-md border flex items-center justify-center gap-1 shadow-sm transition-all ring-1 ring-inset relative
+        <>
+            <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsOpen(!isOpen)}
+                className={`h-10 pl-3 pr-2 rounded-full backdrop-blur-md border flex items-center justify-center gap-1 shadow-sm transition-all ring-1 ring-inset relative
             ${isActive
-                    ? 'bg-emerald-500 text-white border-emerald-400 ring-emerald-300/30 shadow-emerald-500/20'
-                    : 'bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 ring-transparent'}
+                        ? 'bg-emerald-500 text-white border-emerald-400 ring-emerald-300/30 shadow-emerald-500/20'
+                        : 'bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 ring-transparent'}
             ${className}`}
-        >
-            {icon}
-            {showChevron && (
-                <ChevronDown size={14} className={`opacity-70 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-            )}
-            {indicator}
-        </button>
+            >
+                {icon}
+                {showChevron && (
+                    <ChevronDown size={14} className={`opacity-70 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                )}
+                {indicator}
+            </motion.button>
+            {children}
+        </>
     );
 }
 
@@ -130,7 +141,8 @@ export function FilterItem({ children, onClick, isSelected, className = '', icon
     };
 
     return (
-        <button
+        <motion.button
+            whileTap={{ scale: 0.98 }}
             onClick={handleClick}
             className={`w-full px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3
             ${isSelected
@@ -146,6 +158,21 @@ export function FilterItem({ children, onClick, isSelected, className = '', icon
             <div className="flex-1 flex items-center justify-between">
                 {children}
             </div>
+        </motion.button>
+    );
+}
+
+export function FilterActionButton({ children, onClick, className = '' }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
+    const { close } = useFilterDropdown();
+    return (
+        <button
+            onClick={() => {
+                onClick?.();
+                close();
+            }}
+            className={className}
+        >
+            {children}
         </button>
     );
 }

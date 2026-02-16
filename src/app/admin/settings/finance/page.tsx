@@ -49,7 +49,7 @@ export default function ManageFinancePage() {
     /** Build default fund list */
     const getDefaultFunds = (): Fund[] => {
         const defs: Omit<Fund, 'balance'>[] = [
-            { id: 'kas_masjid', name: 'Kas Masjid (Operasional)', type: 'OPERASIONAL', active: true, locked: true, icon: Building2, desc: 'Dana operasional umum masjid.', allocation: { type: 'CASH' } },
+            { id: 'kas_masjid', name: 'Kas Masjid', type: 'OPERASIONAL', active: true, locked: true, icon: Building2, desc: 'Dana operasional umum masjid.', allocation: { type: 'CASH' } },
             { id: 'kas_yatim', name: 'Kas Santunan Yatim', type: 'SOCIAL', active: false, locked: false, icon: HeartHandshake, desc: 'Dana khusus untuk anak yatim.', allocation: { type: 'CASH' } },
             { id: 'kas_zakat_fitrah', name: 'Kas Zakat Fitrah', type: 'ZAKAT', active: false, locked: false, icon: Coins, desc: 'Dana zakat fitrah Ramadhan.', allocation: { type: 'CASH' } },
             { id: 'kas_zakat_maal', name: 'Kas Zakat Maal', type: 'ZAKAT', active: false, locked: false, icon: ShieldCheck, desc: 'Dana zakat harta (2.5%).', allocation: { type: 'CASH' } },
@@ -76,6 +76,8 @@ export default function ManageFinancePage() {
                 const parsed = JSON.parse(savedConfig);
                 const restored = parsed.map((f: any) => ({
                     ...f,
+                    // Migration: Fix name if old
+                    name: (f.id === 'kas_masjid' && f.name.includes('(Operasional)')) ? 'Kas Masjid' : f.name,
                     icon: getIconForType(f.id, f.type)
                 }));
 

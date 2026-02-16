@@ -2,189 +2,258 @@
 
 import { useState, useEffect } from 'react';
 import { Transaction, Program } from '@/types';
-import { getTransactions, getPrograms } from '@/lib/api';
-import { Download, ChevronLeft, ChevronRight, PieChart, TrendingUp, Wallet, ShieldCheck, Layers } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { getTransactions, getPrograms, getTotalBalance, getAssetAccounts } from '@/lib/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import ReportsHeader from '@/components/features/reports/ReportsHeader';
+import SummaryCard from '@/components/features/reports/SummaryCard';
+import CategoryBreakdown from '@/components/features/reports/CategoryBreakdown';
+import YearlyReportsView from '@/components/features/reports/YearlyReportsView';
+import WeeklyReportsView from '@/components/features/reports/WeeklyReportsView';
+import { Layers, Calendar } from 'lucide-react';
 
 export default function ReportsPage() {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+    const [viewMode, setViewMode] = useState<'WEEKLY' | 'MONTHLY' | 'YEARLY'>('WEEKLY'); // Default to Weekly for easier access? Or Monthly. Let's keep Monthly as default for now, then change if user wants. Actually Weekly is high value for DKM. let's stick to Monthly default for consistency.
 
     // Data State
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [programs, setPrograms] = useState<Program[]>([]);
+    const [netBalance, setNetBalance] = useState(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const loadData = async () => {
-            const [txData, progData] = await Promise.all([
-                getTransactions(),
-                getPrograms()
-            ]);
-            setTransactions(txData);
-            setPrograms(progData);
-            setLoading(false);
+            try {
+                const [txData, progData] = await Promise.all([
+                    getTransactions(),
+                    getPrograms(),
+                    getAssetAccounts() // Ensure assets are loaded for total balance
+                ]);
+                setTransactions(txData);
+                setPrograms(progData);
+                // Calculate Net Balance (Total Assets)
+                setNetBalance(getTotalBalance());
+            } catch (error) {
+                console.error("Failed to load report data", error);
+            } finally {
+                setLoading(false);
+            }
         };
         loadData();
     }, []);
 
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-
     // Filter Transactions for Selected Month
     const monthlyTransactions = transactions.filter(t => {
-        return t.date.getMonth() === currentMonth && t.date.getFullYear() === currentYear;
+        const d = new Date(t.date);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
     });
 
-    const income = monthlyTransactions.filter(t => t.type === 'INCOME').reduce((a, b) => a + b.amount, 0);
-    const expense = monthlyTransactions.filter(t => t.type === 'EXPENSE').reduce((a, b) => a + b.amount, 0);
+    // Calculate Totals (Monthly)
+    const incomeTotal = monthlyTransactions
+        .filter(t => t.type === 'INCOME')
+        .reduce((sum, t) => sum + t.amount, 0);
 
-    // Fund Separation Logic (Real Data)
-    const restrictedBalance = programs
-        .filter(p => p.type === 'RESTRICTED')
-        .reduce((sum, p) => sum + p.balance, 0);
+    const expenseTotal = monthlyTransactions
+        .filter(t => t.type === 'EXPENSE')
+        .reduce((sum, t) => sum + t.amount, 0);
 
-    const operationalBalance = programs
-        .filter(p => p.type === 'UNRESTRICTED')
-        .reduce((sum, p) => sum + p.balance, 0);
+    // Group by Category Logic
+    const groupByCategory = (type: 'INCOME' | 'EXPENSE') => {
+        const filtered = monthlyTransactions.filter(t => t.type === type);
+        const grouped: Record<string, number> = {};
 
-    const formatRupiah = (amount: number) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(amount);
+        filtered.forEach(t => {
+            const category = t.category || 'Lainnya';
+            grouped[category] = (grouped[category] || 0) + t.amount;
+        });
+
+        const total = type === 'INCOME' ? incomeTotal : expenseTotal;
+
+        return Object.entries(grouped)
+            .map(([name, amount]) => ({
+                name,
+                amount,
+                percentage: total === 0 ? 0 : (amount / total) * 100,
+                color: type === 'INCOME' ? 'emerald' : 'rose'
+            }))
+            .sort((a, b) => b.amount - a.amount); // Sort by highest amount
     };
 
-    const handlePrevMonth = () => {
-        if (currentMonth === 0) {
-            setCurrentMonth(11);
-            setCurrentYear(currentYear - 1);
-        } else {
-            setCurrentMonth(currentMonth - 1);
+    const incomeBreakdown = groupByCategory('INCOME');
+    const expenseBreakdown = groupByCategory('EXPENSE');
+
+    const handleExport = () => {
+        alert("Fitur Download PDF akan segera hadir!");
+    };
+
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: { staggerChildren: 0.1 }
         }
     };
 
-    const handleNextMonth = () => {
-        if (currentMonth === 11) {
-            setCurrentMonth(0);
-            setCurrentYear(currentYear + 1);
-        } else {
-            setCurrentMonth(currentMonth + 1);
-        }
+    const item = {
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0 }
     };
 
-    if (loading) return <div className="p-10 text-center text-slate-400">Loading reports...</div>;
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-xl font-bold text-slate-800">Laporan Keuangan</h1>
+        <div className="min-h-screen pb-24 relative overflow-hidden font-sans">
+            {/* Deep Ambient Backgrounds (Shared with Finance/Events) */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute top-[10%] right-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[128px] mix-blend-multiply dark:mix-blend-screen animate-blob" />
+                <div className="absolute top-[40%] left-[-10%] w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[128px] mix-blend-multiply dark:mix-blend-screen animate-blob animation-delay-2000" />
+                <div className="absolute bottom-[-10%] right-[20%] w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[128px] mix-blend-multiply dark:mix-blend-screen animate-blob animation-delay-4000" />
             </div>
 
-            {/* Month Filter */}
-            <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
-                <button onClick={handlePrevMonth} className="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-600">
-                    <ChevronLeft size={20} />
-                </button>
-                <span className="font-bold text-slate-800">
-                    {months[currentMonth]} {currentYear}
-                </span>
-                <button onClick={handleNextMonth} className="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-600">
-                    <ChevronRight size={20} />
-                </button>
-            </div>
+            {/* Header: Hide navigation unless needed (Weekly handles its own nav, Yearly handles its own nav, Monthly uses header nav) */}
+            <ReportsHeader
+                currentMonth={currentMonth}
+                currentYear={currentYear}
+                onMonthChange={setCurrentMonth}
+                onYearChange={setCurrentYear}
+                onExport={handleExport}
+                viewMode={viewMode === 'MONTHLY' ? 'MONTHLY' : 'YEARLY'} // Hack: hide nav if not monthly. We need to update ReportsHeader prop type or logic if we want strictly 'WEEKLY' there too. For now let's reuse logic: if not monthly, header hides nav.
+            />
 
-            {/* Arus Kas Chart */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
-                <div className="flex items-center gap-2 mb-6">
-                    <TrendingUp size={18} className="text-emerald-600" />
-                    <h2 className="font-bold text-slate-800">Arus Kas Bulanan</h2>
-                </div>
+            <main className="px-4 pt-6 relative z-10 space-y-6">
 
-                <div className="flex items-end gap-4 h-40">
-                    {/* Income Bar */}
-                    <div className="flex-1 flex flex-col justify-end items-center gap-2 group cursor-pointer">
-                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity absolute top-16">
-                            {formatRupiah(income)}
-                        </span>
-                        <div
-                            className="w-full bg-emerald-500 rounded-t-xl hover:bg-emerald-600 transition-all relative"
-                            style={{ height: `${(income / ((income + expense) || 1)) * 100}%`, minHeight: '4px' }}
-                        ></div>
-                        <span className="text-xs font-medium text-slate-500">Masuk</span>
+                {/* View Switcher (Mingguan / Bulanan / Tahunan) */}
+                <div className="flex justify-center mb-4">
+                    <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-full flex items-center relative w-full max-w-md">
+                        {/* Sliding Background */}
+                        <motion.div
+                            className="absolute bg-white dark:bg-slate-700 shadow-sm rounded-full h-8 top-1 left-1"
+                            initial={false}
+                            animate={{
+                                x: viewMode === 'WEEKLY' ? '0%' : viewMode === 'MONTHLY' ? '100%' : '200%',
+                            }}
+                            style={{ width: 'calc(33.33% - 4px)' }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        />
+                        <button
+                            onClick={() => setViewMode('WEEKLY')}
+                            className={`relative z-10 w-1/3 px-2 py-1.5 text-xs sm:text-sm font-medium rounded-full transition-colors text-center ${viewMode === 'WEEKLY' ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}
+                        >
+                            Jumat
+                        </button>
+                        <button
+                            onClick={() => setViewMode('MONTHLY')}
+                            className={`relative z-10 w-1/3 px-2 py-1.5 text-xs sm:text-sm font-medium rounded-full transition-colors text-center ${viewMode === 'MONTHLY' ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}
+                        >
+                            Bulanan
+                        </button>
+                        <button
+                            onClick={() => setViewMode('YEARLY')}
+                            className={`relative z-10 w-1/3 px-2 py-1.5 text-xs sm:text-sm font-medium rounded-full transition-colors text-center ${viewMode === 'YEARLY' ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}
+                        >
+                            Tahunan
+                        </button>
                     </div>
-
-                    {/* Expense Bar */}
-                    <div className="flex-1 flex flex-col justify-end items-center gap-2 group cursor-pointer">
-                        <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity absolute top-16">
-                            {formatRupiah(expense)}
-                        </span>
-                        <div
-                            className="w-full bg-rose-500 rounded-t-xl hover:bg-rose-600 transition-all relative"
-                            style={{ height: `${(expense / ((income + expense) || 1)) * 100}%`, minHeight: '4px' }}
-                        ></div>
-                        <span className="text-xs font-medium text-slate-500">Keluar</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Rincian Saldo (Fund Separation) */}
-            <div className="space-y-3">
-                <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                    <PieChart size={18} className="text-slate-500" />
-                    Posisi Saldo per Program
-                </h3>
-
-                {/* Operational */}
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-5 rounded-2xl text-white shadow-lg shadow-blue-200">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                            <Wallet size={20} />
-                        </div>
-                        <span className="text-sm font-medium text-blue-50">Dana Operasional</span>
-                    </div>
-                    <p className="text-sm text-blue-100 mb-1">Bebas digunakan (Unrestricted)</p>
-                    <p className="text-2xl font-bold">{formatRupiah(operationalBalance)}</p>
                 </div>
 
-                {/* Restricted */}
-                <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-5 rounded-2xl text-white shadow-lg shadow-amber-200">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                            <ShieldCheck size={20} />
-                        </div>
-                        <span className="text-sm font-medium text-amber-50">Dana Terikat (Restricted)</span>
-                    </div>
-                    <p className="text-sm text-amber-100 mb-1">Khusus Zakat, Yatim, Wakaf</p>
-                    <p className="text-2xl font-bold">{formatRupiah(restrictedBalance)}</p>
-                </div>
+                <AnimatePresence mode="wait">
+                    {viewMode === 'WEEKLY' && (
+                        <motion.div
+                            key="weekly-view"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <WeeklyReportsView transactions={transactions} netBalance={netBalance} />
+                        </motion.div>
+                    )}
 
-                {/* Detailed Program Breakdown */}
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Rincian Program</h4>
-                    {programs.map(prog => (
-                        <div key={prog.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors">
-                            <div className="flex items-center gap-3">
-                                <span className={`w-2 h-2 rounded-full bg-${prog.color}-500`}></span>
-                                <span className="text-sm font-medium text-slate-700">{prog.name}</span>
-                            </div>
-                            <span className="text-sm font-bold text-slate-800">{formatRupiah(prog.balance)}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                    {viewMode === 'MONTHLY' && (
+                        <motion.div
+                            key="monthly-view"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            transition={{ duration: 0.3 }}
+                            className="space-y-8"
+                        >
+                            {/* Summary Cards Section */}
+                            <motion.section
+                                variants={container}
+                                initial="hidden"
+                                animate="show"
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                            >
+                                <motion.div variants={item} className="md:col-span-2 lg:col-span-1">
+                                    <SummaryCard
+                                        title="Saldo Bersih Saat Ini"
+                                        amount={netBalance}
+                                        type="NET"
+                                    />
+                                </motion.div>
+                                <motion.div variants={item}>
+                                    <SummaryCard
+                                        title="Total Pemasukan"
+                                        amount={incomeTotal}
+                                        type="INCOME"
+                                    />
+                                </motion.div>
+                                <motion.div variants={item}>
+                                    <SummaryCard
+                                        title="Total Pengeluaran"
+                                        amount={expenseTotal}
+                                        type="EXPENSE"
+                                    />
+                                </motion.div>
+                            </motion.section>
 
-            {/* Export Button */}
-            <div className="pt-4">
-                <button className="w-full bg-slate-800 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-900 active:scale-[0.98] transition-all shadow-xl">
-                    <Download size={20} />
-                    Download Laporan PDF
-                </button>
-                <p className="text-center text-xs text-slate-400 mt-3">
-                    Format PDF mencakup rincian transaksi dan posisi saldo akhir bulan {months[currentMonth]}.
-                </p>
-            </div>
+                            {/* Breakdown Section */}
+                            <motion.section
+                                variants={container}
+                                initial="hidden"
+                                animate="show"
+                                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                            >
+                                <motion.div variants={item}>
+                                    <CategoryBreakdown
+                                        title="Rincian Pemasukan"
+                                        data={incomeBreakdown}
+                                        type="INCOME"
+                                    />
+                                </motion.div>
+
+                                <motion.div variants={item}>
+                                    <CategoryBreakdown
+                                        title="Rincian Pengeluaran"
+                                        data={expenseBreakdown}
+                                        type="EXPENSE"
+                                    />
+                                </motion.div>
+                            </motion.section>
+                        </motion.div>
+                    )}
+
+                    {viewMode === 'YEARLY' && (
+                        <motion.div
+                            key="yearly-view"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <YearlyReportsView year={currentYear} transactions={transactions} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </main>
         </div>
     );
 }

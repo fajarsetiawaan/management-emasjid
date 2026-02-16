@@ -1,82 +1,120 @@
 
-import { Transaction } from '@/types';
+import { Transaction, TransactionCategory } from '@/types';
 import { formatRupiah, formatCategory } from '@/lib/formatter';
-import { TrendingUp, Activity, Wallet, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import {
+    TrendingUp,
+    TrendingDown,
+    Heart,
+    HandHeart,
+    Gift,
+    Coins,
+    Zap,
+    Briefcase,
+    Hammer,
+    Users,
+    HeartHandshake,
+    Wallet
+} from 'lucide-react';
 
 interface TransactionCardProps {
     transaction: Transaction;
     programName: string;
 }
 
+// Icon Helper
+const getCategoryIcon = (category?: TransactionCategory) => {
+    switch (category) {
+        case 'INFAQ_JUMAT':
+        case 'INFAQ_UMUM':
+        case 'DONASI':
+            return <Coins size={20} className="text-emerald-600 dark:text-emerald-400" />;
+        case 'ZAKAT_FITRAH':
+        case 'ZAKAT_MAL':
+            return <Gift size={20} className="text-emerald-600 dark:text-emerald-400" />;
+        case 'WAKAF':
+            return <Heart size={20} className="text-emerald-600 dark:text-emerald-400" />;
+
+        case 'OPERASIONAL':
+            return <Zap size={20} className="text-amber-600 dark:text-amber-400" />;
+        case 'PEMBANGUNAN':
+            return <Hammer size={20} className="text-blue-600 dark:text-blue-400" />;
+        case 'HONOR_PETUGAS':
+            return <Users size={20} className="text-indigo-600 dark:text-indigo-400" />;
+        case 'SOSIAL_YATIM':
+        case 'SANTUNAN':
+            return <HeartHandshake size={20} className="text-rose-600 dark:text-rose-400" />;
+
+        default:
+            return <Wallet size={20} className="text-slate-600 dark:text-slate-400" />;
+    }
+};
+
+const getCategoryColor = (category?: TransactionCategory) => {
+    switch (category) {
+        case 'INFAQ_JUMAT':
+        case 'INFAQ_UMUM':
+        case 'DONASI':
+        case 'ZAKAT_FITRAH':
+        case 'ZAKAT_MAL':
+        case 'WAKAF':
+            return 'bg-emerald-100 dark:bg-emerald-500/20';
+
+        case 'OPERASIONAL':
+            return 'bg-amber-100 dark:bg-amber-500/20';
+        case 'PEMBANGUNAN':
+            return 'bg-blue-100 dark:bg-blue-500/20';
+        case 'HONOR_PETUGAS':
+            return 'bg-indigo-100 dark:bg-indigo-500/20';
+        case 'SOSIAL_YATIM':
+        case 'SANTUNAN':
+            return 'bg-rose-100 dark:bg-rose-500/20';
+
+        default:
+            return 'bg-slate-100 dark:bg-slate-800';
+    }
+};
+
 export default function TransactionCard({ transaction, programName }: TransactionCardProps) {
     const isIncome = transaction.type === 'INCOME';
     const formattedCategory = formatCategory(transaction.category);
 
-    // Clean Description Logic: Remove Category if it appears in the description
-    // e.g. "Hamba Allah - Zakat Mal" -> "Hamba Allah"
     const getCleanDescription = (desc: string) => {
         if (!desc) return 'Transaksi Tanpa Nama';
-
-        // Case insensitive check
         const descLower = desc.toLowerCase();
         const catLower = formattedCategory.toLowerCase();
-
-        // Check for " - Category" pattern
-        if (descLower.includes(` - ${catLower}`)) {
-            return desc.replace(new RegExp(` - ${formattedCategory}`, 'i'), '');
-        }
-
-        // Check for "- Category" (no space)
-        if (descLower.includes(`-${catLower}`)) {
-            return desc.replace(new RegExp(`-${formattedCategory}`, 'i'), '');
-        }
-
-        // Check if description IS the category
-        if (descLower === catLower) {
-            return 'Hamba Allah'; // Default if name is missing and only category was used
-        }
-
+        if (descLower.includes(` - ${catLower}`)) return desc.replace(new RegExp(` - ${formattedCategory}`, 'i'), '');
+        if (descLower.includes(`-${catLower}`)) return desc.replace(new RegExp(`-${formattedCategory}`, 'i'), '');
+        if (descLower === catLower) return 'Hamba Allah';
         return desc;
     };
 
     const cleanDescription = getCleanDescription(transaction.description);
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-[2rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 border border-slate-100 dark:border-slate-800/50 flex items-start justify-between group relative overflow-hidden">
+        <div className="group flex items-center gap-4 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 shadow-sm hover:shadow-md transition-all border border-white/50 dark:border-slate-800/50 hover:bg-white/90 dark:hover:bg-slate-800/80">
 
-            {/* Discrete Type Indicator Bar */}
-            <div className={`absolute left-0 top-6 bottom-6 w-1 rounded-r-full ${isIncome ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-
-            <div className="flex flex-col justify-center pl-4 gap-2">
-                {/* Description / Name */}
-                <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[15px] leading-tight">
-                    {cleanDescription}
-                </h4>
-
-                <div className="flex flex-wrap items-center gap-2">
-                    {/* Category Badge - Pill Style */}
-                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide
-                        ${isIncome
-                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
-                            : 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
-                        }`}>
-                        {formattedCategory}
-                    </span>
-
-                    {/* Program Badge - Soft Gray Pill */}
-                    <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
-                        {programName}
-                    </span>
-                </div>
+            {/* 1. Icon Box */}
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${getCategoryColor(transaction.category)}`}>
+                {getCategoryIcon(transaction.category)}
             </div>
 
-            {/* Amount */}
-            <div className={`text-right ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                <div className="flex items-center justify-end gap-1 mb-1 opacity-0 hover:opacity-100 transition-opacity">
-                    {/* Hidden arrow helper, only shows if needed or keep layout stable */}
-                </div>
-                <p className="font-black text-lg tracking-tight">
-                    {formatRupiah(transaction.amount).replace(/,00$/, '').replace('Rp', '')}
+            {/* 2. Middle Info */}
+            <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[15px] truncate">
+                    {cleanDescription}
+                </h4>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                    {formattedCategory}
+                </p>
+            </div>
+
+            {/* 3. Right Info (Amount) */}
+            <div className="text-right flex-shrink-0">
+                <p className={`font-extrabold text-[15px] tracking-tight ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-200'}`}>
+                    {isIncome ? '+' : '-'} {formatRupiah(transaction.amount).replace(/,00$/, '').replace('Rp', '')}
+                </p>
+                <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md inline-block">
+                    {programName}
                 </p>
             </div>
         </div>

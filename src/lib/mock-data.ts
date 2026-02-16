@@ -142,7 +142,7 @@ export const MOCK_BANK_ACCOUNTS: BankAccount[] = MOCK_ASSET_ACCOUNTS
 export const MOCK_PROGRAMS: Program[] = [
     {
         id: 'kas_masjid',
-        name: 'Kas Masjid (Operasional)',
+        name: 'Kas Masjid',
         type: 'UNRESTRICTED',
         balance: 22500000,
         description: 'Biaya listrik, air, kebersihan, dan admin',
