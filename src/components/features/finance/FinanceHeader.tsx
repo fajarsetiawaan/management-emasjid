@@ -5,11 +5,14 @@ import {
     ChevronDown,
     Layers,
     ChevronRight,
-    ArrowLeft
+    ArrowLeft,
+    SlidersHorizontal,
+    Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import GlassDatePicker from '@/components/features/finance/GlassDatePicker';
+import { Program } from '@/types';
 
 export type DateFilterType = 'ALL' | 'WEEK' | 'MONTH' | 'CUSTOM';
 
@@ -19,6 +22,9 @@ interface FinanceHeaderProps {
     setDateFilter: (filter: DateFilterType) => void;
     customDateRange: { start: string; end: string };
     setCustomDateRange: (range: { start: string; end: string }) => void;
+    programs: Program[];
+    selectedProgramId: string;
+    setSelectedProgramId: (id: string) => void;
 }
 
 export default function FinanceHeader({
@@ -26,20 +32,23 @@ export default function FinanceHeader({
     dateFilter,
     setDateFilter,
     customDateRange,
-    setCustomDateRange
+    setCustomDateRange,
+    programs,
+    selectedProgramId,
+    setSelectedProgramId
 }: FinanceHeaderProps) {
-    const [showFilterMenu, setShowFilterMenu] = useState(false);
+    const [showDateMenu, setShowDateMenu] = useState(false);
+    const [showProgramMenu, setShowProgramMenu] = useState(false);
     const [showCustomPicker, setShowCustomPicker] = useState(false);
     const dateFilterRef = useRef<HTMLDivElement>(null);
+    const programFilterRef = useRef<HTMLDivElement>(null);
 
     // Helpers to convert string dates to Date objects for the picker
     const startDateObj = customDateRange.start ? new Date(customDateRange.start) : null;
     const endDateObj = customDateRange.end ? new Date(customDateRange.end) : null;
 
     const handleDateChange = (start: Date | null, end: Date | null) => {
-        // Convert Date objects back to YYYY-MM-DD strings for parent state
         const formatDate = (d: Date) => {
-            // Adjust for timezone to ensure the date string is accurate to what the user clicked
             const offset = d.getTimezoneOffset();
             const localDate = new Date(d.getTime() - (offset * 60 * 1000));
             return localDate.toISOString().split('T')[0];
@@ -53,16 +62,19 @@ export default function FinanceHeader({
 
     // Reset sub-menu on close
     useEffect(() => {
-        if (!showFilterMenu) {
+        if (!showDateMenu) {
             setTimeout(() => setShowCustomPicker(false), 300);
         }
-    }, [showFilterMenu]);
+    }, [showDateMenu]);
 
     // Close on click outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dateFilterRef.current && !dateFilterRef.current.contains(event.target as Node)) {
-                setShowFilterMenu(false);
+                setShowDateMenu(false);
+            }
+            if (programFilterRef.current && !programFilterRef.current.contains(event.target as Node)) {
+                setShowProgramMenu(false);
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -78,25 +90,26 @@ export default function FinanceHeader({
                     <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Keuangan</h1>
                     <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{mosqueName}</p>
                 </div>
+
                 <div className="flex gap-2">
                     {/* Date Filter Button */}
                     <div className="relative" ref={dateFilterRef}>
                         <button
-                            onClick={() => setShowFilterMenu(!showFilterMenu)}
+                            onClick={() => setShowDateMenu(!showDateMenu)}
                             className={`h-10 pl-3 pr-2 rounded-full backdrop-blur-md border flex items-center justify-center gap-1 shadow-sm transition-all ring-1 ring-inset relative
                             ${dateFilter !== 'ALL'
                                     ? 'bg-emerald-500 text-white border-emerald-400 ring-emerald-300/30 shadow-emerald-500/20'
                                     : 'bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 ring-transparent'}`}
                         >
                             <Calendar size={18} />
-                            <ChevronDown size={14} className={`opacity-70 transition-transform duration-300 ${showFilterMenu ? 'rotate-180' : ''}`} />
+                            <ChevronDown size={14} className={`opacity-70 transition-transform duration-300 ${showDateMenu ? 'rotate-180' : ''}`} />
                             {dateFilter !== 'ALL' && (
                                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
                             )}
                         </button>
 
                         <AnimatePresence>
-                            {showFilterMenu && (
+                            {showDateMenu && (
                                 <motion.div
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -113,15 +126,15 @@ export default function FinanceHeader({
                                                 transition={{ duration: 0.2 }}
                                                 className="flex flex-col gap-1"
                                             >
-                                                <button onClick={() => { setDateFilter('WEEK'); setShowFilterMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'WEEK' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
+                                                <button onClick={() => { setDateFilter('WEEK'); setShowDateMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'WEEK' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'WEEK' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Calendar size={14} /></div>
                                                     Pekan Ini
                                                 </button>
-                                                <button onClick={() => { setDateFilter('MONTH'); setShowFilterMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'MONTH' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
+                                                <button onClick={() => { setDateFilter('MONTH'); setShowDateMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'MONTH' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'MONTH' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Calendar size={14} /></div>
                                                     Bulan Ini
                                                 </button>
-                                                <button onClick={() => { setDateFilter('ALL'); setShowFilterMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'ALL' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
+                                                <button onClick={() => { setDateFilter('ALL'); setShowDateMenu(false); }} className={`px-4 py-2.5 text-left text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${dateFilter === 'ALL' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}>
                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dateFilter === 'ALL' ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}><Layers size={14} /></div>
                                                     Semua
                                                 </button>
@@ -164,7 +177,7 @@ export default function FinanceHeader({
                                                 />
 
                                                 <button
-                                                    onClick={() => { setDateFilter('CUSTOM'); setShowFilterMenu(false); }}
+                                                    onClick={() => { setDateFilter('CUSTOM'); setShowDateMenu(false); }}
                                                     className="w-full mt-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-bold hover:opacity-90 transition-opacity shadow-lg"
                                                 >
                                                     Terapkan Filter
@@ -172,6 +185,66 @@ export default function FinanceHeader({
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Program Filter Button */}
+                    <div className="relative" ref={programFilterRef}>
+                        <button
+                            onClick={() => setShowProgramMenu(!showProgramMenu)}
+                            className={`h-10 w-10 rounded-xl flex items-center justify-center border shadow-sm transition-all
+                            ${selectedProgramId !== 'ALL'
+                                    ? 'bg-slate-900 text-white border-slate-800 dark:bg-white dark:text-slate-900'
+                                    : 'bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'}`}
+                        >
+                            <SlidersHorizontal size={18} />
+                            {selectedProgramId !== 'ALL' && (
+                                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-400 shadow-sm border border-slate-900"></span>
+                            )}
+                        </button>
+
+                        <AnimatePresence>
+                            {showProgramMenu && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="absolute right-0 top-12 w-64 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-2 z-50 origin-top-right ring-1 ring-black/5"
+                                >
+                                    <h4 className="px-3 py-2 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Filter Dompet</h4>
+                                    <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto custom-scrollbar">
+                                        <button
+                                            onClick={() => { setSelectedProgramId('ALL'); setShowProgramMenu(false); }}
+                                            className={`px-3 py-2.5 text-left text-xs font-bold rounded-xl transition-all flex items-center justify-between
+                                            ${selectedProgramId === 'ALL'
+                                                    ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
+                                                    : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}
+                                        >
+                                            Semua Dompet
+                                            {selectedProgramId === 'ALL' && <Check size={14} />}
+                                        </button>
+
+                                        {programs.map((program) => (
+                                            <button
+                                                key={program.id}
+                                                onClick={() => { setSelectedProgramId(program.id); setShowProgramMenu(false); }}
+                                                className={`px-3 py-2.5 text-left text-xs font-bold rounded-xl transition-all flex items-center justify-between group
+                                                ${selectedProgramId === program.id
+                                                        ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
+                                                        : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'}`}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-500 text-[10px]">
+                                                        <Layers size={12} />
+                                                    </div>
+                                                    {program.name}
+                                                </div>
+                                                {selectedProgramId === program.id && <Check size={14} />}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </motion.div>
                             )}
                         </AnimatePresence>

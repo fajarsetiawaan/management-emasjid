@@ -8,7 +8,7 @@ import QRCode from 'react-qr-code';
 
 import { MOCK_BANK_ACCOUNTS, MOCK_MOSQUE } from '@/lib/mock-data';
 import { BankAccount } from '@/types';
-import { BankItem } from '@/components/admin/settings/BankItem';
+import BankItem from '@/components/features/settings/BankItem';
 import { toast } from 'sonner';
 
 function QrisSection({ slug }: { slug: string }) {
@@ -397,7 +397,7 @@ export default function BankAccountsPage() {
                                                 animate={{ opacity: 1, y: 0 }}
                                                 exit={{ opacity: 0, scale: 0.9 }}
                                             >
-                                                <BankItem account={acc} onDelete={handleDelete} onEdit={handleEditAccount} />
+                                                <BankItem bank={acc} onDelete={handleDelete} onEdit={handleEditAccount} />
                                             </motion.div>
                                         ))}
                                     </AnimatePresence>

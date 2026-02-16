@@ -5,6 +5,7 @@ import { TransactionType, Transaction, AssetAccount, Program } from '@/types';
 import { getTransactions, getAssetAccounts, getPrograms, getTotalBalance, getMosque } from '@/lib/api';
 import FinanceHeader, { DateFilterType } from '@/components/features/finance/FinanceHeader';
 import FinanceHeroCard from '@/components/features/finance/FinanceHeroCard';
+import FinanceQuickActions from '@/components/features/finance/FinanceQuickActions';
 import FundCards from '@/components/features/finance/FundCards';
 import FinanceTabs from '@/components/features/finance/FinanceTabs';
 import TransactionList from '@/components/features/finance/TransactionList';
@@ -130,7 +131,7 @@ export default function FinancePage() {
     const incomePercentage = totalFlow === 0 ? 0 : Math.round((totalFilteredIncome / totalFlow) * 100);
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 relative overflow-hidden font-outfit">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 relative overflow-hidden font-sans">
             {/* Deep Ambient Backgrounds */}
             <div className="fixed inset-0 pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[128px] mix-blend-multiply dark:mix-blend-screen dark:bg-emerald-500/10 animate-blob" />
@@ -144,33 +145,33 @@ export default function FinancePage() {
                 setDateFilter={setDateFilter}
                 customDateRange={customDateRange}
                 setCustomDateRange={setCustomDateRange}
+                programs={programs}
+                selectedProgramId={selectedProgramId}
+                setSelectedProgramId={setSelectedProgramId}
             />
 
-            <main className="px-4 pt-6 relative z-10 space-y-8">
+            <main className="px-4 pt-4 relative z-10">
                 <FinanceHeroCard
                     balance={totalBalance}
                     incomePercentage={incomePercentage}
                 />
 
+                <FinanceQuickActions />
+
                 <FundCards programs={programs} />
 
-                {/* Main Content Area: Tabs + Transactions */}
-                <section className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl rounded-[2.5rem] border border-white/50 dark:border-slate-800/50 shadow-2xl shadow-slate-200/50 dark:shadow-black/20 overflow-hidden min-h-[500px]">
-                    <div className="p-6 pb-2">
-                        <FinanceTabs
-                            activeTab={activeTab}
-                            setActiveTab={setActiveTab}
-                            programs={programs}
-                            selectedProgramId={selectedProgramId}
-                            setSelectedProgramId={setSelectedProgramId}
-                        />
-                    </div>
+                {/* Sticky Tabs & Full Width List */}
+                <FinanceTabs
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                />
 
+                <div className="min-h-[400px]">
                     <TransactionList
                         transactions={filteredTransactions}
                         programs={programs}
                     />
-                </section>
+                </div>
             </main>
         </div>
     );
