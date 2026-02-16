@@ -523,7 +523,7 @@ export default function ManageFinancePage() {
 
                                         <div className="p-6 space-y-4">
                                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                                Dompet <span className="font-bold text-slate-800 dark:text-white">{pendingFundName}</span> termasuk dalam kategori apa?
+                                                Akun <span className="font-bold text-slate-800 dark:text-white">{pendingFundName}</span> termasuk dalam kategori apa?
                                             </p>
 
                                             <div className="grid grid-cols-1 gap-3">

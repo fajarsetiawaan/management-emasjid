@@ -152,14 +152,14 @@ export default function FinanceHeader({
                             )}
                         >
                             <FilterContent width="w-64">
-                                <h4 className="px-3 py-2 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Filter Dompet</h4>
+                                <h4 className="px-3 py-2 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Filter Akun</h4>
                                 <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto custom-scrollbar">
                                     <FilterItem
                                         onClick={() => setSelectedFundId('ALL')}
                                         isSelected={selectedFundId === 'ALL'}
                                         icon={<Check size={14} className={selectedFundId === 'ALL' ? '' : 'invisible'} />}
                                     >
-                                        Semua Dompet
+                                        Semua Akun
                                     </FilterItem>
 
                                     {funds.map((fund) => (

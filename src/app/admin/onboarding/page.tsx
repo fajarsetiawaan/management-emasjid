@@ -485,9 +485,9 @@ export default function OnboardingSetupPage() {
                                     <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-blue-500 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-800/50 rotate-3">
                                         <LayoutGrid size={40} strokeWidth={1.5} />
                                     </div>
-                                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Kelola Dompet</h2>
+                                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Kelola Akun</h2>
                                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 px-4 leading-relaxed">
-                                        Aktifkan dompet dan tentukan alokasi saldo awalnya.
+                                        Aktifkan akun dan tentukan alokasi saldo awalnya.
                                     </p>
                                 </div>
 
@@ -509,7 +509,7 @@ export default function OnboardingSetupPage() {
 
                                             <input
                                                 type="text"
-                                                placeholder="Buat nama dompet baru..."
+                                                placeholder="Buat nama akun baru..."
                                                 className="flex-1 bg-transparent text-sm outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 font-bold px-2"
                                                 value={customFund}
                                                 onChange={(e) => setCustomFund(e.target.value)}
@@ -552,7 +552,7 @@ export default function OnboardingSetupPage() {
 
                                                     <div className="p-6 space-y-4">
                                                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                                                            Dompet <span className="font-bold text-slate-800 dark:text-white">{pendingFundName}</span> termasuk dalam kategori apa?
+                                                            Akun <span className="font-bold text-slate-800 dark:text-white">{pendingFundName}</span> termasuk dalam kategori apa?
                                                         </p>
 
                                                         <div className="grid grid-cols-1 gap-3">
