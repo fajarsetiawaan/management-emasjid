@@ -436,97 +436,97 @@ export default function TransactionForm() {
 
                     {/* INCOME: Informasi Dana Dropdown */}
                     {type === 'INCOME' && (
-                        <ListRow ...
-                    icon={<Tags size={20} />}
-                    label={incomeCategory || 'Informasi Dana'}
-                    isOpen={isIncomeCategoryOpen}
-                    onClick={() => setIsIncomeCategoryOpen(!isIncomeCategoryOpen)}
-                    className={!incomeCategory ? 'text-slate-400' : ''}
-                                >
-                    {INCOME_CATEGORIES.map((cat) => (
-                        <button
-                            key={cat}
-                            onClick={() => {
-                                setIncomeCategory(cat);
-                                setIsIncomeCategoryOpen(false);
-                            }}
-                            className="w-full flex items-center justify-between p-4 pl-[60px] hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 text-left transition-colors"
+                        <ListRow
+                            icon={<Tags size={20} />}
+                            label={incomeCategory || 'Informasi Dana'}
+                            isOpen={isIncomeCategoryOpen}
+                            onClick={() => setIsIncomeCategoryOpen(!isIncomeCategoryOpen)}
+                            className={!incomeCategory ? 'text-slate-400' : ''}
                         >
-                            <span className="text-[15px]">{cat}</span>
-                            {incomeCategory === cat && <Check size={16} className="text-blue-500" />}
-                        </button>
-                    ))}
-                </ListRow>
-                            )}
+                            {INCOME_CATEGORIES.map((cat) => (
+                                <button
+                                    key={cat}
+                                    onClick={() => {
+                                        setIncomeCategory(cat);
+                                        setIsIncomeCategoryOpen(false);
+                                    }}
+                                    className="w-full flex items-center justify-between p-4 pl-[60px] hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 text-left transition-colors"
+                                >
+                                    <span className="text-[15px]">{cat}</span>
+                                    {incomeCategory === cat && <Check size={16} className="text-blue-500" />}
+                                </button>
+                            ))}
+                        </ListRow>
+                    )}
 
-                {/* INCOME: Dari (Donatur/Sumber) */}
-                {type === 'INCOME' && (
+                    {/* INCOME: Dari (Donatur/Sumber) */}
+                    {type === 'INCOME' && (
+                        <div className="flex items-center p-4">
+                            <div className="text-slate-400 mr-3">
+                                <User size={20} />
+                            </div>
+                            <input
+                                type="text"
+                                value={incomeDetail}
+                                onChange={(e) => setIncomeDetail(e.target.value)}
+                                placeholder="Dari (Donatur/Sumber)"
+                                className="flex-1 bg-transparent font-medium text-[17px] focus:outline-none text-slate-900 dark:text-white placeholder:text-slate-400"
+                            />
+                        </div>
+                    )}
+
+                    {/* NOTE / INFORMASI (Shared) */}
                     <div className="flex items-center p-4">
                         <div className="text-slate-400 mr-3">
-                            <User size={20} />
+                            <AlignLeft size={20} />
                         </div>
                         <input
                             type="text"
-                            value={incomeDetail}
-                            onChange={(e) => setIncomeDetail(e.target.value)}
-                            placeholder="Dari (Donatur/Sumber)"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder={type === 'INCOME' ? "Informasi" : "Catatan"}
                             className="flex-1 bg-transparent font-medium text-[17px] focus:outline-none text-slate-900 dark:text-white placeholder:text-slate-400"
                         />
                     </div>
-                )}
 
-                {/* NOTE / INFORMASI (Shared) */}
-                <div className="flex items-center p-4">
-                    <div className="text-slate-400 mr-3">
-                        <AlignLeft size={20} />
-                    </div>
-                    <input
-                        type="text"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder={type === 'INCOME' ? "Informasi" : "Catatan"}
-                        className="flex-1 bg-transparent font-medium text-[17px] focus:outline-none text-slate-900 dark:text-white placeholder:text-slate-400"
-                    />
+                    {/* Date */}
+                    <ListRow
+                        icon={<Calendar size={20} />}
+                        label={format(date, 'EEEE, dd MMMM yyyy', { locale: id })}
+                        isOpen={isDatePickerOpen}
+                        onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+                    >
+                        <SingleDatePicker
+                            date={date}
+                            onChange={(newDate) => {
+                                setDate(newDate);
+                                setIsDatePickerOpen(false);
+                            }}
+                        />
+                    </ListRow>
                 </div>
 
-                {/* Date */}
-                <ListRow
-                    icon={<Calendar size={20} />}
-                    label={format(date, 'EEEE, dd MMMM yyyy', { locale: id })}
-                    isOpen={isDatePickerOpen}
-                    onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-                >
-                    <SingleDatePicker
-                        date={date}
-                        onChange={(newDate) => {
-                            setDate(newDate);
-                            setIsDatePickerOpen(false);
-                        }}
-                    />
-                </ListRow>
+                <button className="w-full py-4 rounded-[14px] bg-[#1C1C1E] dark:bg-slate-800 border border-slate-800 dark:border-slate-700 text-emerald-500 font-medium text-[17px]">
+                    Tambah Detail Lainnya
+                </button>
             </div>
 
-            <button className="w-full py-4 rounded-[14px] bg-[#1C1C1E] dark:bg-slate-800 border border-slate-800 dark:border-slate-700 text-emerald-500 font-medium text-[17px]">
-                Tambah Detail Lainnya
-            </button>
-        </div>
+            {/* Sticky Save Button */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-50/90 dark:bg-black/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800">
+                <div className="max-w-md mx-auto">
+                    <button
+                        onClick={handleSubmit}
+                        className="w-full py-3.5 rounded-full bg-slate-400/20 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 font-semibold text-[17px] hover:bg-emerald-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                            backgroundColor: (amount && accountId && (type !== 'TRANSFER' || targetAccountId) && (type !== 'EXPENSE' || expenseCategory)) ? '#10B981' : undefined,
+                            color: (amount && accountId && (type !== 'TRANSFER' || targetAccountId) && (type !== 'EXPENSE' || expenseCategory)) ? 'white' : undefined,
+                        }}
+                    >
+                        Simpan
+                    </button>
+                </div>
+            </div>
 
-            {/* Sticky Save Button */ }
-    <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-50/90 dark:bg-black/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800">
-        <div className="max-w-md mx-auto">
-            <button
-                onClick={handleSubmit}
-                className="w-full py-3.5 rounded-full bg-slate-400/20 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 font-semibold text-[17px] hover:bg-emerald-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                    backgroundColor: (amount && accountId && (type !== 'TRANSFER' || targetAccountId) && (type !== 'EXPENSE' || expenseCategory)) ? '#10B981' : undefined,
-                    color: (amount && accountId && (type !== 'TRANSFER' || targetAccountId) && (type !== 'EXPENSE' || expenseCategory)) ? 'white' : undefined,
-                }}
-            >
-                Simpan
-            </button>
-        </div>
-    </div>
-
-            </div >
-            );
+        </div >
+    );
 }
