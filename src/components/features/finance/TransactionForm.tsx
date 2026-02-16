@@ -433,7 +433,10 @@ export default function TransactionForm() {
                                         {INCOME_CATEGORIES.map((cat) => (
                                             <button
                                                 key={cat}
-                                                onClick={() => { setIncomeCategory(cat); setIsIncomeCategoryOpen(false); }}
+                                                onClick={() => {
+                                                    setIncomeCategory(cat);
+                                                    setIsIncomeCategoryOpen(false);
+                                                }}
                                                 className="w-full flex items-center justify-between p-4 pl-[60px] hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 text-left"
                                             >
                                                 <span className="text-[15px]">{cat}</span>
