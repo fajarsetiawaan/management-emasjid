@@ -70,7 +70,8 @@ export default function TransactionForm() {
     const [isExpenseCategoryOpen, setIsExpenseCategoryOpen] = useState(false);
 
     // Income Specific
-    const [incomeCategory, setIncomeCategory] = useState('');
+    const [incomeCategory, setIncomeCategory] = useState('Dari (Donatur/Sumber)'); // Default
+    const [incomeDetail, setIncomeDetail] = useState('');
     const [isIncomeCategoryOpen, setIsIncomeCategoryOpen] = useState(false);
 
     // Data Source
@@ -130,16 +131,20 @@ export default function TransactionForm() {
         const selectedFund = funds.find(f => f.id === fundId);
         const category = type === 'EXPENSE'
             ? expenseCategory
-            : (type === 'INCOME' ? (incomeCategory || selectedFund?.type || 'INCOME') : 'TRANSFER');
+            : (type === 'INCOME' ? (selectedFund?.type || 'INCOME') : 'TRANSFER');
+
+        const finalDescription = (type === 'INCOME' && incomeDetail)
+            ? `${incomeCategory.split(' ')[0]}: ${incomeDetail}. ${description}`
+            : (description || (type === 'TRANSFER' ? 'Mutasi Saldo' : '-'));
 
         const payload = {
             amount: numAmount,
             type,
             accountId,
-            fundId: type === 'TRANSFER' ? (funds[0]?.id || 'transfer-fund') : fundId,
+            fundId: fundId || (type === 'TRANSFER' ? (funds[0]?.id || 'transfer-fund') : ''),
             transferTargetAccountId: type === 'TRANSFER' ? targetAccountId : undefined,
             date,
-            description: description || (type === 'TRANSFER' ? 'Mutasi Saldo' : '-'),
+            description: finalDescription.trim(),
             category
         };
 
@@ -155,7 +160,8 @@ export default function TransactionForm() {
             setDescription('');
             setFundId('');
             setExpenseCategory('');
-            setIncomeCategory('');
+            setIncomeCategory('Dari (Donatur/Sumber)');
+            setIncomeDetail('');
             if (type === 'TRANSFER') setTargetAccountId('');
 
             // Close all drawers
@@ -287,6 +293,49 @@ export default function TransactionForm() {
                     </div>
                 </div>
 
+                {/* 3. Category / Fund Source (Renamed 'Pilih Akun Sumber' for Transfer) */}
+                <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden">
+                    <ListRow
+                        icon={
+                            fundId ? (
+                                <span className="text-white text-xs font-bold">{getSelectedFundName(fundId).substring(0, 2).toUpperCase()}</span>
+                            ) : (
+                                <Wallet size={20} />
+                            )
+                        }
+                        label={fundId ? getSelectedFundName(fundId) : (type === 'TRANSFER' ? 'Pilih Akun Sumber' : (type === 'INCOME' ? 'Pilih Kategori' : 'Sumber Dana'))}
+                        isOpen={isCategoryOpen}
+                        onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                        iconClassName={fundId ? getFundColor(fundId) : 'bg-slate-200 dark:bg-slate-700'}
+                        className={!fundId ? 'text-slate-400' : ''}
+                    >
+                        <div className="p-2 space-y-4">
+                            {FUND_CATEGORIES.map(cat => {
+                                const catFunds = funds.filter(f => f.type === cat.id);
+                                if (catFunds.length === 0) return null;
+                                return (
+                                    <div key={cat.id}>
+                                        <div className="px-4 py-1 text-xs font-bold text-slate-400 uppercase tracking-widest">{cat.label}</div>
+                                        {catFunds.map(fund => (
+                                            <button
+                                                key={fund.id}
+                                                onClick={() => { setFundId(fund.id); setIsCategoryOpen(false); }}
+                                                className="w-full flex items-center justify-between p-3 pl-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-2 h-2 rounded-full bg-${cat.color}-500`} />
+                                                    <span className="text-[15px]">{fund.name}</span>
+                                                </div>
+                                                {fundId === fund.id && <Check size={16} className="text-blue-500" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </ListRow>
+                </div>
+
                 {/* 2. Target Account (Only for Transfer) */}
                 {type === 'TRANSFER' && (
                     <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden">
@@ -312,46 +361,6 @@ export default function TransactionForm() {
                                     </button>
                                 ))
                             )}
-                        </ListRow>
-                    </div>
-                )}
-
-
-                {/* 3. Category / Fund Source */}
-                {type !== 'TRANSFER' && (
-                    <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden">
-                        <ListRow
-                            icon={fundId && <span className="text-white text-xs font-bold">{getSelectedFundName(fundId).substring(0, 2).toUpperCase()}</span>}
-                            label={fundId ? getSelectedFundName(fundId) : (type === 'EXPENSE' ? 'Sumber Dana' : 'Pilih Kategori')}
-                            isOpen={isCategoryOpen}
-                            onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                            iconClassName={fundId ? getFundColor(fundId) : 'bg-slate-200 dark:bg-slate-700'}
-                            className={!fundId ? 'text-slate-400' : ''}
-                        >
-                            <div className="p-2 space-y-4">
-                                {FUND_CATEGORIES.map(cat => {
-                                    const catFunds = funds.filter(f => f.type === cat.id);
-                                    if (catFunds.length === 0) return null;
-                                    return (
-                                        <div key={cat.id}>
-                                            <div className="px-4 py-1 text-xs font-bold text-slate-400 uppercase tracking-widest">{cat.label}</div>
-                                            {catFunds.map(fund => (
-                                                <button
-                                                    key={fund.id}
-                                                    onClick={() => { setFundId(fund.id); setIsCategoryOpen(false); }}
-                                                    className="w-full flex items-center justify-between p-3 pl-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-2 h-2 rounded-full bg-${cat.color}-500`} />
-                                                        <span className="text-[15px]">{fund.name}</span>
-                                                    </div>
-                                                    {fundId === fund.id && <Check size={16} className="text-blue-500" />}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    );
-                                })}
-                            </div>
                         </ListRow>
                     </div>
                 )}
@@ -383,26 +392,58 @@ export default function TransactionForm() {
                 {/* 4. Details Group */}
                 <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
 
-                    {/* Income Category / Informasi Dana */}
+                    {/* Income Category & Detail Input */}
                     {type === 'INCOME' && (
-                        <ListRow
-                            icon={<Tags size={20} />}
-                            label={incomeCategory || 'Informasi Dana'}
-                            isOpen={isIncomeCategoryOpen}
-                            onClick={() => setIsIncomeCategoryOpen(!isIncomeCategoryOpen)}
-                            className={!incomeCategory ? 'text-slate-400' : ''}
-                        >
-                            {INCOME_CATEGORIES.map((cat) => (
+                        <div className="bg-white dark:bg-[#1C1C1E] rounded-xl overflow-hidden">
+                            <div className="flex items-center p-4">
+                                <div className="text-slate-400 mr-3">
+                                    <Tags size={20} />
+                                </div>
+
+                                {/* Dropdown Trigger */}
                                 <button
-                                    key={cat}
-                                    onClick={() => { setIncomeCategory(cat); setIsIncomeCategoryOpen(false); }}
-                                    className="w-full flex items-center justify-between p-4 pl-[60px] hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"
+                                    onClick={() => setIsIncomeCategoryOpen(!isIncomeCategoryOpen)}
+                                    className="flex items-center font-medium text-slate-700 dark:text-slate-200 mr-2 px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors whitespace-nowrap"
                                 >
-                                    <span className="text-[15px]">{cat}</span>
-                                    {incomeCategory === cat && <Check size={16} className="text-blue-500" />}
+                                    <span className="mr-1">{incomeCategory.split(' ')[0]}</span>
+                                    <ChevronRight size={14} className={`transition-transform ${isIncomeCategoryOpen ? 'rotate-90' : ''}`} />
                                 </button>
-                            ))}
-                        </ListRow>
+
+                                <div className="h-6 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2" />
+
+                                {/* Detail Input */}
+                                <input
+                                    type="text"
+                                    value={incomeDetail}
+                                    onChange={(e) => setIncomeDetail(e.target.value)}
+                                    placeholder={incomeCategory.includes('Informasi') ? "Isi keterangan..." : "Nama Donatur..."}
+                                    className="flex-1 bg-transparent font-medium text-[17px] focus:outline-none text-slate-900 dark:text-white placeholder:text-slate-400 min-w-0"
+                                />
+                            </div>
+
+                            {/* Dropdown Options */}
+                            <AnimatePresence>
+                                {isIncomeCategoryOpen && (
+                                    <motion.div
+                                        initial={{ height: 0 }}
+                                        animate={{ height: 'auto' }}
+                                        exit={{ height: 0 }}
+                                        className="border-t border-slate-100 dark:border-slate-800"
+                                    >
+                                        {INCOME_CATEGORIES.map((cat) => (
+                                            <button
+                                                key={cat}
+                                                onClick={() => { setIncomeCategory(cat); setIsIncomeCategoryOpen(false); }}
+                                                className="w-full flex items-center justify-between p-4 pl-[60px] hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 text-left"
+                                            >
+                                                <span className="text-[15px]">{cat}</span>
+                                                {incomeCategory === cat && <Check size={16} className="text-blue-500" />}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     )}
 
                     {/* Note */}
