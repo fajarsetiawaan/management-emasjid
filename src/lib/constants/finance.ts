@@ -156,7 +156,7 @@ export const DEFAULT_FUNDS: Fund[] = [
     // --- SOSIAL ---
     {
         id: 'santunan_yatim',
-        name: 'Santunan Yatim',
+        name: 'Yatim',
         type: 'SOSIAL',
         active: false,
         locked: false,

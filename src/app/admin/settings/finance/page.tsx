@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Building2, HeartHandshake, Coins, ShieldCheck, Gift, CheckCircle2, Wallet, Plus, Banknote, Landmark, Save, Edit3, X, CreditCard, PieChart, MoreVertical, Trash2, Briefcase, Calculator, Tent, Beef, GraduationCap } from 'lucide-react';
+import { ArrowLeft, Building2, HeartHandshake, Coins, ShieldCheck, Gift, CheckCircle2, Wallet, Plus, Banknote, Landmark, Save, Edit3, X, CreditCard, PieChart, MoreVertical, Trash2, Briefcase, Calculator, Tent, Beef, GraduationCap, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -34,25 +34,35 @@ export default function ManageFinancePage() {
     const [editingFundId, setEditingId] = useState<string | null>(null);
     const [editForm, setEditForm] = useState({ name: '', description: '' });
 
+    // Accordion State: Track which fund is currently expanded
+    const [expandedFundId, setExpandedFundId] = useState<string | null>(null);
+
     // Load Data
     useEffect(() => {
         const loadData = async () => {
             try {
-                // Load Banks (Legacy)
+                // ... (Load Banks) ...
                 if (typeof window !== 'undefined') {
                     const savedBanks = localStorage.getItem('sim_bank_accounts');
                     if (savedBanks) setBankAccounts(JSON.parse(savedBanks));
                     else setBankAccounts(MOCK_BANK_ACCOUNTS);
                 }
 
-                // Load Funds using Centralized API
+                // Load Funds
                 const data = await getFunds();
-                // Hydrate icons because standard JSON doesn't store components
                 const dataWithIcons = data.map(f => ({
                     ...f,
                     icon: getIconForType(f.id, f.type)
                 }));
                 setFunds(dataWithIcons);
+
+                // Default: Expand "Kas Masjid" if active, or the first active fund
+                const kasMasjid = dataWithIcons.find(f => f.id === 'kas_masjid' && f.active);
+                if (kasMasjid) setExpandedFundId(kasMasjid.id);
+                else {
+                    const firstActive = dataWithIcons.find(f => f.active);
+                    if (firstActive) setExpandedFundId(firstActive.id);
+                }
             } catch (error) {
                 console.error('Failed to load settings data', error);
                 toast.error('Gagal memuat data keuangan');
@@ -156,6 +166,18 @@ export default function ManageFinancePage() {
         setEditingId(null);
     };
 
+    const handleHeaderClick = (fund: Fund) => {
+        if (!fund.active) {
+            // Case 1: Inactive -> Activate & Expand
+            toggleFund(fund.id);
+            setExpandedFundId(fund.id);
+        } else {
+            // Case 2: Active -> Toggle Expansion (Accordion)
+            // If clicking current, close it. If clicking other, open it.
+            setExpandedFundId(prev => (prev === fund.id ? null : fund.id));
+        }
+    };
+
     // Initiate Add Fund (Open Modal)
     const initiateAddFund = () => {
         if (!customFundName) return;
@@ -247,7 +269,7 @@ export default function ManageFinancePage() {
                         <div className="flex items-center justify-between px-2">
                             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <Wallet size={16} className="text-slate-400" />
-                                Manage Akun
+                                Kelola Akun
                             </h3>
                             <button
                                 onClick={() => setIsAddingNew(true)}
@@ -308,8 +330,8 @@ export default function ManageFinancePage() {
 
                                                     {/* Header Section */}
                                                     <div
-                                                        onClick={() => !fund.active && toggleFund(fund.id)}
-                                                        className={`p-5 flex items-center gap-5 ${!fund.active ? 'cursor-pointer' : ''}`}
+                                                        onClick={() => handleHeaderClick(fund)}
+                                                        className={`p-5 flex items-center gap-5 cursor-pointer`}
                                                     >
                                                         <div className={`
                                                             relative w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all duration-500
@@ -327,7 +349,7 @@ export default function ManageFinancePage() {
                                                                     {fund.name}
                                                                 </h4>
                                                                 {fund.locked && (
-                                                                    <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                                                                    <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700/50 text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500">
                                                                         Wajib
                                                                     </span>
                                                                 )}
@@ -336,7 +358,14 @@ export default function ManageFinancePage() {
                                                         </div>
 
                                                         {/* Actions */}
-                                                        <div className="flex items-center z-20">
+                                                        <div className="flex items-center z-20 gap-2">
+                                                            {/* Chevron Indicator */}
+                                                            {fund.active && (
+                                                                <div className={`transition-transform duration-300 ${expandedFundId === fund.id ? 'rotate-180' : ''}`}>
+                                                                    <ChevronDown size={18} className="text-slate-400" />
+                                                                </div>
+                                                            )}
+
                                                             {!fund.active ? (
                                                                 <div className="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-300 dark:text-slate-600 group-hover:border-emerald-400 group-hover:text-emerald-400 transition-all">
                                                                     <Plus size={16} />
@@ -365,7 +394,7 @@ export default function ManageFinancePage() {
 
                                                     {/* Expanded Content Helper */}
                                                     <AnimatePresence>
-                                                        {fund.active && (
+                                                        {fund.active && expandedFundId === fund.id && (
                                                             <motion.div
                                                                 initial={{ height: 0, opacity: 0 }}
                                                                 animate={{ height: 'auto', opacity: 1 }}

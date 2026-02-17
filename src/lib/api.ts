@@ -194,11 +194,12 @@ export async function getFunds(): Promise<Fund[]> {
             if (saved) {
                 let funds = JSON.parse(saved) as Fund[];
 
-                // Migration: Fix Fund Name if old one exists (Kas Masjid)
                 const kasMasjid = funds.find(f => f.id === 'kas_masjid');
-                if (kasMasjid && kasMasjid.name === 'Kas Operasional Masjid') {
+                if (kasMasjid) {
                     funds = funds.map(f =>
-                        f.id === 'kas_masjid' ? { ...f, name: 'Kas Masjid' } : f
+                        f.id === 'kas_masjid'
+                            ? { ...f, name: 'Kas Masjid', locked: true }
+                            : f
                     );
                     localStorage.setItem('sim_funds', JSON.stringify(funds));
                 }
