@@ -82,7 +82,18 @@ export async function getTransactions(): Promise<Transaction[]> {
     if (USE_MOCK) {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('sim_transactions');
-            if (saved) return JSON.parse(saved) as Transaction[];
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    return parsed.map((t: any) => ({
+                        ...t,
+                        date: t.date ? new Date(t.date) : new Date() // Fallback for missing dates
+                    })).filter((t: Transaction) => !isNaN(t.date.getTime())) as Transaction[]; // Filter out invalid dates
+                } catch (e) {
+                    console.error('Failed to parse transactions', e);
+                    return MOCK_TRANSACTIONS;
+                }
+            }
         }
         return MOCK_TRANSACTIONS;
     }
@@ -185,7 +196,7 @@ export async function getFunds(): Promise<Fund[]> {
 
                 // Migration: Fix Fund Name if old one exists (Kas Masjid)
                 const kasMasjid = funds.find(f => f.id === 'kas_masjid');
-                if (kasMasjid && kasMasjid.name.includes('(Operasional)')) {
+                if (kasMasjid && kasMasjid.name === 'Kas Operasional Masjid') {
                     funds = funds.map(f =>
                         f.id === 'kas_masjid' ? { ...f, name: 'Kas Masjid' } : f
                     );

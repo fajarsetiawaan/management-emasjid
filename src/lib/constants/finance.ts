@@ -42,7 +42,7 @@ export const DEFAULT_FUNDS: Fund[] = [
     // --- OPERASIONAL ---
     {
         id: 'kas_masjid',
-        name: 'Kas Operasional Masjid',
+        name: 'Kas Masjid',
         type: 'OPERASIONAL',
         active: true,
         locked: true,

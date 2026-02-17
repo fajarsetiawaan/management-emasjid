@@ -7,8 +7,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
-import { MOCK_BANK_ACCOUNTS, MOCK_FUNDS } from '@/lib/mock-data';
-import { FUND_CATEGORIES, DEFAULT_FUNDS } from '@/lib/constants/finance';
+import { getFunds } from '@/lib/api';
+import { MOCK_BANK_ACCOUNTS } from '@/lib/mock-data';
+import { FUND_CATEGORIES } from '@/lib/constants/finance';
 import { BankAccount, Fund, FundAllocation, FundCategory } from '@/types';
 import { toast } from 'sonner';
 
@@ -32,58 +33,33 @@ export default function ManageFinancePage() {
     const [editingFundId, setEditingId] = useState<string | null>(null);
     const [editForm, setEditForm] = useState({ name: '', description: '' });
 
-    /** Build default fund list */
-    const getDefaultFunds = (): Fund[] => {
-        return DEFAULT_FUNDS.map(d => {
-            const mock = MOCK_FUNDS.find(p => p.id === d.id);
-            return { ...d, balance: mock?.balance ?? 0, active: mock ? true : d.active } as Fund;
-        });
-    };
-
     // Load Data
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            // Load Banks
-            const savedBanks = localStorage.getItem('sim_bank_accounts');
-            if (savedBanks) setBankAccounts(JSON.parse(savedBanks));
-            else setBankAccounts(MOCK_BANK_ACCOUNTS);
+        const loadData = async () => {
+            try {
+                // Load Banks (Legacy)
+                if (typeof window !== 'undefined') {
+                    const savedBanks = localStorage.getItem('sim_bank_accounts');
+                    if (savedBanks) setBankAccounts(JSON.parse(savedBanks));
+                    else setBankAccounts(MOCK_BANK_ACCOUNTS);
+                }
 
-            // Load Funds Config
-            const savedConfig = localStorage.getItem('sim_fund_config');
-            if (savedConfig) {
-                const parsed = JSON.parse(savedConfig);
-                const restored = parsed.map((f: any) => ({
+                // Load Funds using Centralized API
+                const data = await getFunds();
+                // Hydrate icons because standard JSON doesn't store components
+                const dataWithIcons = data.map(f => ({
                     ...f,
-                    // Migration: Fix name if old
-                    name: (f.id === 'kas_masjid' && f.name.includes('(Operasional)')) ? 'Kas Masjid' : f.name,
                     icon: getIconForType(f.id, f.type)
                 }));
-
-                const defaultFunds = getDefaultFunds();
-                const savedIds = new Set(restored.map((f: any) => f.id));
-                const missing = defaultFunds.filter(d => !savedIds.has(d.id));
-                const merged = [...restored, ...missing];
-
-                const totalBalance = merged.reduce((s: number, f: any) => s + (f.balance || 0), 0);
-                const MOCK_TOTAL = 47500000;
-
-                if (totalBalance < MOCK_TOTAL) {
-                    const enriched = merged.map((f: any) => {
-                        const mockProg = MOCK_FUNDS.find(p => p.id === f.id);
-                        if (mockProg && (f.balance === 0 || f.balance === undefined)) {
-                            return { ...f, balance: mockProg.balance, active: true };
-                        }
-                        return f;
-                    });
-                    setFunds(enriched);
-                } else {
-                    setFunds(merged);
-                }
-            } else {
-                setFunds(getDefaultFunds());
+                setFunds(dataWithIcons);
+            } catch (error) {
+                console.error('Failed to load settings data', error);
+                toast.error('Gagal memuat data keuangan');
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
-        }
+        };
+        loadData();
     }, []);
 
     const getIconForType = (id: string, type: string) => {
@@ -102,23 +78,24 @@ export default function ManageFinancePage() {
     // Auto-Save Logic
     const saveChanges = (updatedFunds: Fund[]) => {
         if (typeof window !== 'undefined') {
-            const activeFunds = updatedFunds.filter(f => f.active);
-            const assets = [];
+            // Update local state immediately
+            // setFunds(updatedFunds); // Already updated by caller usually, but good practice if not
 
-            // Cash
-            const totalPhysicalCash = activeFunds
-                .filter(f => f.allocation?.type === 'CASH')
-                .reduce((acc, curr) => acc + (curr.balance || 0), 0);
+            // Persist to 'sim_funds' which is the Source of Truth for API
+            // We save ALL funds, not just active ones, to preserve state if toggled back
+            // However, getFunds() usually filters empty ones or mocks. 
+            // Let's save standard list.
 
-            // Reconstruct Asset Accounts logic if needed, but primarily we save funds logic
-            // ... (Skipping asset logic detail for brevity, mimicking existing behavior)
+            localStorage.setItem('sim_funds', JSON.stringify(updatedFunds));
 
-            // Funds (formerly Programs)
-            localStorage.setItem('sim_funds', JSON.stringify(activeFunds));
-
-            // Config
+            // Legacy support: We might still need sim_fund_config if other parts use it, 
+            // but the goal is to UNIFY. 
+            // Let's update sim_fund_config too just in case, but sim_funds is primary.
             const configToSave = updatedFunds.map(({ icon, ...rest }) => rest);
             localStorage.setItem('sim_fund_config', JSON.stringify(configToSave));
+
+            // Dispatch event for other tabs/components
+            window.dispatchEvent(new Event('storage'));
         }
     };
 
