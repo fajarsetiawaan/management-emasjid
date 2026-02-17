@@ -16,7 +16,6 @@ import {
     LayoutGrid,
     Plus,
     X,
-    Calculator,
     AlertCircle,
     Gift,
     Landmark,
@@ -32,9 +31,9 @@ import {
 import BankItem from '@/components/features/settings/BankItem';
 import { MOCK_MOSQUE } from '@/lib/mock-data';
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
+import { NumericKeypadInput } from '@/components/ui/NumericKeypadInput';
 import SetupWizard from '@/components/features/onboarding/SetupWizard';
-
-// Helper for Bank Options
+import FundSummaryCard from '@/components/features/finance/FundSummaryCard';
 const BANK_OPTIONS = [
     { id: 'bsi', name: 'Bank Syariah Indonesia (BSI)', color: 'bg-emerald-500' },
     { id: 'bri', name: 'Bank Rakyat Indonesia (BRI)', color: 'bg-blue-600' },
@@ -258,9 +257,36 @@ export default function OnboardingSetupPage() {
                     color: f.type === 'OPERASIONAL' ? 'blue' : f.type === 'ZAKAT' ? 'purple' : 'amber'
                 }));
 
+                // 3. Create Initial Transactions (Saldo Awal)
+                const initialTransactions: any[] = [];
+                activeFunds.forEach(f => {
+                    if ((f.balance || 0) > 0) {
+                        // Determine Target Account (Where the money is)
+                        // Default to Cash (Uang Tunai) unless allocated to Bank
+                        let targetAccountId = 'asset_cash';
+                        if (f.allocation?.type === 'BANK' && f.allocation?.bankId) {
+                            targetAccountId = `asset_${f.allocation.bankId}`;
+                        }
 
+                        initialTransactions.push({
+                            id: crypto.randomUUID(),
+                            date: new Date(), // Now
+                            amount: f.balance,
+                            type: 'INCOME',
+                            category: 'SALDO_AWAL', // Special category
+                            accountId: targetAccountId, // Where
+                            fundId: f.id,               // For What
+                            description: `Saldo Awal ${f.name}`,
+                            status: 'COMPLETED'
+                        });
+                    }
+                });
 
-                localStorage.setItem('sim_funds', JSON.stringify(activeFunds));
+                if (initialTransactions.length > 0) {
+                    localStorage.setItem('sim_transactions', JSON.stringify(initialTransactions));
+                }
+
+                localStorage.setItem('sim_funds', JSON.stringify(funds));
 
                 // Save Fund Config for Re-editing in Settings (Save ALL funds)
                 localStorage.setItem('sim_fund_config', JSON.stringify(funds));
@@ -380,12 +406,13 @@ export default function OnboardingSetupPage() {
 
                                                 <div className="space-y-1.5">
                                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Nomor Rekening</label>
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl outline-none text-sm font-bold font-mono text-slate-800 dark:text-slate-200 focus:border-emerald-500 transition-colors"
-                                                        placeholder="0000 0000 0000"
+                                                    <NumericKeypadInput
                                                         value={currentBank.accountNumber}
-                                                        onChange={(e) => setCurrentBank({ ...currentBank, accountNumber: e.target.value })}
+                                                        onChange={(val) => setCurrentBank({ ...currentBank, accountNumber: val })}
+                                                        placeholder="0000 0000 0000"
+                                                        // Using the same styling as other inputs for consistency, but NumericKeypadInput has its own default which is similar. 
+                                                        // We can pass inputClassName to match exactly if needed, but default is good.
+                                                        inputClassName="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl outline-none text-sm font-bold font-mono text-slate-800 dark:text-slate-200 focus:border-emerald-500 transition-colors cursor-pointer caret-transparent"
                                                     />
                                                 </div>
 
@@ -507,57 +534,7 @@ export default function OnboardingSetupPage() {
                                     />
 
                                     {/* Fund Summary Card */}
-                                    <div className="mt-8 bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-6 border border-slate-200 dark:border-slate-700">
-                                        <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                                            <Calculator size={16} className="text-emerald-500" />
-                                            Ringkasan Saldo Awal
-                                        </h3>
-                                        <div className="space-y-3">
-                                            {FUND_CATEGORIES.filter(c => c.id !== 'CUSTOM').map(category => {
-                                                const total = funds
-                                                    .filter(f => f.type === category.id && f.active)
-                                                    .reduce((sum, f) => sum + (f.balance || 0), 0);
-
-                                                if (total === 0) return null;
-
-                                                const getColorClass = (color: string) => {
-                                                    switch (color) {
-                                                        case 'emerald': return 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30';
-                                                        case 'indigo': return 'text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/30';
-                                                        case 'blue': return 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30';
-                                                        case 'rose': return 'text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-900/30';
-                                                        default: return 'text-slate-600 bg-slate-100';
-                                                    }
-                                                };
-
-                                                return (
-                                                    <div key={category.id} className="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${getColorClass(category.color)}`}>
-                                                                {category.id.charAt(0)}
-                                                            </div>
-                                                            <div>
-                                                                <div className="text-xs font-bold text-slate-700 dark:text-slate-200">{category.label}</div>
-                                                                <div className="text-[10px] text-slate-400">Total dari {funds.filter(f => f.type === category.id && f.active).length} akun</div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <div className="text-xs font-bold text-slate-400 mr-1">Rp</div>
-                                                            <div className="text-sm font-black text-slate-900 dark:text-white tabular-nums">
-                                                                {total.toLocaleString('id-ID')}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-
-                                            {funds.filter(f => f.active).reduce((sum, f) => sum + (f.balance || 0), 0) === 0 && (
-                                                <div className="text-center py-4 text-xs text-slate-400 italic">
-                                                    Belum ada saldo yang dimasukkan.
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                    <FundSummaryCard funds={funds} className="mt-8" />
 
                                     {/* Add Custom Fund Input */}
                                     <div className="p-1 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors mt-6 group">
@@ -662,3 +639,4 @@ export default function OnboardingSetupPage() {
         </div>
     );
 }
+

@@ -2,16 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Building2, HeartHandshake, Coins, ShieldCheck, Gift, CheckCircle2, Wallet, Plus, Banknote, Landmark, Save, Edit3, X, CreditCard, PieChart, MoreVertical, Trash2 } from 'lucide-react';
+import { ArrowLeft, Building2, HeartHandshake, Coins, ShieldCheck, Gift, CheckCircle2, Wallet, Plus, Banknote, Landmark, Save, Edit3, X, CreditCard, PieChart, MoreVertical, Trash2, Briefcase, Calculator, Tent, Beef, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
 import { getFunds } from '@/lib/api';
 import { MOCK_BANK_ACCOUNTS } from '@/lib/mock-data';
-import { FUND_CATEGORIES } from '@/lib/constants/finance';
+import { FUND_CATEGORIES, DEFAULT_FUNDS } from '@/lib/constants/finance';
 import { BankAccount, Fund, FundAllocation, FundCategory } from '@/types';
 import { toast } from 'sonner';
+import FundSummaryCard from '@/components/features/finance/FundSummaryCard';
 
 export default function ManageFinancePage() {
     const router = useRouter();
@@ -63,13 +64,16 @@ export default function ManageFinancePage() {
     }, []);
 
     const getIconForType = (id: string, type: string) => {
-        // Simple mapping based on type or specific ID
-        if (id === 'kas_masjid' || type === 'OPERASIONAL') return Building2;
-        if (id === 'kas_yatim' || type === 'SOSIAL') return HeartHandshake;
-        if (id === 'kas_zakat_fitrah') return Coins;
-        if (id === 'kas_zakat_maal') return ShieldCheck;
-        if (id === 'kas_infaq') return Gift;
-        if (id === 'kas_wakaf' || type === 'WAKAF') return Landmark;
+        // 1. Try to find in DEFAULT_FUNDS for exact match
+        const defaultFund = DEFAULT_FUNDS.find(f => f.id === id);
+        if (defaultFund) return defaultFund.icon;
+
+        // 2. Fallback by Category/Type if custom
+        if (type === 'OPERASIONAL') return Building2;
+        if (type === 'ZAKAT') return Coins; // General Zakat icon
+        if (type === 'WAKAF') return Landmark;
+        if (type === 'SOSIAL') return HeartHandshake;
+
         return Wallet;
     };
 
@@ -225,7 +229,7 @@ export default function ManageFinancePage() {
                         <div className="relative z-10 flex flex-col items-center justify-center py-4">
                             <div className="flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10">
                                 <PieChart size={12} className="text-emerald-300" />
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Total Alokasi Dana</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Total Dana</span>
                             </div>
                             <h2 className="text-4xl font-extrabold tracking-tight mb-2 tabular-nums">
                                 <span className="text-emerald-400 text-2xl align-top mr-1">Rp</span>
@@ -234,6 +238,9 @@ export default function ManageFinancePage() {
                             <p className="text-slate-300 text-sm font-medium">dari {funds.filter(f => f.active).length} akun aktif</p>
                         </div>
                     </div>
+
+                    {/* Fund Summary Card */}
+                    <FundSummaryCard funds={funds} className="mb-8" />
 
                     {/* Funds List */}
                     <div className="space-y-4">
