@@ -21,7 +21,7 @@ import {
     Wallet
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 
@@ -29,6 +29,12 @@ import { useTheme } from '@/components/providers/ThemeProvider';
 
 export default function SettingsPage() {
     const { theme, setTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     // Mock Logout Logic
     const handleLogout = () => {
         if (confirm('Apakah Anda yakin ingin keluar?')) {
@@ -113,31 +119,33 @@ export default function SettingsPage() {
             </div>
 
             {/* A. Profile Header */}
-            <header className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl px-6 pt-8 pb-8 flex items-center justify-between border-b border-white/20 dark:border-white/5 sticky top-0 z-40 transition-all duration-300">
-                <div className="flex items-center gap-4">
+            <header className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl px-6 pt-10 pb-6 flex items-start justify-between border-b border-white/20 dark:border-white/5 sticky top-0 z-40 transition-all duration-300">
+                <div className="flex items-center gap-5">
                     <div className="relative">
-                        <div className="w-16 h-16 rounded-full bg-slate-100/50 dark:bg-slate-800/50 border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden flex items-center justify-center text-slate-400 dark:text-slate-500">
+                        <div className="w-16 h-16 rounded-full bg-slate-100/50 dark:bg-slate-800/50 ring-4 ring-white dark:ring-slate-900 shadow-xl overflow-hidden flex items-center justify-center text-slate-400 dark:text-slate-500 flex-shrink-0">
                             <User size={32} />
-                        </div>
-                        <div className="absolute -bottom-1 -right-1 bg-amber-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white dark:border-slate-900 flex items-center gap-0.5 shadow-sm">
-                            <Crown size={10} fill="currentColor" />
-                            {MOCK_USER.role === 'OWNER' ? 'Ketua DKM' : 'Pengurus'}
                         </div>
                     </div>
                     <div>
-                        <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight">{MOCK_USER.name}</h1>
-                        <p className="text-sm text-slate-400 dark:text-slate-500">{MOCK_USER.email}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                            <h1 className="text-[19px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{MOCK_USER.name}</h1>
+                            <span className="bg-amber-400 text-white text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm uppercase tracking-wider whitespace-nowrap">
+                                <Crown size={10} fill="currentColor" />
+                                {MOCK_USER.role === 'OWNER' ? 'Ketua DKM' : 'Pengurus'}
+                            </span>
+                        </div>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{MOCK_USER.email}</p>
                     </div>
                 </div>
                 <button
                     onClick={() => handleNavigate('Edit Profil')}
-                    className="w-9 h-9 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors"
+                    className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all shadow-sm active:scale-95 flex-shrink-0"
                 >
-                    <Edit2 size={16} />
+                    <Edit2 size={18} />
                 </button>
             </header>
 
-            <div className="px-4 -mt-4 relative z-10 space-y-6">
+            <div className="px-4 pt-6 relative z-10 space-y-6">
 
                 {/* B. Subscription Card */}
                 <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white shadow-lg shadow-emerald-500/20 dark:shadow-emerald-900/20 flex flex-col gap-4 relative overflow-hidden ring-1 ring-white/10">
@@ -238,7 +246,7 @@ export default function SettingsPage() {
                         icon={Moon}
                         label="Tampilan"
                         onClick={() => setShowThemeModal(true)}
-                        value={theme === 'system' ? 'Otomatis' : theme === 'dark' ? 'Gelap' : 'Terang'}
+                        value={mounted ? (theme === 'system' ? 'Otomatis' : theme === 'dark' ? 'Gelap' : 'Terang') : '...'}
                     />
                 </SettingsGroup>
 
