@@ -68,11 +68,17 @@ export default function YearlyReportsView({ year, transactions }: YearlyReportsV
             {/* Annual Summary Cards */}
             <motion.section
                 variants={item}
-                className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                className="flex flex-col lg:flex-row gap-4 w-full"
             >
-                <SummaryCard title="Surplus/Defisit Tahunan" amount={annualNet} type="NET" />
-                <SummaryCard title="Total Pemasukan Tahun Ini" amount={annualIncome} type="INCOME" />
-                <SummaryCard title="Total Pengeluaran Tahun Ini" amount={annualExpense} type="EXPENSE" />
+                <div className="flex-1">
+                    <SummaryCard title="Surplus/Defisit Tahunan" amount={annualNet} type="NET" />
+                </div>
+                <div className="flex-[1.2]">
+                    <SummaryCard title="Total Pemasukan Tahun Ini" amount={annualIncome} type="INCOME" />
+                </div>
+                <div className="flex-[1.2]">
+                    <SummaryCard title="Total Pengeluaran Tahun Ini" amount={annualExpense} type="EXPENSE" />
+                </div>
             </motion.section>
 
             {/* Trend Analysis Chart */}

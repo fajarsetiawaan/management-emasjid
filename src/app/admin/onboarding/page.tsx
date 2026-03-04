@@ -31,7 +31,7 @@ import {
 import BankItem from '@/components/features/settings/BankItem';
 import { MOCK_MOSQUE } from '@/lib/mock-data';
 import { CalculatorInput } from '@/components/ui/CalculatorInput';
-import { NumericKeypadInput } from '@/components/ui/NumericKeypadInput';
+import { AccountKeypadInput } from '@/components/ui/AccountKeypadInput';
 import SetupWizard from '@/components/features/onboarding/SetupWizard';
 import FundSummaryCard from '@/components/features/finance/FundSummaryCard';
 const BANK_OPTIONS = [
@@ -406,12 +406,10 @@ export default function OnboardingSetupPage() {
 
                                                 <div className="space-y-1.5">
                                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Nomor Rekening</label>
-                                                    <NumericKeypadInput
+                                                    <AccountKeypadInput
                                                         value={currentBank.accountNumber}
                                                         onChange={(val) => setCurrentBank({ ...currentBank, accountNumber: val })}
                                                         placeholder="0000 0000 0000"
-                                                        // Using the same styling as other inputs for consistency, but NumericKeypadInput has its own default which is similar. 
-                                                        // We can pass inputClassName to match exactly if needed, but default is good.
                                                         inputClassName="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl outline-none text-sm font-bold font-mono text-slate-800 dark:text-slate-200 focus:border-emerald-500 transition-colors cursor-pointer caret-transparent"
                                                     />
                                                 </div>

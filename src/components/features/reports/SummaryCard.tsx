@@ -76,7 +76,7 @@ export default function SummaryCard({ title, amount, type }: SummaryCardProps) {
             </div>
 
             <div>
-                <h3 className={`text-2xl font-bold tracking-tight ${style.valueColor}`}>
+                <h3 className={`text-xl lg:text-2xl font-bold tracking-tight truncate ${style.valueColor}`}>
                     {formatRupiah(amount)}
                 </h3>
             </div>

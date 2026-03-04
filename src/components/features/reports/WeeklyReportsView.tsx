@@ -170,44 +170,44 @@ export default function WeeklyReportsView({ transactions, netBalance }: WeeklyRe
                             </div>
                             <button
                                 onClick={copyToClipboard}
-                                className="group flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all font-semibold text-sm"
+                                className="group flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all font-semibold shadow-sm"
+                                title="Salin Teks Laporan"
                             >
-                                <Copy size={16} className="group-hover:scale-110 transition-transform" />
-                                <span>Salin Teks</span>
+                                <Copy size={18} className="group-hover:scale-110 transition-transform" />
                             </button>
                         </div>
 
                         {/* Main Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex flex-col lg:flex-row gap-4">
                             {/* Saldo Awal */}
-                            <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-3xl border border-slate-100 dark:border-slate-700/50">
+                            <div className="flex-1 bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl p-4 sm:p-5 rounded-3xl border border-white/60 dark:border-slate-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                                 <p className="text-sm font-medium text-slate-500 mb-1">Saldo Jumat Lalu</p>
-                                <p className="text-xl sm:text-2xl font-bold text-slate-700 dark:text-slate-300 tracking-tight">
+                                <p className="text-xl lg:text-2xl font-bold text-slate-800 dark:text-slate-200 tracking-tight truncate">
                                     {formatRp(openingBalance)}
                                 </p>
                             </div>
 
                             {/* Mutasi */}
-                            <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-3xl border border-slate-100 dark:border-slate-700/50 flex flex-col justify-center gap-3">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm font-medium text-slate-500">Pemasukan</span>
-                                    <span className="text-base font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-500/20 px-2 py-0.5 rounded-lg">
+                            <div className="flex-[1.2] bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl p-4 sm:p-5 rounded-3xl border border-white/60 dark:border-slate-700/50 flex flex-col justify-center gap-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                                <div className="flex justify-between items-center gap-3">
+                                    <span className="text-sm font-medium text-slate-500 whitespace-nowrap">Pemasukan</span>
+                                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100/60 dark:bg-emerald-500/20 px-2.5 py-1 rounded-lg truncate text-right">
                                         + {formatRp(weeklyData.income)}
                                     </span>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm font-medium text-slate-500">Pengeluaran</span>
-                                    <span className="text-base font-bold text-rose-600 bg-rose-100 dark:bg-rose-500/20 px-2 py-0.5 rounded-lg">
+                                <div className="flex justify-between items-center gap-3">
+                                    <span className="text-sm font-medium text-slate-500 whitespace-nowrap">Pengeluaran</span>
+                                    <span className="text-sm font-bold text-rose-700 dark:text-rose-400 bg-rose-100/60 dark:bg-rose-500/20 px-2.5 py-1 rounded-lg truncate text-right">
                                         - {formatRp(weeklyData.expense)}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Saldo Akhir - Highlighted */}
-                            <div className="md:col-span-1 bg-gradient-to-br from-violet-600 to-indigo-700 p-5 rounded-3xl text-white shadow-lg shadow-indigo-500/30 relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/20 transition-colors"></div>
-                                <p className="text-indigo-100 text-sm font-medium mb-1 relative z-10">Saldo Akhir Saat Ini</p>
-                                <p className="text-2xl sm:text-3xl font-extrabold tracking-tight relative z-10">
+                            <div className="flex-[1.2] bg-gradient-to-br from-violet-600/90 to-indigo-700/90 backdrop-blur-xl p-4 sm:p-5 rounded-3xl text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden group border border-white/20">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-white/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/30 transition-colors"></div>
+                                <p className="text-indigo-100 text-sm font-medium mb-1 relative z-10 whitespace-nowrap">Saldo Akhir Saat Ini</p>
+                                <p className="text-2xl lg:text-3xl font-extrabold tracking-tight relative z-10 truncate">
                                     {formatRp(balanceAtEndOfWeek)}
                                 </p>
                             </div>
