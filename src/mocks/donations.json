@@ -1,0 +1,87 @@
+{
+    "campaigns": [
+        {
+            "id": "camp-1",
+            "mosque_slug": "masjid-al-ikhlas",
+            "title": "Renovasi Atap Masjid Al-Ikhlas",
+            "slug": "renovasi-atap-2026",
+            "description": "Atap masjid saat ini sudah mulai bocor di beberapa titik. Kami berencana mengganti seluruh atap masjid agar jamaah bisa beribadah dengan nyaman dan khusyuk saat turun hujan. Estimasi kebutuhan biaya sekitar Rp 50.000.000.",
+            "target_amount": 50000000,
+            "current_amount": 15000000,
+            "flyer_url": "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80&w=1200",
+            "start_date": "2026-03-01T00:00:00.000Z",
+            "end_date": "2026-06-30T23:59:59.000Z",
+            "status": "ACTIVE",
+            "created_at": "2026-02-28T10:00:00.000Z"
+        },
+        {
+            "id": "camp-2",
+            "mosque_slug": "masjid-al-ikhlas",
+            "title": "Sedekah Buka Puasa Bersama Ramadhan 1447 H",
+            "slug": "sedekah-ifthar-ramadhan-1447",
+            "description": "Program rutin tahunan membagikan 200 porsi makanan berbuka puasa (ifthar) setiap hari selama bulan Ramadhan untuk jamaah, musafir, dan masyarakat sekitar masjid.",
+            "target_amount": 120000000,
+            "current_amount": 1500000,
+            "flyer_url": "https://images.unsplash.com/photo-1511974797120-0447fa003a27?auto=format&fit=crop&q=80&w=1200",
+            "start_date": "2026-02-01T00:00:00.000Z",
+            "end_date": "2026-04-10T23:59:59.000Z",
+            "status": "DRAFT",
+            "created_at": "2026-01-15T09:00:00.000Z"
+        },
+        {
+            "id": "camp-3",
+            "mosque_slug": "masjid-al-ikhlas",
+            "title": "Pengadaan Karpet Baru Ruang Utama",
+            "slug": "pengadaan-karpet-baru",
+            "description": "Alhamdulillah, karpet lama telah kami gunakan selama 5 tahun. Mari bersama-sama kita perbarui karpet masjid demi kebersihan dan kenyamanan sujud kita.",
+            "target_amount": 35000000,
+            "current_amount": 35000000,
+            "flyer_url": "https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=1200",
+            "start_date": "2025-10-01T00:00:00.000Z",
+            "end_date": "2025-12-31T23:59:59.000Z",
+            "status": "COMPLETED",
+            "created_at": "2025-09-20T08:00:00.000Z"
+        }
+    ],
+    "campaign_donations": [
+        {
+            "id": "don-1",
+            "campaign_id": "camp-1",
+            "donor_name": "Hamba Allah",
+            "amount": 5000000,
+            "payment_method": "BSI (Bank Syariah Indonesia)",
+            "status": "VERIFIED",
+            "message": "Semoga menjadi amal jariyah.",
+            "created_at": "2026-03-02T14:30:00.000Z"
+        },
+        {
+            "id": "don-2",
+            "campaign_id": "camp-1",
+            "donor_name": "Bapak Budi",
+            "amount": 10000000,
+            "payment_method": "QRIS",
+            "status": "VERIFIED",
+            "message": "Bismillah, semoga lancar pembangunannya.",
+            "created_at": "2026-03-03T09:15:00.000Z"
+        },
+        {
+            "id": "don-3",
+            "campaign_id": "camp-1",
+            "donor_name": "Ibu Aisyah",
+            "amount": 250000,
+            "payment_method": "MANDIRI",
+            "status": "PENDING",
+            "message": "",
+            "created_at": "2026-03-04T10:00:00.000Z"
+        }
+    ],
+    "campaign_updates": [
+        {
+            "id": "upd-1",
+            "campaign_id": "camp-1",
+            "content": "Alhamdulillah, donasi tahap pertama telah digunakan untuk pembelian material genteng dan kayu. Terima kasih kepada para donatur.",
+            "image_url": "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=800",
+            "created_at": "2026-03-04T12:00:00.000Z"
+        }
+    ]
+}

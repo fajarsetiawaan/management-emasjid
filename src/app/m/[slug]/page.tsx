@@ -8,6 +8,8 @@ import { getMosqueBySlug, getTransactions, getEvents } from '@/lib/api';
 import PrayerWidget from '@/components/features/public/PrayerWidget';
 import { getPrayerTimes, PrayerTimes } from '@/lib/prayer-service';
 import { Mosque, Transaction, Event } from '@/types';
+import Link from 'next/link';
+import DONATIONS_MOCK from '@/mocks/donations.json';
 
 export default function PublicMosquePage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
@@ -18,7 +20,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
     const [loading, setLoading] = useState(true);
 
     // UI State
-    const [activeTab, setActiveTab] = useState<'LAPORAN' | 'AGENDA' | 'PROFIL'>('LAPORAN');
+    const [activeTab, setActiveTab] = useState<'LAPORAN' | 'AGENDA' | 'DONASI' | 'PROFIL'>('LAPORAN');
     const [reportType, setReportType] = useState<'INCOME' | 'EXPENSE'>('INCOME');
     const [prayerTimings, setPrayerTimings] = useState<PrayerTimes | null>(null);
 
@@ -373,6 +375,107 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
         );
     };
 
+    const renderDonasi = () => {
+        const activeCampaigns = DONATIONS_MOCK.campaigns.filter(camp => camp.status === 'ACTIVE');
+
+        return (
+            <div className="space-y-6">
+                <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <HeartHandshake className="text-pink-500" size={18} />
+                        Program Donasi
+                    </h3>
+                </div>
+
+                {activeCampaigns.map((camp, index) => {
+                    const progress = Math.min(100, Math.floor((camp.current_amount / camp.target_amount) * 100));
+
+                    return (
+                        <motion.div
+                            key={camp.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/60 dark:border-white/10 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                        >
+                            <Link href={`/m/${slug}/donations/${camp.slug}`}>
+                                <div className="h-44 w-full relative bg-slate-200 dark:bg-slate-800 overflow-hidden cursor-pointer">
+                                    {camp.flyer_url ? (
+                                        <img src={camp.flyer_url} alt={camp.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                                    ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+                                            <HeartHandshake className="text-pink-400 opacity-60" size={40} />
+                                            <span className="text-xs font-bold text-slate-400">Tanpa Poster</span>
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
+                                    <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] uppercase tracking-wider font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        Berjalan
+                                    </div>
+                                </div>
+                            </Link>
+
+                            <div className="p-5">
+                                <Link href={`/m/${slug}/donations/${camp.slug}`}>
+                                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-[17px] leading-tight mb-3 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors cursor-pointer">
+                                        {camp.title}
+                                    </h3>
+                                </Link>
+
+                                <div className="space-y-2 mb-5">
+                                    <div className="flex justify-between items-end">
+                                        <div>
+                                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Terkumpul</p>
+                                            <p className="text-sm font-bold text-pink-600 dark:text-pink-400">{formatRupiah(camp.current_amount)}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Target</p>
+                                            <p className="text-sm font-bold text-slate-600 dark:text-slate-300">{formatRupiah(camp.target_amount)}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${progress}%` }}
+                                            transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+                                            className="h-full bg-gradient-to-r from-pink-500 to-rose-500 rounded-full relative"
+                                        >
+                                            <div className="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-r from-transparent to-white/30"></div>
+                                        </motion.div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700/50">
+                                        <Calendar size={14} className="text-slate-400" />
+                                        <span>Sisa {Math.ceil((new Date(camp.end_date).getTime() - new Date().getTime()) / (1000 * 3600 * 24))} hari</span>
+                                    </div>
+                                    <Link href={`/m/${slug}/donations/${camp.slug}`}>
+                                        <button className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-sm px-4 py-2 rounded-xl shadow-lg shadow-pink-500/30 transition-all active:scale-95 flex items-center gap-1.5">
+                                            Donasi <HeartHandshake size={14} />
+                                        </button>
+                                    </Link>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )
+                })}
+
+                {activeCampaigns.length === 0 && (
+                    <div className="text-center py-16 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-white/40 dark:border-white/10 shadow-sm px-6">
+                        <div className="w-16 h-16 bg-pink-50 dark:bg-pink-900/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-pink-100 dark:border-pink-900/50 shadow-sm">
+                            <HeartHandshake className="text-pink-400" size={28} />
+                        </div>
+                        <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-1">Belum Ada Program</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Saat ini tidak ada program penggalangan dana yang sedang berjalan.</p>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const renderProfil = () => {
         return (
             <div className="space-y-6">
@@ -432,6 +535,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                         {[
                             { id: 'LAPORAN', label: 'Keuangan', icon: PieChart },
                             { id: 'AGENDA', label: 'Agenda', icon: Calendar },
+                            { id: 'DONASI', label: 'Donasi', icon: HeartHandshake },
                             { id: 'PROFIL', label: 'Profil', icon: Building2 },
                         ].map((tab) => (
                             <button
@@ -469,6 +573,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                         >
                             {activeTab === 'LAPORAN' && renderLaporan()}
                             {activeTab === 'AGENDA' && renderAgenda()}
+                            {activeTab === 'DONASI' && renderDonasi()}
                             {activeTab === 'PROFIL' && renderProfil()}
                         </motion.div>
                     </AnimatePresence>

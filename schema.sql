@@ -62,3 +62,44 @@ ALTER TABLE "user" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "session" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "account" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "verification" ENABLE ROW LEVEL SECURITY;
+
+-- Campaign / Donation Feature
+CREATE TABLE "campaign" (
+	"id" text NOT NULL,
+    "mosqueSlug" text NOT NULL,
+	"title" text NOT NULL,
+	"slug" text NOT NULL,
+	"description" text,
+	"targetAmount" numeric NOT NULL,
+	"currentAmount" numeric DEFAULT 0,
+	"flyerUrl" text,
+	"startDate" timestamp,
+	"endDate" timestamp,
+	"status" text DEFAULT 'DRAFT',
+	"createdAt" timestamp NOT NULL,
+	"updatedAt" timestamp NOT NULL,
+	PRIMARY KEY ("id")
+);
+
+CREATE TABLE "campaign_donation" (
+	"id" text NOT NULL,
+	"campaignId" text NOT NULL,
+	"donorName" text,
+	"amount" numeric NOT NULL,
+	"paymentMethod" text,
+	"status" text DEFAULT 'PENDING',
+	"message" text,
+	"createdAt" timestamp NOT NULL,
+	PRIMARY KEY ("id"),
+    CONSTRAINT "campaign_donation_campaignId_campaign_id_fk" FOREIGN KEY ("campaignId") REFERENCES "campaign"("id") ON DELETE CASCADE
+);
+
+CREATE TABLE "campaign_update" (
+	"id" text NOT NULL,
+	"campaignId" text NOT NULL,
+	"content" text NOT NULL,
+	"imageUrl" text,
+	"createdAt" timestamp NOT NULL,
+	PRIMARY KEY ("id"),
+    CONSTRAINT "campaign_update_campaignId_campaign_id_fk" FOREIGN KEY ("campaignId") REFERENCES "campaign"("id") ON DELETE CASCADE
+);
