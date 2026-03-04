@@ -20,7 +20,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
     const [loading, setLoading] = useState(true);
 
     // UI State
-    const [activeTab, setActiveTab] = useState<'LAPORAN' | 'AGENDA' | 'DONASI' | 'PROFIL'>('LAPORAN');
+    const [activeTab, setActiveTab] = useState<'DONASI' | 'AGENDA' | 'LAPORAN' | 'PROFIL'>('DONASI');
     const [reportType, setReportType] = useState<'INCOME' | 'EXPENSE'>('INCOME');
     const [prayerTimings, setPrayerTimings] = useState<PrayerTimes | null>(null);
 
@@ -533,9 +533,9 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                 <div className="sticky top-0 z-40 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl py-3 px-4 shadow-[0_1px_0_rgba(0,0,0,0.05)] border-b border-white/10">
                     <div className="bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-2xl flex relative">
                         {[
-                            { id: 'LAPORAN', label: 'Keuangan', icon: PieChart },
-                            { id: 'AGENDA', label: 'Agenda', icon: Calendar },
                             { id: 'DONASI', label: 'Donasi', icon: HeartHandshake },
+                            { id: 'AGENDA', label: 'Agenda', icon: Calendar },
+                            { id: 'LAPORAN', label: 'Keuangan', icon: PieChart },
                             { id: 'PROFIL', label: 'Profil', icon: Building2 },
                         ].map((tab) => (
                             <button
@@ -571,9 +571,9 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
                         >
-                            {activeTab === 'LAPORAN' && renderLaporan()}
-                            {activeTab === 'AGENDA' && renderAgenda()}
                             {activeTab === 'DONASI' && renderDonasi()}
+                            {activeTab === 'AGENDA' && renderAgenda()}
+                            {activeTab === 'LAPORAN' && renderLaporan()}
                             {activeTab === 'PROFIL' && renderProfil()}
                         </motion.div>
                     </AnimatePresence>
