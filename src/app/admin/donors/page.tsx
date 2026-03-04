@@ -2,15 +2,19 @@
 
 import { useState } from 'react';
 import { MOCK_DONORS } from '@/lib/mock-data';
-import { Search, Phone, User, ExternalLink, Plus, Filter } from 'lucide-react';
+import { Search, Phone, User, ExternalLink, Plus, SlidersHorizontal } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { FilterDropdown, FilterTrigger, FilterContent, FilterItem } from '@/components/shared/FilterDropdown';
 
 export default function DonorsPage() {
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterType, setFilterType] = useState('ALL');
 
-    const filteredDonors = MOCK_DONORS.filter(d =>
-        d.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredDonors = MOCK_DONORS.filter(d => {
+        const matchesSearch = d.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesType = filterType === 'ALL' || d.type === filterType;
+        return matchesSearch && matchesType;
+    });
 
     const getInitials = (name: string) => {
         return name
@@ -60,10 +64,20 @@ export default function DonorsPage() {
                     </div>
 
                     <div className="flex gap-2">
-                        {/* Example Filter/Tools Button */}
-                        <button className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all">
-                            <Filter size={18} />
-                        </button>
+                        <FilterDropdown>
+                            <FilterTrigger
+                                icon={<SlidersHorizontal size={18} />}
+                                isActive={filterType !== 'ALL'}
+                                indicator={filterType !== 'ALL' && <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full" />}
+                            >
+                                <FilterContent width="w-56">
+                                    <h4 className="px-3 py-2 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Jenis Donatur</h4>
+                                    <FilterItem onClick={() => setFilterType('ALL')} isSelected={filterType === 'ALL'}>Semua Tipe</FilterItem>
+                                    <FilterItem onClick={() => setFilterType('DONATUR_TETAP')} isSelected={filterType === 'DONATUR_TETAP'}>Donatur Tetap</FilterItem>
+                                    <FilterItem onClick={() => setFilterType('UMUM')} isSelected={filterType === 'UMUM'}>Umum</FilterItem>
+                                </FilterContent>
+                            </FilterTrigger>
+                        </FilterDropdown>
                     </div>
                 </div>
 
@@ -160,7 +174,7 @@ export default function DonorsPage() {
 
                         {filteredDonors.length === 0 && (
                             <div className="text-center py-12 text-slate-400 text-sm italic backdrop-blur-sm bg-white/30 dark:bg-slate-900/30 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
-                                Tidak ditemukan nama "{searchTerm}".
+                                Tidak ditemukan nama yang cocok.
                             </div>
                         )}
                     </div>

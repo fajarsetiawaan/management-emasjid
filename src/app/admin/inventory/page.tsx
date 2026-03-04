@@ -1,11 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import { MOCK_INVENTORY } from '@/lib/mock-data';
-import { Package, Search, Plus, Filter } from 'lucide-react';
+import { Package, Search, Plus, SlidersHorizontal } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { FilterDropdown, FilterTrigger, FilterContent, FilterItem } from '@/components/shared/FilterDropdown';
 
 export default function InventoryPage() {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterCondition, setFilterCondition] = useState('ALL');
+
     const getConditionColor = (condition: string) => {
         switch (condition) {
             case 'GOOD': return 'bg-emerald-50/80 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800/50';
@@ -14,6 +19,13 @@ export default function InventoryPage() {
             default: return 'bg-slate-50/80 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-100 dark:border-slate-700/50';
         }
     };
+
+    const filteredInventory = MOCK_INVENTORY.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.location.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCondition = filterCondition === 'ALL' || item.condition === filterCondition;
+        return matchesSearch && matchesCondition;
+    });
 
     const container = {
         hidden: { opacity: 0 },
@@ -46,10 +58,21 @@ export default function InventoryPage() {
                     </div>
 
                     <div className="flex gap-2">
-                        {/* Example Filter/Tools Button */}
-                        <button className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all">
-                            <Filter size={18} />
-                        </button>
+                        <FilterDropdown>
+                            <FilterTrigger
+                                icon={<SlidersHorizontal size={18} />}
+                                isActive={filterCondition !== 'ALL'}
+                                indicator={filterCondition !== 'ALL' && <span className="absolute top-1 right-1 w-2 h-2 bg-emerald-500 rounded-full" />}
+                            >
+                                <FilterContent width="w-56">
+                                    <h4 className="px-3 py-2 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Kondisi Barang</h4>
+                                    <FilterItem onClick={() => setFilterCondition('ALL')} isSelected={filterCondition === 'ALL'}>Semua Kondisi</FilterItem>
+                                    <FilterItem onClick={() => setFilterCondition('GOOD')} isSelected={filterCondition === 'GOOD'}>Baik (Good)</FilterItem>
+                                    <FilterItem onClick={() => setFilterCondition('MAINTENANCE')} isSelected={filterCondition === 'MAINTENANCE'}>Perbaikan (Maintenance)</FilterItem>
+                                    <FilterItem onClick={() => setFilterCondition('BROKEN')} isSelected={filterCondition === 'BROKEN'}>Rusak (Broken)</FilterItem>
+                                </FilterContent>
+                            </FilterTrigger>
+                        </FilterDropdown>
                     </div>
                 </div>
 
@@ -62,6 +85,8 @@ export default function InventoryPage() {
                         <input
                             type="text"
                             placeholder="Cari barang, kode, atau ruangan..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-11 pr-4 py-3 bg-white/60 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-500 dark:text-white backdrop-blur-md shadow-inner transition-all placeholder:text-slate-400"
                         />
                     </div>
@@ -81,7 +106,7 @@ export default function InventoryPage() {
                                 Daftar Aset
                             </h2>
                             <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[9px] font-black px-1.5 rounded-md">
-                                {MOCK_INVENTORY.length}
+                                {filteredInventory.length}
                             </span>
                         </div>
 
@@ -95,7 +120,7 @@ export default function InventoryPage() {
                     </div>
 
                     <div className="space-y-4">
-                        {MOCK_INVENTORY.map((item) => (
+                        {filteredInventory.map((item) => (
                             <motion.div
                                 key={item.id}
                                 variants={itemVariant}
@@ -128,9 +153,9 @@ export default function InventoryPage() {
                             </motion.div>
                         ))}
 
-                        {MOCK_INVENTORY.length === 0 && (
+                        {filteredInventory.length === 0 && (
                             <div className="text-center py-12 text-slate-400 text-sm italic backdrop-blur-sm bg-white/30 dark:bg-slate-900/30 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
-                                Belum ada data inventaris.
+                                Belum ada data inventaris yang cocok.
                             </div>
                         )}
                     </div>
