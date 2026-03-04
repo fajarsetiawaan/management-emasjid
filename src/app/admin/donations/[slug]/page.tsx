@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Edit2, Share2, Target, Users, TrendingUp, CheckCircle2, MessageSquare, Image as ImageIcon, Send } from 'lucide-react';
 import Link from 'next/link';
@@ -16,11 +16,12 @@ const formatRupiah = (amount: number) => {
     }).format(amount);
 };
 
-export default function CampaignDetailPage({ params }: { params: { slug: string } }) {
+export default function CampaignDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = use(params);
     const [activeTab, setActiveTab] = useState<'overview' | 'donors' | 'updates'>('overview');
 
     // Find campaign data (mock)
-    const campaign = DONATIONS_MOCK.campaigns.find(c => c.slug === params.slug) || DONATIONS_MOCK.campaigns[0];
+    const campaign = DONATIONS_MOCK.campaigns.find(c => c.slug === slug) || DONATIONS_MOCK.campaigns[0];
     const donations = DONATIONS_MOCK.campaign_donations.filter(d => d.campaign_id === campaign.id);
     const updates = DONATIONS_MOCK.campaign_updates.filter(u => u.campaign_id === campaign.id);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Share2, HeartHandshake, TrendingUp, Users, CheckCircle2, Copy } from 'lucide-react';
 import Link from 'next/link';
@@ -17,12 +17,13 @@ const formatRupiah = (amount: number) => {
     }).format(amount);
 };
 
-export default function PublicCampaignDetailPage({ params }: { params: { slug: string, campaignSlug: string } }) {
+export default function PublicCampaignDetailPage({ params }: { params: Promise<{ slug: string, campaignSlug: string }> }) {
+    const { slug, campaignSlug } = use(params);
     const [activeTab, setActiveTab] = useState<'cerita' | 'update' | 'donatur'>('cerita');
     const [showDonateModal, setShowDonateModal] = useState(false);
 
     // Find campaign data (mock)
-    const campaign = DONATIONS_MOCK.campaigns.find(c => c.slug === params.campaignSlug) || DONATIONS_MOCK.campaigns[0];
+    const campaign = DONATIONS_MOCK.campaigns.find(c => c.slug === campaignSlug) || DONATIONS_MOCK.campaigns[0];
     const donations = DONATIONS_MOCK.campaign_donations.filter(d => d.campaign_id === campaign.id);
     const updates = DONATIONS_MOCK.campaign_updates.filter(u => u.campaign_id === campaign.id);
 
@@ -46,7 +47,7 @@ export default function PublicCampaignDetailPage({ params }: { params: { slug: s
 
             {/* Header Sticky Container over Flyer */}
             <div className="sticky top-0 z-50 w-full px-5 py-4 flex justify-between items-center transition-all">
-                <Link href={`/m/${params.slug}`} className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/50 transition-colors shadow-sm border border-white/20">
+                <Link href={`/m/${slug}`} className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/50 transition-colors shadow-sm border border-white/20">
                     <ArrowLeft size={20} />
                 </Link>
                 <button className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/50 transition-colors shadow-sm border border-white/20">
