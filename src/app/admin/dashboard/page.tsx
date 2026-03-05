@@ -19,7 +19,8 @@ import {
     HeartHandshake,
     Newspaper
 } from 'lucide-react';
-import { MOCK_MOSQUE, MOCK_EVENTS, MOCK_CAMPAIGNS } from '@/lib/mock-data';
+import { MOCK_MOSQUE, MOCK_EVENTS } from '@/lib/mock-data';
+import MOCK_DONATIONS from '@/mocks/donations.json';
 import { getPublishedArticles } from '@/services/articles';
 import { getTotalBalance } from '@/lib/api';
 import { Article } from '@/services/articles';
@@ -28,7 +29,7 @@ export default function AdminDashboardPage() {
     const [displayBalance, setDisplayBalance] = useState(MOCK_MOSQUE.balance);
     const isNewUser = displayBalance === 0;
     const nextEvent = isNewUser ? null : MOCK_EVENTS.find(e => e.status === 'UPCOMING');
-    const activeCampaign = MOCK_CAMPAIGNS?.find(c => c.status === 'ACTIVE') || null;
+    const activeCampaign = MOCK_DONATIONS.campaigns.find(c => c.status === 'ACTIVE') || null;
     const [latestArticle, setLatestArticle] = useState<Article | null>(null);
 
     // Load balance from localStorage (onboarding data) on client
@@ -209,11 +210,11 @@ export default function AdminDashboardPage() {
                                         <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm truncate group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">{activeCampaign.title}</h4>
                                         <div className="mt-2">
                                             <div className="flex justify-between text-[10px] text-slate-500 mb-1">
-                                                <span className="font-medium text-pink-600">{formatRupiah(activeCampaign.collected_amount)}</span>
+                                                <span className="font-medium text-pink-600">{formatRupiah(activeCampaign.current_amount)}</span>
                                                 <span>dari {formatRupiah(activeCampaign.target_amount)}</span>
                                             </div>
                                             <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                                <div className="bg-gradient-to-r from-pink-500 to-rose-500 h-1.5 rounded-full" style={{ width: `${Math.min(100, (activeCampaign.collected_amount / activeCampaign.target_amount) * 100)}%` }}></div>
+                                                <div className="bg-gradient-to-r from-pink-500 to-rose-500 h-1.5 rounded-full" style={{ width: `${Math.min(100, (activeCampaign.current_amount / activeCampaign.target_amount) * 100)}%` }}></div>
                                             </div>
                                         </div>
                                     </div>
