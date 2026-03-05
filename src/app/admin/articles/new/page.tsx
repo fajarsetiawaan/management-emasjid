@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Image, Save, Send, Newspaper } from 'lucide-react';
+import { ArrowLeft, Save, UploadCloud, Type, AlignLeft, ImageIcon, Tag, User, FileText, Send } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const CATEGORIES = [
     { value: 'PENGUMUMAN', label: 'Pengumuman', color: 'bg-blue-100 text-blue-600' },
@@ -14,186 +15,252 @@ const CATEGORIES = [
 ];
 
 export default function NewArticlePage() {
-    const [title, setTitle] = useState('');
-    const [category, setCategory] = useState('PENGUMUMAN');
-    const [flyerUrl, setFlyerUrl] = useState('');
-    const [excerpt, setExcerpt] = useState('');
-    const [content, setContent] = useState('');
-    const [authorName, setAuthorName] = useState('H. Ahmad Dahlan');
+    const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
 
-    const handleSaveDraft = () => {
+    const [formData, setFormData] = useState({
+        title: '',
+        category: 'PENGUMUMAN',
+        authorName: 'H. Ahmad Dahlan',
+        excerpt: '',
+        content: '',
+    });
+
+    const [flyerPreview, setFlyerPreview] = useState<string | null>(null);
+
+    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFlyerPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSaveDraft = (e: React.MouseEvent) => {
+        e.preventDefault();
         setIsSaving(true);
-        // TODO: Simpan ke Supabase
         setTimeout(() => {
             setIsSaving(false);
-            alert('Artikel berhasil disimpan sebagai draft!');
+            alert('Artikel berhasil disimpan sebagai draft! (Mock)');
+            router.push('/admin/articles');
         }, 1000);
     };
 
-    const handlePublish = () => {
-        if (!title.trim()) {
+    const handlePublish = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (!formData.title.trim()) {
             alert('Judul artikel wajib diisi!');
             return;
         }
         setIsSaving(true);
-        // TODO: Simpan dan publish ke Supabase
         setTimeout(() => {
             setIsSaving(false);
-            alert('Artikel berhasil diterbitkan!');
+            alert('Artikel berhasil diterbitkan! (Mock)');
+            router.push('/admin/articles');
         }, 1000);
     };
 
     return (
-        <div className="bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-300 relative pb-24">
-            {/* Ambient Backgrounds */}
-            <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/15 rounded-full blur-[128px] mix-blend-multiply dark:mix-blend-screen dark:bg-blue-500/10 animate-blob" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-indigo-500/15 rounded-full blur-[128px] mix-blend-multiply dark:mix-blend-screen dark:bg-indigo-500/10 animate-blob animation-delay-2000" />
-            </div>
+        <div className="bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-300 pb-24 relative overflow-hidden">
+            {/* Background Details */}
+            <div className="absolute top-0 left-0 w-full h-[30vh] bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-transparent pointer-events-none"></div>
 
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 transition-colors duration-300">
-                <div className="px-6 py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <Link href="/admin/articles" className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                            <ArrowLeft size={18} className="text-slate-600 dark:text-slate-400" />
-                        </Link>
-                        <div>
-                            <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Buat Artikel</h1>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Tulis berita atau pengumuman baru</p>
-                        </div>
+            <header className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl px-5 py-5 sticky top-0 z-40 border-b border-white/20 dark:border-white/5 transition-colors">
+                <div className="flex items-center gap-4">
+                    <Link href="/admin/articles" className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+                        <ArrowLeft size={20} />
+                    </Link>
+                    <div>
+                        <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight">Buat Artikel Baru</h1>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-wide">MANAJEMEN PUBLIKASI</p>
                     </div>
                 </div>
             </header>
 
-            <main className="relative z-10 px-6 pt-6 flex flex-col gap-5 max-w-2xl mx-auto">
-                {/* Flyer Preview */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full aspect-video rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm"
-                >
-                    {flyerUrl ? (
-                        <img src={flyerUrl} alt="Preview Flyer" className="w-full h-full object-cover" />
-                    ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
-                            <Newspaper className="text-slate-300 dark:text-slate-600" size={48} />
-                            <span className="text-xs text-slate-400 font-medium">Preview gambar banner</span>
-                        </div>
-                    )}
-                </motion.div>
+            <main className="px-5 mt-6 relative z-10 max-w-2xl mx-auto">
+                <form className="space-y-6">
 
-                {/* Flyer URL */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">URL Gambar Banner</label>
-                    <div className="relative">
-                        <Image size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input
-                            type="url"
-                            placeholder="https://images.unsplash.com/..."
-                            value={flyerUrl}
-                            onChange={(e) => setFlyerUrl(e.target.value)}
-                            className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-4 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-                        />
-                    </div>
-                </motion.div>
+                    {/* Flyer Upload Box */}
+                    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-5 border border-white/40 dark:border-white/10 shadow-sm">
+                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-4">
+                            <ImageIcon size={18} className="text-blue-500" />
+                            Poster / Gambar Banner
+                        </h3>
 
-                {/* Title */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Judul Artikel *</label>
-                    <input
-                        type="text"
-                        placeholder="Contoh: Jadwal Tarawih Ramadhan 1447 H"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-                    />
-                </motion.div>
-
-                {/* Category */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 block">Kategori</label>
-                    <div className="flex flex-wrap gap-2">
-                        {CATEGORIES.map(cat => (
-                            <button
-                                key={cat.value}
-                                onClick={() => setCategory(cat.value)}
-                                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${category === cat.value
-                                        ? `${cat.color} border-transparent ring-2 ring-blue-500/20 scale-105`
-                                        : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-800 hover:border-slate-300'
-                                    }`}
+                        <div className="relative">
+                            <input
+                                type="file"
+                                id="flyer-upload"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handlePhotoUpload}
+                            />
+                            <label
+                                htmlFor="flyer-upload"
+                                className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-2xl cursor-pointer transition-all overflow-hidden relative group
+                                    ${flyerPreview
+                                        ? 'border-transparent'
+                                        : 'border-blue-300/50 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-900/10 hover:bg-blue-100/50 dark:hover:bg-blue-900/20'}`}
                             >
-                                {cat.label}
-                            </button>
-                        ))}
+                                {flyerPreview ? (
+                                    <>
+                                        <img src={flyerPreview} alt="Preview" className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                                            <div className="bg-white/20 text-white px-4 py-2 rounded-xl backdrop-blur-md flex items-center gap-2 font-semibold">
+                                                <UploadCloud size={18} /> Ganti Gambar
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-center p-4">
+                                        <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-blue-100 dark:border-blue-900/30 text-blue-500">
+                                            <UploadCloud size={24} />
+                                        </div>
+                                        <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">Upload Gambar Banner</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Rekomendasi rasio 16:9 atau 4:3</p>
+                                    </div>
+                                )}
+                            </label>
+                        </div>
                     </div>
-                </motion.div>
 
-                {/* Author */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Penulis</label>
-                    <input
-                        type="text"
-                        placeholder="Nama penulis"
-                        value={authorName}
-                        onChange={(e) => setAuthorName(e.target.value)}
-                        className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-                    />
-                </motion.div>
+                    {/* Main Details */}
+                    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-5 border border-white/40 dark:border-white/10 shadow-sm space-y-5">
 
-                {/* Excerpt */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">
-                        Ringkasan <span className="text-slate-300 dark:text-slate-600 font-normal normal-case">(maks 200 karakter)</span>
-                    </label>
-                    <textarea
-                        placeholder="Ringkasan singkat yang akan tampil di preview..."
-                        maxLength={200}
-                        rows={2}
-                        value={excerpt}
-                        onChange={(e) => setExcerpt(e.target.value)}
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 resize-none"
-                    />
-                    <p className="text-[10px] text-slate-400 text-right mt-1">{excerpt.length}/200</p>
-                </motion.div>
+                        {/* Title */}
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 flex items-center gap-1.5">
+                                <Type size={14} className="text-blue-500" />
+                                Judul Artikel
+                            </label>
+                            <input
+                                required
+                                type="text"
+                                placeholder="Contoh: Jadwal Imam Tarawih Ramadhan 1447 H"
+                                value={formData.title}
+                                onChange={e => setFormData({ ...formData, title: e.target.value })}
+                                className="w-full bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl px-4 py-3.5 text-slate-800 dark:text-slate-100 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all placeholder:text-slate-400 placeholder:font-normal"
+                            />
+                        </div>
 
-                {/* Content */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Isi Artikel / Narasi</label>
-                    <textarea
-                        placeholder="Tulis narasi lengkap artikel Anda di sini..."
-                        rows={10}
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 resize-none leading-relaxed"
-                    />
-                </motion.div>
+                        {/* Category */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 flex items-center gap-1.5">
+                                <Tag size={14} className="text-blue-500" />
+                                Kategori
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {CATEGORIES.map(cat => (
+                                    <button
+                                        type="button"
+                                        key={cat.value}
+                                        onClick={() => setFormData({ ...formData, category: cat.value })}
+                                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${formData.category === cat.value
+                                            ? `${cat.color} border-transparent ring-2 ring-blue-500/20 scale-105 shadow-sm`
+                                            : 'bg-white/50 dark:bg-slate-800/50 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                                            }`}
+                                    >
+                                        {cat.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
-                {/* Action Buttons */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.35 }}
-                    className="flex gap-3 pb-8"
-                >
-                    <button
-                        onClick={handleSaveDraft}
-                        disabled={isSaving}
-                        className="flex-1 h-12 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
-                    >
-                        <Save size={16} />
-                        Simpan Draft
-                    </button>
-                    <button
-                        onClick={handlePublish}
-                        disabled={isSaving}
-                        className="flex-1 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-sm flex items-center justify-center gap-2 hover:from-blue-700 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/25 disabled:opacity-50"
-                    >
-                        <Send size={16} />
-                        Terbitkan Sekarang
-                    </button>
-                </motion.div>
+                        {/* Author */}
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 flex items-center gap-1.5">
+                                <User size={14} className="text-blue-500" />
+                                Nama Penulis
+                            </label>
+                            <input
+                                required
+                                type="text"
+                                placeholder="Nama Penulis"
+                                value={formData.authorName}
+                                onChange={e => setFormData({ ...formData, authorName: e.target.value })}
+                                className="w-full bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl px-4 py-3.5 text-slate-800 dark:text-slate-100 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all placeholder:text-slate-400 placeholder:font-normal"
+                            />
+                        </div>
+
+                        {/* Excerpt */}
+                        <div className="space-y-1.5">
+                            <label className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 ml-1">
+                                <span className="flex items-center gap-1.5">
+                                    <FileText size={14} className="text-blue-500" />
+                                    Ringkasan Topik
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-normal">{formData.excerpt.length}/200</span>
+                            </label>
+                            <textarea
+                                required
+                                rows={2}
+                                maxLength={200}
+                                placeholder="Tuliskan intisari dari artikel ini untuk di preview..."
+                                value={formData.excerpt}
+                                onChange={e => setFormData({ ...formData, excerpt: e.target.value })}
+                                className="w-full bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl px-4 py-3.5 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all resize-none placeholder:text-slate-400 leading-relaxed"
+                            />
+                        </div>
+
+                        {/* Content */}
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 flex items-center gap-1.5">
+                                <AlignLeft size={14} className="text-blue-500" />
+                                Isi Artikel Lengkap
+                            </label>
+                            <textarea
+                                required
+                                rows={8}
+                                placeholder="Jabarkan narasi lengkap artikel di sini..."
+                                value={formData.content}
+                                onChange={e => setFormData({ ...formData, content: e.target.value })}
+                                className="w-full bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl px-4 py-4 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all resize-none placeholder:text-slate-400 leading-relaxed"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={handleSaveDraft}
+                            disabled={isSaving}
+                            className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] disabled:opacity-50"
+                        >
+                            <Save size={18} />
+                            <span>Simpan Draft</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handlePublish}
+                            disabled={isSaving}
+                            className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg
+                                ${isSaving
+                                    ? 'bg-slate-200 text-slate-400 shadow-none'
+                                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98]'
+                                }`}
+                        >
+                            {isSaving ? (
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                    className="w-5 h-5 border-2 border-slate-400 border-t-transparent rounded-full"
+                                />
+                            ) : (
+                                <>
+                                    <Send size={18} className="drop-shadow-sm" />
+                                    <span>Terbitkan</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+
+                </form>
             </main>
         </div>
     );
