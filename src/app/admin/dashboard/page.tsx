@@ -19,17 +19,26 @@ import {
     HeartHandshake,
     Newspaper
 } from 'lucide-react';
-import { MOCK_MOSQUE, MOCK_EVENTS } from '@/lib/mock-data';
+import { MOCK_MOSQUE, MOCK_EVENTS, MOCK_CAMPAIGNS } from '@/lib/mock-data';
+import { getPublishedArticles } from '@/services/articles';
 import { getTotalBalance } from '@/lib/api';
+import { Article } from '@/services/articles';
 
 export default function AdminDashboardPage() {
     const [displayBalance, setDisplayBalance] = useState(MOCK_MOSQUE.balance);
     const isNewUser = displayBalance === 0;
     const nextEvent = isNewUser ? null : MOCK_EVENTS.find(e => e.status === 'UPCOMING');
+    const activeCampaign = MOCK_CAMPAIGNS?.find(c => c.status === 'ACTIVE') || null;
+    const [latestArticle, setLatestArticle] = useState<Article | null>(null);
 
     // Load balance from localStorage (onboarding data) on client
     useEffect(() => {
         setDisplayBalance(getTotalBalance());
+        getPublishedArticles().then(articles => {
+            if (articles.length > 0) {
+                setLatestArticle(articles[0]);
+            }
+        });
     }, []);
 
     const formatRupiah = (amount: number) => {
@@ -170,6 +179,96 @@ export default function AdminDashboardPage() {
                         ) : (
                             <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">
                                 Belum ada agenda terdekat
+                            </div>
+                        )
+                    }
+                </div>
+
+                {/* Donasi Aktif Section */}
+                <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between px-1">
+                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg tracking-tight">Donasi & Infaq Berjalan</h3>
+                        <Link href="/admin/donations" className="flex items-center gap-1 text-xs text-pink-600 dark:text-pink-400 font-bold hover:underline">
+                            Kelola <ArrowUpRight size={14} />
+                        </Link>
+                    </div>
+
+                    {
+                        activeCampaign ? (
+                            <Link href="/admin/donations" className="block group">
+                                <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-lg rounded-2xl p-5 shadow-sm border border-white/40 dark:border-white/10 flex items-center gap-5 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group-hover:-translate-y-1">
+                                    <div className="bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border border-pink-100 dark:border-pink-800/50 shadow-sm relative overflow-hidden">
+                                        {activeCampaign.flyer_url ? (
+                                            <img src={activeCampaign.flyer_url} alt="Campaign" className="w-full h-full object-cover rounded-2xl absolute inset-0 opacity-80" />
+                                        ) : (
+                                            <HeartHandshake size={24} className="relative z-10" />
+                                        )}
+                                        <div className="absolute inset-0 bg-pink-500/20 dark:bg-pink-500/40 mix-blend-overlay"></div>
+                                    </div>
+                                    <div className="flex-1 min-w-0 py-1">
+                                        <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm truncate group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">{activeCampaign.title}</h4>
+                                        <div className="mt-2">
+                                            <div className="flex justify-between text-[10px] text-slate-500 mb-1">
+                                                <span className="font-medium text-pink-600">{formatRupiah(activeCampaign.collected_amount)}</span>
+                                                <span>dari {formatRupiah(activeCampaign.target_amount)}</span>
+                                            </div>
+                                            <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-gradient-to-r from-pink-500 to-rose-500 h-1.5 rounded-full" style={{ width: `${Math.min(100, (activeCampaign.collected_amount / activeCampaign.target_amount) * 100)}%` }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-pink-500 group-hover:text-white transition-all">
+                                        <ChevronRight size={18} className="text-slate-300 dark:text-slate-600 group-hover:text-white" />
+                                    </div>
+                                </div>
+                            </Link>
+                        ) : (
+                            <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">
+                                Belum ada program penggalangan dana aktif
+                            </div>
+                        )
+                    }
+                </div>
+
+                {/* Artikel Terbaru Section */}
+                <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between px-1">
+                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg tracking-tight">Artikel & Publikasi</h3>
+                        <Link href="/admin/articles" className="flex items-center gap-1 text-xs text-sky-600 dark:text-sky-400 font-bold hover:underline">
+                            Lihat Semua <ArrowUpRight size={14} />
+                        </Link>
+                    </div>
+
+                    {
+                        latestArticle ? (
+                            <Link href={`/admin/articles/${latestArticle.slug}`} className="block group">
+                                <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-lg rounded-2xl p-5 shadow-sm border border-white/40 dark:border-white/10 flex items-center gap-5 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group-hover:-translate-y-1">
+                                    <div className="bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border border-sky-100 dark:border-sky-800/50 shadow-sm relative overflow-hidden">
+                                        {latestArticle.flyer_url ? (
+                                            <img src={latestArticle.flyer_url} alt="Article Thumbnail" className="w-full h-full object-cover rounded-2xl absolute inset-0 opacity-80" />
+                                        ) : (
+                                            <Newspaper size={24} className="relative z-10" />
+                                        )}
+                                        <div className="absolute inset-0 bg-sky-500/10 dark:bg-sky-500/30 mix-blend-overlay"></div>
+                                    </div>
+                                    <div className="flex-1 min-w-0 py-1">
+                                        <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm truncate group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{latestArticle.title}</h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate font-medium">{latestArticle.excerpt}</p>
+                                        <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-400 dark:text-slate-500 font-medium tracking-wide">
+                                            <span className="bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 px-2.5 py-1 rounded-md">{latestArticle.category}</span>
+                                            {latestArticle.published_at && (
+                                                <span>{new Date(latestArticle.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-all">
+                                        <ChevronRight size={18} className="text-slate-300 dark:text-slate-600 group-hover:text-white" />
+                                    </div>
+                                </div>
+                            </Link>
+                        ) : (
+                            <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">
+                                Belum ada artikel dipublikasikan
                             </div>
                         )
                     }
