@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { HeartHandshake, Plus, Search, MapPin, Target, Users, ArrowRight, Activity, CalendarDays, SlidersHorizontal, Check } from 'lucide-react';
 import Link from 'next/link';
 import { FilterDropdown, FilterTrigger, FilterContent, FilterItem } from '@/components/shared/FilterDropdown';
@@ -19,8 +19,16 @@ const formatRupiah = (amount: number) => {
 };
 
 export default function AdminDonationsPage() {
+    const [filterStatus, setFilterStatus] = useState('ALL');
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState<string>('ALL'); // ALL, ACTIVE, DRAFT, COMPLETED
+    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isSearchExpanded && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [isSearchExpanded]);
 
     // Filter campaigns
     const filteredCampaigns = DONATIONS_MOCK.campaigns.filter(camp => {
@@ -69,29 +77,58 @@ export default function AdminDonationsPage() {
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                        {/* Search Bar - Condensed */}
-                        <div className="relative group hidden sm:block">
-                            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-pink-500 transition-colors">
-                                <Search size={16} />
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Cari program..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-[140px] md:w-[180px] h-10 bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 text-sm rounded-full pl-9 pr-3 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all placeholder:text-slate-400"
-                            />
+                        {/* Expandable Search Bar */}
+                        <div className="relative flex items-center justify-end h-10">
+                            <AnimatePresence initial={false} mode="wait">
+                                {!isSearchExpanded ? (
+                                    <motion.button
+                                        key="search-btn"
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.8 }}
+                                        transition={{ duration: 0.15 }}
+                                        onClick={() => setIsSearchExpanded(true)}
+                                        className="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm flex items-center justify-center bg-white dark:bg-slate-900 transition-colors"
+                                    >
+                                        <Search size={18} strokeWidth={2.5} className="text-slate-400 opacity-80" />
+                                    </motion.button>
+                                ) : (
+                                    <motion.div
+                                        key="search-input"
+                                        initial={{ width: 40, opacity: 0 }}
+                                        animate={{ width: 220, opacity: 1 }}
+                                        exit={{ width: 40, opacity: 0 }}
+                                        transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+                                        className="relative origin-right"
+                                    >
+                                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400 transition-colors">
+                                            <Search size={18} strokeWidth={2.5} className="opacity-80" />
+                                        </div>
+                                        <input
+                                            ref={searchInputRef}
+                                            type="text"
+                                            placeholder="Cari program..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            onBlur={() => {
+                                                if (!searchQuery) setIsSearchExpanded(false);
+                                            }}
+                                            className="w-full h-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-sm rounded-full pl-9 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-400"
+                                        />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
 
-                        {/* Status Filter Dropdown directly matching Finance FilterTrigger */}
                         <FilterDropdown>
                             <FilterTrigger
-                                icon={<SlidersHorizontal size={18} />}
+                                icon={<SlidersHorizontal size={18} strokeWidth={2.5} />}
                                 isActive={filterStatus !== 'ALL'}
-                                activeColorClass="bg-pink-500"
-                                showChevron={false}
+                                activeColorClass="text-blue-600 border-blue-500 ring-2 ring-blue-500/20 bg-blue-50"
+                                showChevron={true}
+                                className="!px-3 !h-10 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm"
                                 indicator={filterStatus !== 'ALL' && (
-                                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-pink-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
+                                    <span className="absolute top-1 right-2 w-2.5 h-2.5 bg-blue-500 border-2 border-white dark:border-slate-900 rounded-full shadow-sm"></span>
                                 )}
                             >
                                 <FilterContent width="w-48">
