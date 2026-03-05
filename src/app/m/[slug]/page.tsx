@@ -3,8 +3,9 @@
 import { useState, use, useEffect } from 'react';
 import { notFound } from 'next/navigation';
 import { interpolate, useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
-import { ArrowDownLeft, ArrowUpRight, Building2, Calendar, FileText, User, Copy, ChevronRight, TrendingUp, TrendingDown, PieChart, Wallet, ShoppingBag, Zap, HeartHandshake, CircleDollarSign, Wrench } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Building2, Calendar, FileText, User, Copy, ChevronRight, TrendingUp, TrendingDown, PieChart, Wallet, ShoppingBag, Zap, HeartHandshake, CircleDollarSign, Wrench, Newspaper } from 'lucide-react';
 import { getMosqueBySlug, getTransactions, getEvents } from '@/lib/api';
+import { getPublishedArticles, type Article } from '@/services/articles';
 import PrayerWidget from '@/components/features/public/PrayerWidget';
 import { getPrayerTimes, PrayerTimes } from '@/lib/prayer-service';
 import { Mosque, Transaction, Event } from '@/types';
@@ -17,10 +18,11 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
     const [mosque, setMosque] = useState<Mosque | null>(null);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [events, setEvents] = useState<Event[]>([]);
+    const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
 
     // UI State
-    const [activeTab, setActiveTab] = useState<'DONASI' | 'AGENDA' | 'LAPORAN' | 'PROFIL'>('DONASI');
+    const [activeTab, setActiveTab] = useState<'DONASI' | 'AGENDA' | 'LAPORAN' | 'PROFIL' | 'ARTIKEL'>('DONASI');
     const [reportType, setReportType] = useState<'INCOME' | 'EXPENSE'>('INCOME');
     const [prayerTimings, setPrayerTimings] = useState<PrayerTimes | null>(null);
 
@@ -35,12 +37,14 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                 }
                 setMosque(mosqueData);
 
-                const [txData, eventsData] = await Promise.all([
+                const [txData, eventsData, articlesData] = await Promise.all([
                     getTransactions(),
-                    getEvents()
+                    getEvents(),
+                    getPublishedArticles()
                 ]);
                 setTransactions(txData);
                 setEvents(eventsData);
+                setArticles(articlesData);
             } catch (e) {
                 console.error("Failed to load mosque data", e);
             } finally {
@@ -476,6 +480,58 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
         );
     };
 
+    const renderArtikel = () => {
+        return (
+            <div className="space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <Newspaper className="text-sky-500" size={18} />
+                        Artikel Terbaru
+                    </h3>
+                </div>
+                {articles.slice(0, 3).map((article) => (
+                    <Link href={`/m/${slug}/articles/${article.slug}`} key={article.id}>
+                        <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md p-4 rounded-xl border border-white/40 dark:border-white/5 shadow-sm flex gap-4 mb-3 hover:shadow-md transition-shadow active:scale-[0.98]">
+                            {article.flyer_url ? (
+                                <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                    <img src={article.flyer_url} alt={article.title} className="w-full h-full object-cover" />
+                                </div>
+                            ) : (
+                                <div className="w-20 h-20 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
+                                    <Newspaper className="text-slate-300 dark:text-slate-600" size={24} />
+                                </div>
+                            )}
+                            <div className="flex-1">
+                                <h4 className="font-bold text-slate-800 dark:text-slate-100 line-clamp-2 text-sm mb-1 leading-tight">{article.title}</h4>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mb-2">{article.excerpt}</p>
+                                <div className="flex items-center gap-3 text-[10px] text-slate-400 font-medium">
+                                    <div className="flex items-center gap-1">
+                                        <User size={10} />
+                                        <span>{article.author_name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Calendar size={10} />
+                                        <span>{article.published_at ? new Date(article.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+                {articles.length === 0 && (
+                    <div className="text-center py-12 text-slate-400 text-sm font-medium">Belum ada artikel.</div>
+                )}
+                {articles.length > 0 && (
+                    <Link href={`/m/${slug}/articles`}>
+                        <button className="w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-sm mt-2 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                            Lihat Semua Artikel
+                        </button>
+                    </Link>
+                )}
+            </div>
+        );
+    };
+
     const renderProfil = () => {
         return (
             <div className="space-y-6">
@@ -531,17 +587,18 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
 
                 {/* Tab Navigation (Sticky Segmented Control) */}
                 <div className="sticky top-0 z-40 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl py-3 px-4 shadow-[0_1px_0_rgba(0,0,0,0.05)] border-b border-white/10">
-                    <div className="bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-2xl flex relative">
+                    <div className="bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-2xl flex overflow-x-auto gap-1 relative [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {[
                             { id: 'DONASI', label: 'Donasi', icon: HeartHandshake },
                             { id: 'AGENDA', label: 'Agenda', icon: Calendar },
+                            { id: 'ARTIKEL', label: 'Artikel', icon: Newspaper },
                             { id: 'LAPORAN', label: 'Keuangan', icon: PieChart },
                             { id: 'PROFIL', label: 'Profil', icon: Building2 },
                         ].map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex-1 py-2.5 text-xs font-bold flex items-center justify-center gap-2 rounded-xl transition-all relative z-10
+                                className={`flex-1 min-w-[90px] py-2.5 px-3 text-xs font-bold flex items-center justify-center gap-2 rounded-xl transition-all relative z-10
                     ${activeTab === tab.id
                                         ? 'text-slate-800 dark:text-slate-200'
                                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
@@ -573,6 +630,7 @@ export default function PublicMosquePage({ params }: { params: Promise<{ slug: s
                         >
                             {activeTab === 'DONASI' && renderDonasi()}
                             {activeTab === 'AGENDA' && renderAgenda()}
+                            {activeTab === 'ARTIKEL' && renderArtikel()}
                             {activeTab === 'LAPORAN' && renderLaporan()}
                             {activeTab === 'PROFIL' && renderProfil()}
                         </motion.div>
