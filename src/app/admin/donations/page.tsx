@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { HeartHandshake, Plus, Search, MapPin, Target, Users, ArrowRight, Activity, CalendarDays } from 'lucide-react';
+import { HeartHandshake, Plus, Search, MapPin, Target, Users, ArrowRight, Activity, CalendarDays, SlidersHorizontal, Check } from 'lucide-react';
 import Link from 'next/link';
+import { FilterDropdown, FilterTrigger, FilterContent, FilterItem } from '@/components/shared/FilterDropdown';
 
 // Use mock data directly until Supabase is integrated
 import DONATIONS_MOCK from '@/mocks/donations.json';
@@ -52,146 +53,196 @@ export default function AdminDonationsPage() {
 
     return (
         <div className="bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-300 relative pb-24">
-            {/* Background Effects */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none fixed">
-                <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-pink-400/10 dark:bg-pink-600/5 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-rose-400/10 dark:bg-rose-600/5 rounded-full blur-[100px]" />
+            {/* Abstract Ambient Backgrounds (Matching Finance) */}
+            <div className="fixed inset-0 pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-pink-500/20 rounded-full blur-[128px] mix-blend-multiply dark:mix-blend-screen dark:bg-pink-500/10 animate-blob" />
+                <div className="absolute top-[20%] right-[-10%] w-[400px] h-[400px] bg-rose-500/20 rounded-full blur-[128px] mix-blend-multiply dark:mix-blend-screen dark:bg-rose-500/10 animate-blob animation-delay-2000" />
             </div>
 
-            {/* Header / Sticky Top */}
-            <header className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl px-5 py-6 sticky top-0 z-40 border-b border-white/20 dark:border-white/5 shadow-sm transition-colors">
-                <div className="flex justify-between items-center mb-6 mt-2">
-                    <div className="flex items-center gap-3">
-                        <Link href="/admin/dashboard" className="w-10 h-10 rounded-full bg-slate-100/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                            <ArrowRight className="rotate-180" size={20} />
-                        </Link>
-                        <div>
-                            <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Program Donasi</h1>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Kelola penggalangan dana masjid</p>
-                        </div>
+            {/* Header matching FinanceHeader styling */}
+            <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 transition-colors duration-300">
+                <div className="px-6 py-4 flex justify-between items-center">
+                    <div>
+                        <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Program Donasi</h1>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Penggalangan dana masjid</p>
                     </div>
-                </div>
 
-                {/* Filters & Search */}
-                <div className="flex gap-3">
-                    <div className="relative flex-1 group">
-                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-pink-500 transition-colors">
-                            <Search size={18} />
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                        {/* Search Bar - Condensed */}
+                        <div className="relative group hidden sm:block">
+                            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-pink-500 transition-colors">
+                                <Search size={16} />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Cari program..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-[140px] md:w-[180px] h-10 bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 text-sm rounded-full pl-9 pr-3 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all placeholder:text-slate-400"
+                            />
                         </div>
-                        <input
-                            type="text"
-                            placeholder="Cari program donasi..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 text-sm rounded-2xl pl-10 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all placeholder:text-slate-400"
-                        />
+
+                        {/* Status Filter Dropdown directly matching Finance FilterTrigger */}
+                        <FilterDropdown>
+                            <FilterTrigger
+                                icon={<SlidersHorizontal size={18} />}
+                                isActive={filterStatus !== 'ALL'}
+                                activeColorClass="bg-pink-500"
+                                showChevron={false}
+                                indicator={filterStatus !== 'ALL' && (
+                                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-pink-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
+                                )}
+                            >
+                                <FilterContent width="w-48">
+                                    <h4 className="px-3 py-2 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Status Program</h4>
+                                    <div className="flex flex-col gap-1">
+                                        <FilterItem
+                                            onClick={() => setFilterStatus('ALL')}
+                                            isSelected={filterStatus === 'ALL'}
+                                            icon={<Check size={14} className={filterStatus === 'ALL' ? '' : 'invisible'} />}
+                                        >
+                                            Semua
+                                        </FilterItem>
+                                        <FilterItem
+                                            onClick={() => setFilterStatus('ACTIVE')}
+                                            isSelected={filterStatus === 'ACTIVE'}
+                                            icon={<Check size={14} className={filterStatus === 'ACTIVE' ? '' : 'invisible'} />}
+                                        >
+                                            Berjalan
+                                        </FilterItem>
+                                        <FilterItem
+                                            onClick={() => setFilterStatus('COMPLETED')}
+                                            isSelected={filterStatus === 'COMPLETED'}
+                                            icon={<Check size={14} className={filterStatus === 'COMPLETED' ? '' : 'invisible'} />}
+                                        >
+                                            Selesai
+                                        </FilterItem>
+                                        <FilterItem
+                                            onClick={() => setFilterStatus('DRAFT')}
+                                            isSelected={filterStatus === 'DRAFT'}
+                                            icon={<Check size={14} className={filterStatus === 'DRAFT' ? '' : 'invisible'} />}
+                                        >
+                                            Draft
+                                        </FilterItem>
+                                    </div>
+                                </FilterContent>
+                            </FilterTrigger>
+                        </FilterDropdown>
                     </div>
-                    <select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-2xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all appearance-none"
-                    >
-                        <option value="ALL">Semua</option>
-                        <option value="ACTIVE">Berjalan</option>
-                        <option value="COMPLETED">Selesai</option>
-                        <option value="DRAFT">Draft</option>
-                    </select>
                 </div>
             </header>
 
-            {/* Campaign List */}
-            <main className="p-5 relative z-10 space-y-4">
-                {filteredCampaigns.map((camp, index) => {
-                    const progress = Math.min(100, Math.floor((camp.current_amount / camp.target_amount) * 100));
+            <main className="relative z-10 px-6 pt-6 flex flex-col gap-6">
 
-                    return (
-                        <motion.div
-                            key={camp.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-[1.5rem] overflow-hidden shadow-sm hover:shadow-lg transition-all group"
-                        >
-                            {/* Flyer Banner (Small) */}
-                            <div className="h-32 w-full relative bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                                {camp.flyer_url ? (
-                                    <img src={camp.flyer_url} alt={camp.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <HeartHandshake className="text-slate-400 opacity-50" size={32} />
-                                    </div>
-                                )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                <div className="absolute top-3 right-3">
-                                    <StatusLabel status={camp.status} />
-                                </div>
-                            </div>
+                {/* Actions Grid matching FinanceQuickActions matching */}
+                <section className="grid grid-cols-4 gap-4 mb-2">
+                    <Link href="/admin/donations/new" className="flex flex-col items-center gap-2 group">
+                        <div className="w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400">
+                            <Plus size={24} strokeWidth={2.5} />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Buat Program</span>
+                    </Link>
+                    <Link href="#" className="flex flex-col items-center gap-2 group opacity-60">
+                        <div className="w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                            <Activity size={24} strokeWidth={2.5} />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Laporan</span>
+                    </Link>
+                    <Link href="#" className="flex flex-col items-center gap-2 group opacity-60">
+                        <div className="w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            <Users size={24} strokeWidth={2.5} />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Data Donatur</span>
+                    </Link>
+                    <Link href="#" className="flex flex-col items-center gap-2 group opacity-60">
+                        <div className="w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                            <Target size={24} strokeWidth={2.5} />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Target & Goal</span>
+                    </Link>
+                </section>
 
-                            {/* Content */}
-                            <div className="p-5">
-                                <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg leading-tight mb-2 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
-                                    <Link href={`/admin/donations/${camp.slug}`}>{camp.title}</Link>
-                                </h3>
+                <div className="space-y-4">
+                    {filteredCampaigns.map((camp, index) => {
+                        const progress = Math.min(100, Math.floor((camp.current_amount / camp.target_amount) * 100));
 
-                                {/* Progress Stats */}
-                                <div className="mt-4 space-y-2">
-                                    <div className="flex justify-between items-end">
-                                        <div>
-                                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Terkumpul</p>
-                                            <p className="text-sm font-bold text-pink-600 dark:text-pink-400">{formatRupiah(camp.current_amount)}</p>
+                        return (
+                            <motion.div
+                                key={camp.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-[1.5rem] overflow-hidden shadow-sm hover:shadow-lg transition-all group"
+                            >
+                                {/* Flyer Banner (Small) */}
+                                <div className="h-32 w-full relative bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                                    {camp.flyer_url ? (
+                                        <img src={camp.flyer_url} alt={camp.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <HeartHandshake className="text-slate-400 opacity-50" size={32} />
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Target</p>
-                                            <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{formatRupiah(camp.target_amount)}</p>
+                                    )}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                    <div className="absolute top-3 right-3">
+                                        <StatusLabel status={camp.status} />
+                                    </div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="p-5">
+                                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg leading-tight mb-2 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
+                                        <Link href={`/admin/donations/${camp.slug}`}>{camp.title}</Link>
+                                    </h3>
+
+                                    {/* Progress Stats */}
+                                    <div className="mt-4 space-y-2">
+                                        <div className="flex justify-between items-end">
+                                            <div>
+                                                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Terkumpul</p>
+                                                <p className="text-sm font-bold text-pink-600 dark:text-pink-400">{formatRupiah(camp.current_amount)}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Target</p>
+                                                <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{formatRupiah(camp.target_amount)}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Progress Bar */}
+                                        <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${progress}%` }}
+                                                transition={{ duration: 1, delay: 0.2 }}
+                                                className="h-full bg-gradient-to-r from-pink-500 to-rose-500 rounded-full"
+                                            />
                                         </div>
                                     </div>
 
-                                    {/* Progress Bar */}
-                                    <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${progress}%` }}
-                                            transition={{ duration: 1, delay: 0.2 }}
-                                            className="h-full bg-gradient-to-r from-pink-500 to-rose-500 rounded-full"
-                                        />
+                                    <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                                        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                            <CalendarDays size={14} />
+                                            <span>{new Date(camp.end_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                                        </div>
+                                        <Link href={`/admin/donations/${camp.slug}`} className="text-xs font-bold text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-pink-100 dark:hover:bg-pink-900/40 transition-colors">
+                                            Kelola <ArrowRight size={14} />
+                                        </Link>
                                     </div>
                                 </div>
+                            </motion.div>
+                        )
+                    })}
 
-                                <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/50">
-                                    <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                        <CalendarDays size={14} />
-                                        <span>{new Date(camp.end_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
-                                    </div>
-                                    <Link href={`/admin/donations/${camp.slug}`} className="text-xs font-bold text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-pink-100 dark:hover:bg-pink-900/40 transition-colors">
-                                        Kelola <ArrowRight size={14} />
-                                    </Link>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )
-                })}
-
-                {filteredCampaigns.length === 0 && (
-                    <div className="text-center py-12 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-3xl border border-white/40 dark:border-white/10 border-dashed">
-                        <HeartHandshake className="mx-auto text-slate-300 dark:text-slate-600 mb-3" size={48} />
-                        <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">Tidak Ada Program</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Belum ada program donasi yang dibuat.</p>
-                    </div>
-                )}
+                    {filteredCampaigns.length === 0 && (
+                        <div className="text-center py-12 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-3xl border border-white/40 dark:border-white/10 border-dashed">
+                            <HeartHandshake className="mx-auto text-slate-300 dark:text-slate-600 mb-3" size={48} />
+                            <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">Tidak Ada Program</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Belum ada program donasi yang dibuat.</p>
+                        </div>
+                    )}
+                </div>
             </main>
-
-            {/* Floating Action Button */}
-            <div className="fixed bottom-6 right-6 z-50">
-                <Link href="/admin/donations/new">
-                    <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 text-white flex items-center justify-center shadow-lg shadow-pink-500/30 ring-4 ring-slate-50 dark:ring-slate-950"
-                    >
-                        <Plus size={24} strokeWidth={2.5} />
-                    </motion.div>
-                </Link>
-            </div>
         </div>
     );
 }

@@ -263,6 +263,8 @@ export default function PublicCampaignDetailPage({ params }: { params: Promise<{
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-500 font-bold">Rp</div>
                                         <input
+                                            id="donateAmount"
+                                            name="donateAmount"
                                             type="number"
                                             value={donateAmount || ''}
                                             onChange={e => setDonateAmount(parseInt(e.target.value))}
@@ -277,6 +279,8 @@ export default function PublicCampaignDetailPage({ params }: { params: Promise<{
                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 block uppercase tracking-wider">Profil Donatur</label>
 
                                     <input
+                                        id="donateName"
+                                        name="donateName"
                                         type="text"
                                         placeholder="Nama Lengkap (Kosongkan jika Hamba Allah)"
                                         value={donateName}
@@ -285,6 +289,8 @@ export default function PublicCampaignDetailPage({ params }: { params: Promise<{
                                     />
 
                                     <textarea
+                                        id="donateMessage"
+                                        name="donateMessage"
                                         placeholder="Tulis doa atau dukungan untuk program ini (opsional)"
                                         rows={3}
                                         value={donateMessage}

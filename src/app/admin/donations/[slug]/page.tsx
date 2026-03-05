@@ -199,6 +199,8 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ slug:
                                 {/* Post Update Area */}
                                 <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-4 border border-white/40 dark:border-white/10 shadow-sm">
                                     <textarea
+                                        id="update_content"
+                                        name="update_content"
                                         placeholder="Berikan kabar terbaru tentang progres program ini..."
                                         className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/30 resize-none h-24 text-slate-800 dark:text-slate-200"
                                     ></textarea>

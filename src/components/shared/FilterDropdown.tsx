@@ -57,7 +57,7 @@ export function FilterDropdown({ children, className = '', onOpenChange }: Filte
 }
 
 interface FilterTriggerProps {
-    icon: React.ReactNode;
+    icon?: React.ReactNode;
     label?: string; // Optional text label if needed alongside icon
     isActive: boolean;
     activeColorClass?: string; // e.g., 'bg-emerald-500'
@@ -69,7 +69,9 @@ interface FilterTriggerProps {
 
 export function FilterTrigger({
     icon,
+    label,
     isActive,
+    activeColorClass,
     className = '',
     showChevron = true,
     indicator,
@@ -84,11 +86,12 @@ export function FilterTrigger({
                 onClick={() => setIsOpen(!isOpen)}
                 className={`h-10 pl-3 pr-2 rounded-full backdrop-blur-md border flex items-center justify-center gap-1 shadow-sm transition-all ring-1 ring-inset relative
             ${isActive
-                        ? 'bg-emerald-500 text-white border-emerald-400 ring-emerald-300/30 shadow-emerald-500/20'
+                        ? `${activeColorClass || 'bg-emerald-500'} text-white border-transparent bg-opacity-100 shadow-md`
                         : 'bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 ring-transparent'}
             ${className}`}
             >
-                {icon}
+                {icon && icon}
+                {label && <span className="font-semibold px-1">{label}</span>}
                 {showChevron && (
                     <ChevronDown size={14} className={`opacity-70 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
                 )}

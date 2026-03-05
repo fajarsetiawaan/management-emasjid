@@ -119,6 +119,8 @@ export default function CreateCampaignPage() {
                                 Judul Program
                             </label>
                             <input
+                                id="title"
+                                name="title"
                                 required
                                 type="text"
                                 placeholder="Misal: Renovasi Atap Masjid Al-Ikhlas"
@@ -134,6 +136,8 @@ export default function CreateCampaignPage() {
                                 Target Dana (Rp)
                             </label>
                             <input
+                                id="target_amount"
+                                name="target_amount"
                                 required
                                 type="number"
                                 placeholder="50000000"
@@ -150,6 +154,8 @@ export default function CreateCampaignPage() {
                                     Tanggal Mulai
                                 </label>
                                 <input
+                                    id="start_date"
+                                    name="start_date"
                                     required
                                     type="date"
                                     value={formData.start_date}
@@ -163,6 +169,8 @@ export default function CreateCampaignPage() {
                                     Tanggal Selesai
                                 </label>
                                 <input
+                                    id="end_date"
+                                    name="end_date"
                                     required
                                     type="date"
                                     value={formData.end_date}
@@ -178,6 +186,8 @@ export default function CreateCampaignPage() {
                                 Narasi / Deskripsi
                             </label>
                             <textarea
+                                id="description"
+                                name="description"
                                 required
                                 rows={5}
                                 placeholder="Ceritakan urgensi kebutuhan dana ini untuk meyakinkan calon donatur..."

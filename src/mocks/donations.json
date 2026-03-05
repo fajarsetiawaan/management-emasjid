@@ -22,7 +22,7 @@
             "description": "Program rutin tahunan membagikan 200 porsi makanan berbuka puasa (ifthar) setiap hari selama bulan Ramadhan untuk jamaah, musafir, dan masyarakat sekitar masjid.",
             "target_amount": 120000000,
             "current_amount": 1500000,
-            "flyer_url": "https://images.unsplash.com/photo-1511974797120-0447fa003a27?auto=format&fit=crop&q=80&w=1200",
+            "flyer_url": "",
             "start_date": "2026-02-01T00:00:00.000Z",
             "end_date": "2026-04-10T23:59:59.000Z",
             "status": "DRAFT",
