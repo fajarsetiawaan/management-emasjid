@@ -150,6 +150,7 @@ export interface Event {
     time: string;
     category: EventCategory;
     status: EventStatus;
+    flyer_url?: string;
 }
 
 // ─── Letters (Surat) ───────────────────────────────
