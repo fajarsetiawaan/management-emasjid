@@ -33,7 +33,7 @@ export default function AdminDashboardPage() {
     const [displayBalance, setDisplayBalance] = useState(MOCK_MOSQUE.balance);
     const isNewUser = displayBalance === 0;
     const upcomingEvents = isNewUser ? [] : MOCK_EVENTS.filter(e => e.status === 'UPCOMING');
-    const activeCampaign = MOCK_DONATIONS.campaigns.find(c => c.status === 'ACTIVE') || null;
+    const activeCampaigns = MOCK_DONATIONS.campaigns.filter(c => c.status === 'ACTIVE');
     const [articles, setArticles] = useState<Article[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
@@ -210,41 +210,85 @@ export default function AdminDashboardPage() {
                         </Link>
                     </div>
 
-                    {
-                        activeCampaign ? (
-                            <Link href="/admin/donations" className="block group">
-                                <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-lg rounded-2xl p-5 shadow-sm border border-white/40 dark:border-white/10 flex items-center gap-5 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group-hover:-translate-y-1">
-                                    <div className="bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border border-pink-100 dark:border-pink-800/50 shadow-sm relative overflow-hidden">
-                                        {activeCampaign.flyer_url ? (
-                                            <img src={activeCampaign.flyer_url} alt="Campaign" className="w-full h-full object-cover rounded-2xl absolute inset-0 opacity-80" />
-                                        ) : (
-                                            <HeartHandshake size={24} className="relative z-10" />
-                                        )}
-                                        <div className="absolute inset-0 bg-pink-500/20 dark:bg-pink-500/40 mix-blend-overlay"></div>
-                                    </div>
-                                    <div className="flex-1 min-w-0 py-1">
-                                        <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm truncate group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">{activeCampaign.title}</h4>
-                                        <div className="mt-2">
-                                            <div className="flex justify-between text-[10px] text-slate-500 mb-1">
-                                                <span className="font-medium text-pink-600">{formatRupiah(activeCampaign.current_amount)}</span>
-                                                <span>dari {formatRupiah(activeCampaign.target_amount)}</span>
+                    {activeCampaigns.length > 0 ? (
+                        <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide -mx-1 px-1">
+                            {activeCampaigns.map((campaign) => {
+                                const progress = Math.min(100, Math.floor((campaign.current_amount / campaign.target_amount) * 100));
+                                return (
+                                    <div key={campaign.id} className="w-[70vw] sm:w-[260px] shrink-0 snap-center group">
+                                        <div className="bg-gradient-to-b from-[#fefbfd] to-[#fff5f8] dark:from-slate-900 dark:to-slate-900 border border-pink-100 dark:border-slate-800 rounded-[1.2rem] overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col h-full">
+                                            {/* Image Header */}
+                                            <div className="h-36 w-full relative overflow-hidden shrink-0">
+                                                {campaign.flyer_url ? (
+                                                    <img src={campaign.flyer_url} alt={campaign.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-700 dark:to-slate-800">
+                                                        <HeartHandshake className="text-white/40" size={48} />
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent"></div>
+                                                <div className="absolute top-3 right-3 z-10">
+                                                    <div className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider border shadow-sm bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50">
+                                                        BERJALAN
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                                <div className="bg-gradient-to-r from-pink-500 to-rose-500 h-1.5 rounded-full" style={{ width: `${Math.min(100, (activeCampaign.current_amount / activeCampaign.target_amount) * 100)}%` }}></div>
+
+                                            {/* Content Area */}
+                                            <div className="p-4 flex flex-col flex-1">
+                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm leading-snug mb-3 min-h-[2.5rem]">
+                                                    {campaign.title}
+                                                </h3>
+
+                                                <div className="mt-auto">
+                                                    {/* Progress Stats */}
+                                                    <div className="flex flex-wrap justify-between items-end gap-1 mb-1.5">
+                                                        <div>
+                                                            <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mb-0.5">TERKUMPUL</p>
+                                                            <p className="text-xs font-bold text-[#E91E63] dark:text-pink-500">{formatRupiah(campaign.current_amount)}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mb-0.5">TARGET</p>
+                                                            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{formatRupiah(campaign.target_amount)}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Progress Bar */}
+                                                    <div className="relative h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full mb-4">
+                                                        <div
+                                                            className="absolute top-0 left-0 h-full bg-[#E91E63] rounded-full transition-all duration-1000 ease-out"
+                                                            style={{ width: `${progress}%` }}
+                                                        />
+                                                        {progress > 0 && progress < 100 && (
+                                                            <div
+                                                                className="absolute top-1/2 -mt-1 w-2 h-2 bg-[#E91E63] rounded-full shadow-[0_0_6px_rgba(233,30,99,0.6)]"
+                                                                style={{ left: `calc(${progress}% - 4px)` }}
+                                                            />
+                                                        )}
+                                                    </div>
+
+                                                    {/* Footer */}
+                                                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800/50">
+                                                        <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                                                            <Calendar size={13} />
+                                                            <span>{new Date(campaign.end_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                                                        </div>
+                                                        <Link href={`/admin/donations/${campaign.slug}`} className="text-[11px] font-bold text-[#E91E63] bg-pink-50 dark:bg-pink-900/20 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-pink-100 dark:hover:bg-pink-900/40 transition-colors">
+                                                            Kelola <ChevronRight size={13} />
+                                                        </Link>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-pink-500 group-hover:text-white transition-all">
-                                        <ChevronRight size={18} className="text-slate-300 dark:text-slate-600 group-hover:text-white" />
-                                    </div>
-                                </div>
-                            </Link>
-                        ) : (
-                            <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">
-                                Belum ada program penggalangan dana aktif
-                            </div>
-                        )
-                    }
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">
+                            Belum ada program penggalangan dana aktif
+                        </div>
+                    )}
                 </div>
 
                 {/* Berita Section */}
