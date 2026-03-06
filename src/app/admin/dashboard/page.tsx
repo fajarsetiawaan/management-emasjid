@@ -159,32 +159,35 @@ export default function AdminDashboardPage() {
                                 <div
                                     key={event.id}
                                     onClick={() => setSelectedEvent(event)}
-                                    className="w-[160px] flex-shrink-0 snap-center cursor-pointer group"
+                                    className="w-[130px] flex-shrink-0 snap-center cursor-pointer group"
                                 >
-                                    <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col h-full transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1">
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col h-full transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
 
                                         {/* Image Header */}
-                                        <div className="h-24 w-full shrink-0 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+                                        <div className="h-20 w-full shrink-0 relative overflow-hidden">
                                             {event.flyer_url ? (
-                                                <img src={event.flyer_url} alt="Flyer" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                                <img src={event.flyer_url} alt="Flyer" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                             ) : (
-                                                <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50/80 dark:bg-blue-900/40">
-                                                    <Calendar size={24} className="text-blue-300 dark:text-blue-600 mb-1" />
+                                                <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                                                    <Calendar size={20} className="text-white/50" />
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Content Area */}
-                                        <div className="p-2.5 flex flex-col flex-1">
-                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[12px] line-clamp-2 leading-snug">{event.title}</h4>
-
-                                            <div className="mt-auto pt-3">
-                                                <div className="flex items-center border-t border-slate-100 dark:border-slate-800/60 pt-2">
-                                                    <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-[10px] font-semibold">
-                                                        <Calendar size={10} />
-                                                        <span>{event.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
-                                                    </div>
+                                        <div className="p-2 flex flex-col flex-1">
+                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[11px] line-clamp-2 leading-tight min-h-[2.5em]">{event.title}</h4>
+                                            <div className="flex items-center justify-between mt-auto pt-1">
+                                                <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-[9px] font-semibold">
+                                                    <Calendar size={9} />
+                                                    <span>{event.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
                                                 </div>
+                                                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${event.category === 'KAJIAN' ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400' :
+                                                    event.category === 'RAPAT' ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400' :
+                                                        'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                                                    }`}>
+                                                    {event.category}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
