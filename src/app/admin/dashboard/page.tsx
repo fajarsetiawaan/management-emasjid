@@ -34,16 +34,14 @@ export default function AdminDashboardPage() {
     const isNewUser = displayBalance === 0;
     const upcomingEvents = isNewUser ? [] : MOCK_EVENTS.filter(e => e.status === 'UPCOMING');
     const activeCampaign = MOCK_DONATIONS.campaigns.find(c => c.status === 'ACTIVE') || null;
-    const [latestArticle, setLatestArticle] = useState<Article | null>(null);
+    const [articles, setArticles] = useState<Article[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
     // Load balance from localStorage (onboarding data) on client
     useEffect(() => {
         setDisplayBalance(getTotalBalance());
-        getPublishedArticles().then(articles => {
-            if (articles.length > 0) {
-                setLatestArticle(articles[0]);
-            }
+        getPublishedArticles().then(data => {
+            setArticles(data.slice(0, 3));
         });
     }, []);
 
@@ -62,7 +60,7 @@ export default function AdminDashboardPage() {
         { name: 'Aset', href: '/admin/inventory', icon: Box, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-100 dark:border-purple-800/50' },
         { name: 'Jamaah', href: '/admin/donors', icon: Users, color: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-50 dark:bg-cyan-900/20', border: 'border-cyan-100 dark:border-cyan-800/50' },
         { name: 'Donasi', href: '/admin/donations', icon: HeartHandshake, color: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-50 dark:bg-pink-900/20', border: 'border-pink-100 dark:border-pink-800/50' },
-        { name: 'Artikel', href: '/admin/articles', icon: Newspaper, color: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-50 dark:bg-sky-900/20', border: 'border-sky-100 dark:border-sky-800/50' },
+        { name: 'Berita', href: '/admin/articles', icon: Newspaper, color: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-50 dark:bg-sky-900/20', border: 'border-sky-100 dark:border-sky-800/50' },
         { name: 'Laporan', href: '/admin/reports', icon: BarChart3, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/20', border: 'border-indigo-100 dark:border-indigo-800/50' },
     ];
 
@@ -161,34 +159,30 @@ export default function AdminDashboardPage() {
                                 <div
                                     key={event.id}
                                     onClick={() => setSelectedEvent(event)}
-                                    className="w-[85vw] max-w-[280px] flex-shrink-0 snap-center cursor-pointer group"
+                                    className="w-[160px] flex-shrink-0 snap-center cursor-pointer group"
                                 >
-                                    <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col h-full transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1">
+                                    <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col h-full transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1">
 
                                         {/* Image Header */}
-                                        <div className="h-36 w-full shrink-0 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+                                        <div className="h-24 w-full shrink-0 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
                                             {event.flyer_url ? (
                                                 <img src={event.flyer_url} alt="Flyer" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                                             ) : (
                                                 <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50/80 dark:bg-blue-900/40">
-                                                    <Calendar size={32} className="text-blue-300 dark:text-blue-600 mb-2" />
+                                                    <Calendar size={24} className="text-blue-300 dark:text-blue-600 mb-1" />
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Content Area */}
-                                        <div className="p-4 flex flex-col flex-1">
-                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[15px] line-clamp-2 leading-snug">{event.title}</h4>
+                                        <div className="p-2.5 flex flex-col flex-1">
+                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[12px] line-clamp-2 leading-snug">{event.title}</h4>
 
-                                            <div className="mt-auto pt-5">
-                                                <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-3">
-                                                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs font-semibold">
-                                                        <Calendar size={13} />
+                                            <div className="mt-auto pt-3">
+                                                <div className="flex items-center border-t border-slate-100 dark:border-slate-800/60 pt-2">
+                                                    <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-[10px] font-semibold">
+                                                        <Calendar size={10} />
                                                         <span>{event.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-1 text-pink-600 dark:text-pink-500 text-[11px] font-bold transition-colors group-hover:text-pink-700">
-                                                        Detail <ChevronRight size={14} strokeWidth={2.5} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -250,48 +244,57 @@ export default function AdminDashboardPage() {
                     }
                 </div>
 
-                {/* Artikel Terbaru Section */}
+                {/* Berita Section */}
                 <div className="space-y-3 pt-2">
                     <div className="flex items-center justify-between px-1">
-                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg tracking-tight">Artikel & Publikasi</h3>
+                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg tracking-tight">Berita Terbaru</h3>
                         <Link href="/admin/articles" className="flex items-center gap-1 text-xs text-sky-600 dark:text-sky-400 font-bold hover:underline">
                             Lihat Semua <ArrowUpRight size={14} />
                         </Link>
                     </div>
 
-                    {
-                        latestArticle ? (
-                            <Link href={`/admin/articles/${latestArticle.slug}`} className="block group">
-                                <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-lg rounded-2xl p-5 shadow-sm border border-white/40 dark:border-white/10 flex items-center gap-5 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group-hover:-translate-y-1">
-                                    <div className="bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border border-sky-100 dark:border-sky-800/50 shadow-sm relative overflow-hidden">
-                                        {latestArticle.flyer_url ? (
-                                            <img src={latestArticle.flyer_url} alt="Article Thumbnail" className="w-full h-full object-cover rounded-2xl absolute inset-0 opacity-80" />
+                    {articles.length > 0 ? (
+                        <div className="space-y-3">
+                            {articles.map((article) => (
+                                <Link href={`/admin/articles/${article.slug}`} key={article.id} className="block group">
+                                    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md p-4 rounded-xl border border-white/40 dark:border-white/5 shadow-sm flex gap-4 hover:shadow-md transition-shadow active:scale-[0.98]">
+                                        {article.flyer_url ? (
+                                            <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                                <img src={article.flyer_url} alt={article.title} className="w-full h-full object-cover" />
+                                            </div>
                                         ) : (
-                                            <Newspaper size={24} className="relative z-10" />
+                                            <div className="w-20 h-20 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
+                                                <Newspaper className="text-slate-300 dark:text-slate-600" size={24} />
+                                            </div>
                                         )}
-                                        <div className="absolute inset-0 bg-sky-500/10 dark:bg-sky-500/30 mix-blend-overlay"></div>
-                                    </div>
-                                    <div className="flex-1 min-w-0 py-1">
-                                        <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm truncate group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{latestArticle.title}</h4>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate font-medium">{latestArticle.excerpt}</p>
-                                        <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-400 dark:text-slate-500 font-medium tracking-wide">
-                                            <span className="bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 px-2.5 py-1 rounded-md">{latestArticle.category}</span>
-                                            {latestArticle.published_at && (
-                                                <span>{new Date(latestArticle.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
-                                            )}
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 line-clamp-2 text-sm mb-1 leading-tight">{article.title}</h4>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mb-2">{article.excerpt}</p>
+                                            <div className="flex items-center gap-3 text-[10px] text-slate-400 font-medium">
+                                                <div className="flex items-center gap-1">
+                                                    <User size={10} />
+                                                    <span>{article.author_name}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <Calendar size={10} />
+                                                    <span>{article.published_at ? new Date(article.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-all">
-                                        <ChevronRight size={18} className="text-slate-300 dark:text-slate-600 group-hover:text-white" />
-                                    </div>
-                                </div>
+                                </Link>
+                            ))}
+                            <Link href="/admin/articles">
+                                <button className="w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-sm mt-2 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                    Lihat Semua Berita
+                                </button>
                             </Link>
-                        ) : (
-                            <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">
-                                Belum ada artikel dipublikasikan
-                            </div>
-                        )
-                    }
+                        </div>
+                    ) : (
+                        <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">
+                            Belum ada artikel dipublikasikan
+                        </div>
+                    )}
                 </div>
 
             </div>
@@ -311,75 +314,77 @@ export default function AdminDashboardPage() {
                         className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-2xl overflow-y-auto max-h-[90vh]"
                     >
                         {/* Modal Header & Flyer */}
-                        <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-800 flex flex-col items-center justify-center">
+                        <div className="relative aspect-[16/10] bg-gradient-to-br from-indigo-600 via-blue-700 to-slate-900 flex flex-col items-center justify-center">
                             {selectedEvent.flyer_url ? (
                                 <img src={selectedEvent.flyer_url} alt="Flyer" className="absolute inset-0 w-full h-full object-cover" />
                             ) : (
-                                <div className="text-slate-400 dark:text-slate-500 flex flex-col items-center gap-3 relative z-10 w-32 h-32 rounded-3xl bg-white/50 dark:bg-slate-900/50 shadow-sm border border-white dark:border-slate-700 justify-center backdrop-blur-sm">
-                                    <Calendar size={48} className="text-blue-500/50" />
-                                    <span className="text-xs font-medium">Brosur Kosong</span>
-                                </div>
+                                <>
+                                    <div className="absolute top-0 right-0 w-40 h-40 bg-blue-400 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+                                    <div className="absolute bottom-0 left-0 w-40 h-40 bg-indigo-400 rounded-full blur-3xl opacity-20 translate-y-1/2 -translate-x-1/2"></div>
+                                    <div className="relative z-10 flex flex-col items-center gap-2">
+                                        <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg">
+                                            <Calendar size={32} className="text-white/70" />
+                                        </div>
+                                    </div>
+                                </>
                             )}
 
-                            {/* Gradient Overlay for text readability */}
-                            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                            {/* Dark gradient overlay from bottom */}
+                            <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
 
                             {/* Close Button */}
                             <button
                                 onClick={() => setSelectedEvent(null)}
-                                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-md flex items-center justify-center text-white transition-colors"
+                                className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-md flex items-center justify-center text-white transition-colors z-20"
                             >
                                 <X size={16} strokeWidth={3} />
                             </button>
 
-                            {/* Date Badge */}
-                            <div className="absolute top-4 left-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-lg flex items-center gap-2">
-                                <div className="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg w-8 h-8 flex flex-col items-center justify-center leading-none">
-                                    <span className="text-[8px] font-bold uppercase">{selectedEvent.date.toLocaleString('default', { month: 'short' })}</span>
-                                    <span className="font-bold">{selectedEvent.date.getDate()}</span>
-                                </div>
-                                <div className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                    {selectedEvent.time} WIB
+                            {/* Category Badge - Top Left */}
+                            <span className={`absolute top-3 left-3 z-20 text-[10px] font-bold px-2.5 py-1 rounded-lg tracking-widest uppercase backdrop-blur-sm ${selectedEvent.category === 'KAJIAN' ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/30' :
+                                selectedEvent.category === 'RAPAT' ? 'bg-orange-500/30 text-orange-200 border border-orange-400/30' :
+                                    'bg-white/20 text-white/80 border border-white/20'
+                                }`}>
+                                {selectedEvent.category}
+                            </span>
+
+                            {/* Title overlaid at bottom */}
+                            <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
+                                <h2 className="text-xl font-bold text-white leading-tight drop-shadow-sm">
+                                    {selectedEvent.title}
+                                </h2>
+                                <div className="flex items-center gap-1.5 mt-2 text-white/80 text-xs font-semibold">
+                                    <Clock size={13} className="text-emerald-400" />
+                                    <span>{selectedEvent.date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                                    <span className="text-white/40">•</span>
+                                    <span className="text-emerald-400 font-bold">{selectedEvent.time} WIB</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Modal Content */}
-                        <div className="p-6">
-                            <div className="flex items-center gap-2 mb-3">
-                                <span className={`text-[10px] font-bold px-2 py-1 rounded-md tracking-wide uppercase ${selectedEvent.category === 'KAJIAN' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400' :
-                                    selectedEvent.category === 'RAPAT' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400' :
-                                        'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
-                                    }`}>
-                                    {selectedEvent.category}
-                                </span>
-                            </div>
-
-                            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight mb-2">
-                                {selectedEvent.title}
-                            </h2>
-
-                            <div className="space-y-4 mt-6">
-                                {selectedEvent.ustadz && (
-                                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-900/30">
-                                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                                            <User size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mb-0.5">Pemateri / Ustadz</p>
-                                            <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{selectedEvent.ustadz}</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
-                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0 shadow-sm border border-slate-200/50 dark:border-slate-700">
-                                        <MapPin size={20} />
+                        <div className="p-5 space-y-3">
+                            {/* Ustadz */}
+                            {selectedEvent.ustadz && (
+                                <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/10 border border-blue-100/60 dark:border-blue-800/40">
+                                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/20">
+                                        <User size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Lokasi</p>
-                                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Masjid Utama</p>
+                                        <p className="text-[10px] font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-0.5">Pemateri / Ustadz</p>
+                                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{selectedEvent.ustadz}</p>
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Lokasi */}
+                            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-800/30 border border-slate-200/60 dark:border-slate-700/40">
+                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-slate-500/20">
+                                    <MapPin size={20} />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">Lokasi</p>
+                                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Masjid Utama</p>
                                 </div>
                             </div>
                         </div>
