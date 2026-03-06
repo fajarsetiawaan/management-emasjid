@@ -68,7 +68,7 @@ export default function YearlyReportsView({ year, transactions }: YearlyReportsV
             {/* Annual Summary Cards */}
             <motion.section
                 variants={item}
-                className="flex flex-col lg:flex-row gap-4 w-full"
+                className="flex flex-col gap-4 w-full"
             >
                 <div className="flex-1">
                     <SummaryCard title="Surplus/Defisit Tahunan" amount={annualNet} type="NET" />
@@ -86,12 +86,12 @@ export default function YearlyReportsView({ year, transactions }: YearlyReportsV
                 variants={item}
                 className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 border border-white/50 dark:border-slate-800/50 shadow-sm"
             >
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col gap-3 mb-6">
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white">Tren Keuangan {year}</h3>
-                        <p className="text-sm text-slate-500">Analisis Pemasukan vs Pengeluaran</p>
+                        <h3 className="text-[16px] sm:text-lg font-bold text-slate-800 dark:text-white">Tren Keuangan {year}</h3>
+                        <p className="text-[11px] sm:text-sm text-slate-500">Analisis Pemasukan vs Pengeluaran</p>
                     </div>
-                    <div className="flex items-center gap-3 text-xs font-medium">
+                    <div className="flex flex-wrap items-center gap-3 text-xs font-medium">
                         <div className="flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                             <span className="text-slate-600 dark:text-slate-300">Pemasukan</span>

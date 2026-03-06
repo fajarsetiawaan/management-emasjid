@@ -109,7 +109,7 @@ export default function ReportsPage() {
     }
 
     return (
-        <div className="min-h-screen pb-24 relative overflow-hidden font-sans">
+        <div className="min-h-screen pb-24 relative overflow-x-hidden w-full max-w-[100vw] font-sans">
             {/* Deep Ambient Backgrounds (Shared with Finance/Events) */}
             <div className="fixed inset-0 pointer-events-none z-0">
                 <div className="absolute top-[10%] right-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[128px] mix-blend-multiply dark:mix-blend-screen animate-blob" />
@@ -190,9 +190,9 @@ export default function ReportsPage() {
                                 variants={container}
                                 initial="hidden"
                                 animate="show"
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                                className="flex flex-col gap-4"
                             >
-                                <motion.div variants={item} className="md:col-span-2 lg:col-span-1">
+                                <motion.div variants={item} className="w-full">
                                     <SummaryCard
                                         title="Saldo Bersih Saat Ini"
                                         amount={netBalance}
@@ -220,7 +220,7 @@ export default function ReportsPage() {
                                 variants={container}
                                 initial="hidden"
                                 animate="show"
-                                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                                className="flex flex-col gap-6"
                             >
                                 <motion.div variants={item}>
                                     <CategoryBreakdown

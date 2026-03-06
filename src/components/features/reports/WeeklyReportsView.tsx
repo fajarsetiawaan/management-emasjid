@@ -128,15 +128,15 @@ export default function WeeklyReportsView({ transactions, netBalance }: WeeklyRe
     return (
         <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
             {/* Week Navigation */}
-            <div className="flex items-center justify-between bg-white/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-white/50 dark:border-slate-800/50 backdrop-blur-xl">
-                <button onClick={handlePrevWeek} className="p-2 hover:bg-white/50 rounded-full transition-colors"><ChevronLeft /></button>
-                <div className="text-center">
-                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Periode Laporan</p>
-                    <p className="font-bold text-slate-800 dark:text-white">
+            <div className="flex items-center justify-between bg-white/50 dark:bg-slate-900/50 p-3 sm:p-4 rounded-2xl border border-white/50 dark:border-slate-800/50 backdrop-blur-xl">
+                <button onClick={handlePrevWeek} className="p-2 shrink-0 hover:bg-white/50 rounded-full transition-colors"><ChevronLeft /></button>
+                <div className="text-center flex-1 min-w-0 px-2">
+                    <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider font-bold truncate">Periode Laporan</p>
+                    <p className="font-bold text-[13px] sm:text-base text-slate-800 dark:text-white leading-tight mt-0.5 truncate">
                         {formatDate(prevFriday)} - {formatDate(currentFriday)}
                     </p>
                 </div>
-                <button onClick={handleNextWeek} className="p-2 hover:bg-white/50 rounded-full transition-colors"><ChevronRight /></button>
+                <button onClick={handleNextWeek} className="p-2 shrink-0 hover:bg-white/50 rounded-full transition-colors"><ChevronRight /></button>
             </div>
 
             {/* Announcement Script Card */}
@@ -154,7 +154,7 @@ export default function WeeklyReportsView({ transactions, netBalance }: WeeklyRe
 
                     <div className="relative z-10">
                         {/* Header */}
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                        <div className="flex justify-between items-center gap-4 mb-8">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white shadow-lg shadow-violet-500/30">
                                     <Mic size={20} />
@@ -178,7 +178,7 @@ export default function WeeklyReportsView({ transactions, netBalance }: WeeklyRe
                         </div>
 
                         {/* Main Stats Grid */}
-                        <div className="flex flex-col lg:flex-row gap-4">
+                        <div className="flex flex-col gap-4">
                             {/* Saldo Awal */}
                             <div className="flex-1 bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl p-4 sm:p-5 rounded-3xl border border-white/60 dark:border-slate-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                                 <p className="text-sm font-medium text-slate-500 mb-1">Saldo Jumat Lalu</p>
@@ -217,7 +217,7 @@ export default function WeeklyReportsView({ transactions, netBalance }: WeeklyRe
             </motion.div>
 
             {/* Transaction List for this Week */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-6">
                 {/* Income Section */}
                 <motion.div variants={item} className="space-y-4">
                     <div className="flex items-center justify-between px-1">
