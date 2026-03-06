@@ -156,51 +156,46 @@ export default function AdminDashboardPage() {
                     </div>
 
                     {upcomingEvents.length > 0 ? (
-                        <div className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory gap-4 pb-2 px-1 -mx-1">
-                            <div
-                                key={event.id}
-                                onClick={() => setSelectedEvent(event)}
-                                className="w-[85vw] max-w-[300px] flex-shrink-0 snap-center cursor-pointer group"
-                            >
-                                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-[24px] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col h-full transition-all duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group-hover:-translate-y-1">
+                        <div className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory gap-4 pb-4 px-1 -mx-1">
+                            {upcomingEvents.map((event) => (
+                                <div
+                                    key={event.id}
+                                    onClick={() => setSelectedEvent(event)}
+                                    className="w-[85vw] max-w-[280px] flex-shrink-0 snap-center cursor-pointer group"
+                                >
+                                    <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col h-full transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1">
 
-                                    {/* Image Header */}
-                                    <div className="h-32 w-full bg-slate-100 dark:bg-slate-800 relative">
-                                        {event.flyer_url ? (
-                                            <img src={event.flyer_url} alt="Flyer" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-blue-50 dark:bg-blue-900/20">
-                                                <Calendar size={32} className="text-blue-300 dark:text-blue-700/50" />
-                                            </div>
-                                        )}
-                                        {/* Status Badge */}
-                                        <div className="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-wide text-emerald-600 dark:text-emerald-400">
-                                            BUKA
-                                        </div>
-                                    </div>
-
-                                    {/* Content Area */}
-                                    <div className="p-5 flex flex-col flex-1">
-                                        <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[15px] line-clamp-2 leading-snug">{event.title}</h4>
-                                        {event.ustadz && (
-                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 truncate font-medium">{event.ustadz}</p>
-                                        )}
-
-                                        <div className="mt-auto pt-6">
-                                            <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/50 pt-4">
-                                                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs font-semibold">
-                                                    <Calendar size={14} />
-                                                    <span>{event.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                                        {/* Image Header */}
+                                        <div className="h-36 w-full shrink-0 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+                                            {event.flyer_url ? (
+                                                <img src={event.flyer_url} alt="Flyer" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                            ) : (
+                                                <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50/80 dark:bg-blue-900/40">
+                                                    <Calendar size={32} className="text-blue-300 dark:text-blue-600 mb-2" />
                                                 </div>
+                                            )}
+                                        </div>
 
-                                                <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs font-bold bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg transition-colors group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40">
-                                                    Lihat <ChevronRight size={14} />
+                                        {/* Content Area */}
+                                        <div className="p-4 flex flex-col flex-1">
+                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[15px] line-clamp-2 leading-snug">{event.title}</h4>
+
+                                            <div className="mt-auto pt-5">
+                                                <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-3">
+                                                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs font-semibold">
+                                                        <Calendar size={13} />
+                                                        <span>{event.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1 text-pink-600 dark:text-pink-500 text-[11px] font-bold transition-colors group-hover:text-pink-700">
+                                                        Detail <ChevronRight size={14} strokeWidth={2.5} />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            ))}
                         </div>
                     ) : (
                         <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">
