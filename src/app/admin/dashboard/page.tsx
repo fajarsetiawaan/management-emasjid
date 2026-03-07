@@ -40,6 +40,7 @@ export default function AdminDashboardPage() {
     const activeCampaigns = MOCK_DONATIONS.campaigns.filter(c => c.status === 'ACTIVE');
     const [articles, setArticles] = useState<Article[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+    const [agendaPeriod, setAgendaPeriod] = useState<'week' | 'month'>('week');
 
     const greeting = useMemo(() => {
         const hour = new Date().getHours();
@@ -179,51 +180,79 @@ export default function AdminDashboardPage() {
                             <div className="w-1 h-5 rounded-full bg-gradient-to-b from-blue-500 to-indigo-500"></div>
                             <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base tracking-tight">Agenda Terdekat</h3>
                         </div>
-                        <Link href="/admin/events" className="flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
-                            Lihat Semua <ArrowUpRight size={12} />
-                        </Link>
+                        {/* Period Tabs */}
+                        <div className="flex gap-1.5">
+                            <button
+                                onClick={() => setAgendaPeriod('week')}
+                                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${agendaPeriod === 'week' ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'}`}
+                            >
+                                Pekan Ini
+                            </button>
+                            <button
+                                onClick={() => setAgendaPeriod('month')}
+                                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${agendaPeriod === 'month' ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'}`}
+                            >
+                                Bulan Ini
+                            </button>
+                        </div>
                     </div>
 
                     {upcomingEvents.length > 0 ? (
-                        <div className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory gap-4 pb-4 px-1 -mx-1">
-                            {upcomingEvents.map((event) => (
-                                <div
-                                    key={event.id}
-                                    onClick={() => setSelectedEvent(event)}
-                                    className="w-[130px] flex-shrink-0 snap-center cursor-pointer group"
-                                >
-                                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col h-full transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
-
-                                        {/* Image Header */}
-                                        <div className="h-20 w-full shrink-0 relative overflow-hidden">
-                                            {event.flyer_url ? (
-                                                <img src={event.flyer_url} alt="Flyer" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                                            ) : (
-                                                <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                                                    <Calendar size={20} className="text-white/50" />
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Content Area */}
-                                        <div className="p-2 flex flex-col flex-1">
-                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[11px] line-clamp-2 leading-tight min-h-[2.5em]">{event.title}</h4>
-                                            <div className="flex items-center justify-between mt-auto pt-1">
-                                                <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-[9px] font-semibold">
-                                                    <Calendar size={9} />
-                                                    <span>{event.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
-                                                </div>
-                                                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${event.category === 'KAJIAN' ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400' :
-                                                    event.category === 'RAPAT' ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400' :
-                                                        'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                                                    }`}>
-                                                    {event.category}
-                                                </span>
+                        <div className="space-y-2.5">
+                            {upcomingEvents
+                                .filter(event => {
+                                    const now = new Date();
+                                    if (agendaPeriod === 'week') {
+                                        const endOfWeek = new Date(now);
+                                        endOfWeek.setDate(now.getDate() + (7 - now.getDay()));
+                                        return event.date <= endOfWeek;
+                                    }
+                                    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                                    return event.date <= endOfMonth;
+                                })
+                                .map((event) => (
+                                    <div
+                                        key={event.id}
+                                        onClick={() => setSelectedEvent(event)}
+                                        className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-md rounded-2xl border border-white/50 dark:border-white/5 shadow-sm flex items-center gap-3.5 p-3 cursor-pointer hover:shadow-md hover:bg-white/90 dark:hover:bg-slate-900/90 transition-all active:scale-[0.98] group"
+                                    >
+                                        {/* Thumbnail */}
+                                        <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                                            <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex flex-col items-center justify-center">
+                                                <span className="text-white/50 text-[8px] font-bold uppercase tracking-wider leading-none">{event.date.toLocaleDateString('id-ID', { month: 'short' })}</span>
+                                                <span className="text-white font-black text-xl leading-none mt-0.5">{event.date.getDate()}</span>
                                             </div>
                                         </div>
+
+                                        {/* Content */}
+                                        <div className="flex-1 min-w-0 py-0.5">
+                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[13px] line-clamp-1 leading-snug mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">{event.title}</h4>
+                                            <div className="flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                                                {event.category === 'KAJIAN' && event.ustadz && (
+                                                    <>
+                                                        <div className="flex items-center gap-1">
+                                                            <User size={11} className="text-slate-400" />
+                                                            <span className="text-slate-600 dark:text-slate-300">{event.ustadz}</span>
+                                                        </div>
+                                                        <span className="text-slate-200 dark:text-slate-700">•</span>
+                                                    </>
+                                                )}
+                                                <div className="flex items-center gap-1">
+                                                    <Clock size={11} />
+                                                    <span>{event.time}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Category Badge */}
+                                        <span className={`text-[9px] font-bold px-2 py-1 rounded-lg uppercase tracking-wider flex-shrink-0 ${event.category === 'KAJIAN' ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400' :
+                                            event.category === 'RAPAT' ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400' :
+                                                'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                                            }`}>
+                                            {event.category}
+                                        </span>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     ) : (
                         <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">

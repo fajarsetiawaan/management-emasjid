@@ -95,27 +95,19 @@ export default function AdminArticlesPage() {
                             </AnimatePresence>
                         </div>
 
-                        {/* Filter */}
+                        {/* Filter (Category Only) */}
                         <FilterDropdown>
                             <FilterTrigger
                                 icon={<SlidersHorizontal size={18} strokeWidth={2.5} />}
-                                isActive={filterStatus !== 'ALL' || filterCategory !== 'ALL'}
+                                isActive={filterCategory !== 'ALL'}
                                 activeColorClass="text-blue-600 border-blue-500 ring-2 ring-blue-500/20 bg-blue-50"
                                 showChevron={true}
                                 className="!px-3 !h-10 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm"
-                                indicator={(filterStatus !== 'ALL' || filterCategory !== 'ALL') && (
+                                indicator={filterCategory !== 'ALL' && (
                                     <span className="absolute top-1 right-2 w-2.5 h-2.5 bg-blue-500 border-2 border-white dark:border-slate-900 rounded-full shadow-sm"></span>
                                 )}
                             >
                                 <FilterContent width="w-52">
-                                    <h4 className="px-3 py-2 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Status</h4>
-                                    <div className="flex flex-col gap-1">
-                                        <FilterItem onClick={() => setFilterStatus('ALL')} isSelected={filterStatus === 'ALL'} icon={<Check size={14} className={filterStatus === 'ALL' ? '' : 'invisible'} />}>Semua Status</FilterItem>
-                                        <FilterItem onClick={() => setFilterStatus('PUBLISHED')} isSelected={filterStatus === 'PUBLISHED'} icon={<Check size={14} className={filterStatus === 'PUBLISHED' ? '' : 'invisible'} />}>Terbit</FilterItem>
-                                        <FilterItem onClick={() => setFilterStatus('DRAFT')} isSelected={filterStatus === 'DRAFT'} icon={<Check size={14} className={filterStatus === 'DRAFT' ? '' : 'invisible'} />}>Draft</FilterItem>
-                                        <FilterItem onClick={() => setFilterStatus('ARCHIVED')} isSelected={filterStatus === 'ARCHIVED'} icon={<Check size={14} className={filterStatus === 'ARCHIVED' ? '' : 'invisible'} />}>Arsip</FilterItem>
-                                    </div>
-                                    <div className="border-t border-slate-100 dark:border-slate-800 my-2"></div>
                                     <h4 className="px-3 py-2 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Kategori</h4>
                                     <div className="flex flex-col gap-1">
                                         <FilterItem onClick={() => setFilterCategory('ALL')} isSelected={filterCategory === 'ALL'} icon={<Check size={14} className={filterCategory === 'ALL' ? '' : 'invisible'} />}>Semua Kategori</FilterItem>
@@ -168,6 +160,33 @@ export default function AdminArticlesPage() {
                     <Link href="#" className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors">
                         Lihat Semua
                     </Link>
+                </div>
+
+                {/* Status Filter Tabs */}
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    {[
+                        { key: 'ALL', label: 'Semua', count: articles.length },
+                        { key: 'PUBLISHED', label: 'Terbit', count: articles.filter(a => a.status === 'PUBLISHED').length },
+                        { key: 'DRAFT', label: 'Draft', count: articles.filter(a => a.status === 'DRAFT').length },
+                        { key: 'ARCHIVED', label: 'Arsip', count: articles.filter(a => a.status === 'ARCHIVED').length },
+                    ].map(tab => (
+                        <button
+                            key={tab.key}
+                            onClick={() => setFilterStatus(tab.key)}
+                            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 ${filterStatus === tab.key
+                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
+                                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                }`}
+                        >
+                            {tab.label}
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${filterStatus === tab.key
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                                }`}>
+                                {tab.count}
+                            </span>
+                        </button>
+                    ))}
                 </div>
 
                 <div className="flex overflow-x-auto gap-4 pb-8 pt-2 snap-x snap-mandatory -mx-6 px-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
