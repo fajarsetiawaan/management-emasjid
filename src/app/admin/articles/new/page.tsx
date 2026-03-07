@@ -139,6 +139,8 @@ export default function NewArticlePage() {
                             </label>
                             <input
                                 required
+                                id="article-title"
+                                name="article-title"
                                 type="text"
                                 placeholder="Contoh: Jadwal Imam Tarawih Ramadhan 1447 H"
                                 value={formData.title}
@@ -178,6 +180,8 @@ export default function NewArticlePage() {
                             </label>
                             <input
                                 required
+                                id="article-author"
+                                name="article-author"
                                 type="text"
                                 placeholder="Nama Penulis"
                                 value={formData.authorName}
@@ -197,6 +201,8 @@ export default function NewArticlePage() {
                             </label>
                             <textarea
                                 required
+                                id="article-excerpt"
+                                name="article-excerpt"
                                 rows={2}
                                 maxLength={200}
                                 placeholder="Tuliskan intisari dari artikel ini untuk di preview..."
@@ -214,6 +220,8 @@ export default function NewArticlePage() {
                             </label>
                             <textarea
                                 required
+                                id="article-content"
+                                name="article-content"
                                 rows={8}
                                 placeholder="Jabarkan narasi lengkap artikel di sini..."
                                 value={formData.content}

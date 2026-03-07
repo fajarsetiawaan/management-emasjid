@@ -506,7 +506,7 @@ export const MOCK_EVENTS: Event[] = [
         time: '04:30',
         category: 'KAJIAN',
         status: 'UPCOMING',
-        flyer_url: 'https://images.unsplash.com/photo-1564683214964-658bc7545ed1?auto=format&fit=crop&q=80&w=800'
+        flyer_url: 'https://images.unsplash.com/photo-1564683214964-658bc7545ed1?auto=format&fit=crop&q=80&w=800&crossorigin=anonymous'
     },
     {
         id: 'e2',

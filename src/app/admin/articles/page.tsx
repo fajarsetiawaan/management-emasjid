@@ -97,6 +97,8 @@ export default function AdminArticlesPage() {
                                         </div>
                                         <input
                                             ref={searchInputRef}
+                                            id="article-search"
+                                            name="article-search"
                                             type="text"
                                             placeholder="Cari artikel..."
                                             value={searchQuery}

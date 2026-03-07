@@ -104,6 +104,8 @@ export default function CommentModerationPage() {
                     <div className="relative">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                         <input
+                            id="search-comments"
+                            name="search-comments"
                             type="text"
                             placeholder="Cari komentar atau nama..."
                             value={searchQuery}
