@@ -502,7 +502,7 @@ export const MOCK_EVENTS: Event[] = [
         id: 'e1',
         title: 'Kajian Subuh - Tafsir Al-Quran',
         ustadz: 'Ustadz Adi Hidayat',
-        date: new Date('2026-02-20'),
+        date: new Date('2026-03-10'),
         time: '04:30',
         category: 'KAJIAN',
         status: 'UPCOMING',
@@ -511,7 +511,7 @@ export const MOCK_EVENTS: Event[] = [
     {
         id: 'e2',
         title: 'Rapat DKM Bulanan',
-        date: new Date('2026-02-18'),
+        date: new Date('2026-03-15'),
         time: '19:30',
         category: 'RAPAT',
         status: 'UPCOMING',
@@ -528,7 +528,7 @@ export const MOCK_EVENTS: Event[] = [
     {
         id: 'e4',
         title: 'Bersih-Bersih Masjid',
-        date: new Date('2026-02-22'),
+        date: new Date('2026-03-12'),
         time: '06:00',
         category: 'KEGIATAN',
         status: 'UPCOMING',
@@ -536,7 +536,7 @@ export const MOCK_EVENTS: Event[] = [
     {
         id: 'e5',
         title: 'Santunan Yatim Bulanan',
-        date: new Date('2026-02-25'),
+        date: new Date('2026-03-20'),
         time: '10:00',
         category: 'KEGIATAN',
         status: 'UPCOMING',

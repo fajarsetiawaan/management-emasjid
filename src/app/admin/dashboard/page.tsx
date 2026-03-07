@@ -32,7 +32,9 @@ import { Event } from '@/types';
 export default function AdminDashboardPage() {
     const [displayBalance, setDisplayBalance] = useState(MOCK_MOSQUE.balance);
     const isNewUser = displayBalance === 0;
-    const upcomingEvents = isNewUser ? [] : MOCK_EVENTS.filter(e => e.status === 'UPCOMING');
+    const upcomingEvents = isNewUser ? [] : MOCK_EVENTS
+        .filter(e => e.status === 'UPCOMING' && e.date >= new Date())
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
     const activeCampaigns = MOCK_DONATIONS.campaigns.filter(c => c.status === 'ACTIVE');
     const [articles, setArticles] = useState<Article[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
