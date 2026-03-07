@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Newspaper, Plus, Search, FileText, BarChart3, Archive, ArrowRight, SlidersHorizontal, Check, X, Heart, Eye, Send } from 'lucide-react';
+import { Newspaper, Plus, Search, FileText, BarChart3, Archive, ArrowRight, SlidersHorizontal, Check, MessageSquare, X, Heart, Eye, Send } from 'lucide-react';
 import Link from 'next/link';
 import { FilterDropdown, FilterTrigger, FilterContent, FilterItem } from '@/components/shared/FilterDropdown';
 import AdminArticleCard from '@/components/features/articles/AdminArticleCard';
@@ -143,7 +143,7 @@ export default function AdminArticlesPage() {
             <main className="relative z-10 px-6 pt-6 flex flex-col gap-6">
 
                 {/* Quick Actions Grid */}
-                <section className="grid grid-cols-4 gap-4 mb-2 px-1">
+                <section className="grid grid-cols-5 gap-3 mb-2 px-1">
                     <Link href="/admin/articles/new" className="flex flex-col items-center gap-2 group">
                         <div className="w-14 h-14 rounded-[1.5rem] flex items-center justify-center shadow-md transition-all group-hover:scale-110 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 group-hover:border-blue-500 group-hover:bg-blue-50/50">
                             <Plus size={24} strokeWidth={2.5} className="text-blue-600" />
@@ -162,6 +162,12 @@ export default function AdminArticlesPage() {
                         </div>
                         <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center text-emerald-700/80">Statistik</span>
                     </button>
+                    <Link href="/admin/articles/comments" className="flex flex-col items-center gap-2 group">
+                        <div className="w-14 h-14 rounded-[1.5rem] flex items-center justify-center shadow-md transition-all group-hover:scale-110 bg-[#FFF1F2] text-[#E11D48] dark:bg-rose-900/30 dark:text-rose-400">
+                            <MessageSquare size={24} strokeWidth={2.5} />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center text-rose-700/80">Moderasi</span>
+                    </Link>
                     <button onClick={() => setFilterStatus(filterStatus === 'ARCHIVED' ? 'ALL' : 'ARCHIVED')} className="flex flex-col items-center gap-2 group">
                         <div className={`w-14 h-14 rounded-[1.5rem] flex items-center justify-center shadow-md transition-all group-hover:scale-110 ${filterStatus === 'ARCHIVED' ? 'bg-amber-500 text-white' : 'bg-[#FFFBEB] text-[#F59E0B] dark:bg-amber-900/30 dark:text-amber-400'}`}>
                             <Archive size={24} strokeWidth={2.5} />
