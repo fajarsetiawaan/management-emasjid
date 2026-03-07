@@ -1,17 +1,25 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, CalendarDays, User, Tag, Eye, Send, Share2, Trash2, Edit3, Newspaper, MoreVertical, Heart, MessageCircle, ChevronRight, Bookmark, Archive } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, User, CalendarDays, Eye, Send, Archive, Trash2, Edit3, Newspaper, MoreVertical, Heart, Share2, ChevronRight, MessageCircle, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 import { getArticleBySlug, getPublishedArticles, type Article } from '@/services/articles';
 
-export default function ArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = use(params);
+export default function AdminArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+    const resolvedParams = use(params);
+    const slug = resolvedParams.slug;
     const [article, setArticle] = useState<Article | null>(null);
     const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // Mock comments data for admin view
+    const [comments, setComments] = useState([
+        { id: 1, name: 'Ahmad Fauzi', text: 'Masya Allah, bermanfaat sekali artikelnya 🤲', time: '2 jam lalu' },
+        { id: 2, name: 'Siti Nurhaliza', text: 'Jazakallahu khairan, terima kasih sudah berbagi ilmu', time: '5 jam lalu' },
+    ]);
+    const [showComments, setShowComments] = useState(true);
     const [isLiked, setIsLiked] = useState(false);
     const [isBookmarked, setIsBookmarked] = useState(false);
 
@@ -255,6 +263,69 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ slug: 
                                 👎 Tidak
                             </button>
                         </div>
+                    </motion.div>
+
+                    {/* Comments Section */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="mb-8"
+                    >
+                        <button
+                            onClick={() => setShowComments(!showComments)}
+                            className="flex items-center justify-between w-full py-3 border-b border-slate-100 dark:border-slate-800"
+                        >
+                            <div className="flex items-center gap-2">
+                                <MessageCircle size={18} className="text-slate-600 dark:text-slate-400" />
+                                <span className="font-bold text-sm text-slate-800 dark:text-white">
+                                    Komentar ({comments.length})
+                                </span>
+                            </div>
+                            <ChevronRight size={16} className={`text-slate-400 transition-transform duration-200 ${showComments ? 'rotate-90' : ''}`} />
+                        </button>
+
+                        <AnimatePresence>
+                            {showComments && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="space-y-4 pt-4">
+                                        {comments.map((comment) => (
+                                            <div key={comment.id} className="flex gap-3 group">
+                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                                    {comment.name.charAt(0)}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between mb-0.5">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[12px] font-bold text-slate-800 dark:text-slate-200">{comment.name}</span>
+                                                            <span className="text-[10px] text-slate-400">{comment.time}</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => setComments(comments.filter(c => c.id !== comment.id))}
+                                                            className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                                                            title="Hapus Komentar"
+                                                        >
+                                                            <Trash2 size={12} />
+                                                        </button>
+                                                    </div>
+                                                    <p className="text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed pr-6">{comment.text}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {comments.length === 0 && (
+                                            <div className="text-center py-6 text-slate-400 text-sm">
+                                                Belum ada komentar
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </motion.div>
 
                     {/* Related Articles */}
