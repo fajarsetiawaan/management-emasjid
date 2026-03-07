@@ -197,20 +197,21 @@ export default function AdminDashboardPage() {
                         </div>
                     </div>
 
-                    {upcomingEvents.length > 0 ? (
-                        <div className="space-y-2.5">
-                            {upcomingEvents
-                                .filter(event => {
-                                    const now = new Date();
-                                    if (agendaPeriod === 'week') {
-                                        const endOfWeek = new Date(now);
-                                        endOfWeek.setDate(now.getDate() + (7 - now.getDay()));
-                                        return event.date <= endOfWeek;
-                                    }
-                                    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                                    return event.date <= endOfMonth;
-                                })
-                                .map((event) => (
+                    {(() => {
+                        const now = new Date();
+                        const filteredEvents = upcomingEvents.filter(event => {
+                            if (agendaPeriod === 'week') {
+                                const endOfWeek = new Date(now);
+                                endOfWeek.setDate(now.getDate() + (7 - now.getDay()));
+                                return event.date <= endOfWeek;
+                            }
+                            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                            return event.date <= endOfMonth;
+                        });
+
+                        return filteredEvents.length > 0 ? (
+                            <div className="space-y-2.5">
+                                {filteredEvents.map((event) => (
                                     <div
                                         key={event.id}
                                         onClick={() => setSelectedEvent(event)}
@@ -253,12 +254,13 @@ export default function AdminDashboardPage() {
                                         </span>
                                     </div>
                                 ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">
-                            Belum ada agenda terdekat
-                        </div>
-                    )}
+                            </div>
+                        ) : (
+                            <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-sm bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 border-dashed">
+                                {agendaPeriod === 'week' ? 'Pekan ini belum ada agenda' : 'Bulan ini belum ada agenda'}
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {/* Donasi Aktif Section */}
