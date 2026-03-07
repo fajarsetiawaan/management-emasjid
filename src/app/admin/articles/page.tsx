@@ -14,7 +14,7 @@ export default function AdminArticlesPage() {
     const [filterCategory, setFilterCategory] = useState('ALL');
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-    const [activeDrawer, setActiveDrawer] = useState<'NONE' | 'CATEGORY' | 'STATS'>('NONE');
+    const [activeDrawer, setActiveDrawer] = useState<'NONE' | 'STATS'>('NONE');
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -145,19 +145,13 @@ export default function AdminArticlesPage() {
             <main className="relative z-10 px-6 pt-6 flex flex-col gap-6">
 
                 {/* Quick Actions Grid */}
-                <section className="grid grid-cols-5 gap-3 mb-2 px-1">
+                <section className="grid grid-cols-4 gap-3 mb-2 px-1">
                     <Link href="/admin/articles/new" className="flex flex-col items-center gap-2 group">
                         <div className="w-14 h-14 rounded-[1.5rem] flex items-center justify-center shadow-md transition-all group-hover:scale-110 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 group-hover:border-blue-500 group-hover:bg-blue-50/50">
                             <Plus size={24} strokeWidth={2.5} className="text-blue-600" />
                         </div>
                         <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Baru</span>
                     </Link>
-                    <button onClick={() => setActiveDrawer('CATEGORY')} className="flex flex-col items-center gap-2 group">
-                        <div className="w-14 h-14 rounded-[1.5rem] flex items-center justify-center shadow-md transition-all group-hover:scale-110 bg-[#F5F3FF] text-[#7C3AED] dark:bg-purple-900/30 dark:text-purple-400">
-                            <FileText size={24} strokeWidth={2.5} />
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center text-purple-700/80">Kategori</span>
-                    </button>
                     <button onClick={() => setActiveDrawer('STATS')} className="flex flex-col items-center gap-2 group">
                         <div className="w-14 h-14 rounded-[1.5rem] flex items-center justify-center shadow-md transition-all group-hover:scale-110 bg-[#ECFDF5] text-[#10B981] dark:bg-emerald-900/30 dark:text-emerald-400">
                             <BarChart3 size={24} strokeWidth={2.5} />
@@ -252,7 +246,7 @@ export default function AdminArticlesPage() {
 
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                                        {activeDrawer === 'CATEGORY' ? 'Distribusi Kategori' : 'Statistik Artikel'}
+                                        Analisis & Statistik
                                     </h2>
                                     <button
                                         onClick={() => setActiveDrawer('NONE')}
@@ -262,25 +256,8 @@ export default function AdminArticlesPage() {
                                     </button>
                                 </div>
 
-                                {activeDrawer === 'CATEGORY' ? (
-                                    <div className="space-y-3">
-                                        {[
-                                            { id: 'PENGUMUMAN', label: 'Pengumuman', color: 'bg-blue-500', count: catStats.PENGUMUMAN },
-                                            { id: 'KAJIAN', label: 'Kajian', color: 'bg-purple-500', count: catStats.KAJIAN },
-                                            { id: 'KEGIATAN', label: 'Kegiatan', color: 'bg-orange-500', count: catStats.KEGIATAN },
-                                            { id: 'EDUKASI', label: 'Edukasi', color: 'bg-emerald-500', count: catStats.EDUKASI },
-                                            { id: 'INFAQ', label: 'Infaq', color: 'bg-pink-500', count: catStats.INFAQ },
-                                        ].map((cat) => (
-                                            <div key={cat.id} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                                                <div className={`w-3 h-3 rounded-full ${cat.color}`} />
-                                                <span className="flex-1 font-bold text-slate-700 dark:text-slate-300 text-sm">{cat.label}</span>
-                                                <span className="px-3 py-1 rounded-lg bg-white dark:bg-slate-800 text-xs font-black text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
-                                                    {cat.count}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
+                                <div className="space-y-6">
+                                    {/* Main Stats Cards */}
                                     <div className="grid grid-cols-1 gap-4">
                                         <div className="p-6 rounded-3xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 flex items-center justify-between">
                                             <div className="flex items-center gap-4">
@@ -312,7 +289,29 @@ export default function AdminArticlesPage() {
                                             </div>
                                         </div>
                                     </div>
-                                )}
+
+                                    {/* Category Distribution (Merged) */}
+                                    <div>
+                                        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Distribusi Kategori</h3>
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {[
+                                                { id: 'PENGUMUMAN', label: 'Pengumuman', color: 'bg-blue-500', count: catStats.PENGUMUMAN },
+                                                { id: 'KAJIAN', label: 'Kajian', color: 'bg-purple-500', count: catStats.KAJIAN },
+                                                { id: 'KEGIATAN', label: 'Kegiatan', color: 'bg-orange-500', count: catStats.KEGIATAN },
+                                                { id: 'EDUKASI', label: 'Edukasi', color: 'bg-emerald-500', count: catStats.EDUKASI },
+                                                { id: 'INFAQ', label: 'Infaq', color: 'bg-pink-500', count: catStats.INFAQ },
+                                            ].map((cat) => (
+                                                <div key={cat.id} className="flex items-center gap-4 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                                    <div className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
+                                                    <span className="flex-1 font-bold text-slate-700 dark:text-slate-300 text-xs">{cat.label}</span>
+                                                    <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 text-[11px] font-black text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
+                                                        {cat.count}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     </>
