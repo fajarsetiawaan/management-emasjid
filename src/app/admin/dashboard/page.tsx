@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -20,7 +20,9 @@ import {
     Newspaper,
     X,
     ImageIcon,
-    User
+    User,
+    TrendingUp,
+    Sparkles
 } from 'lucide-react';
 import { MOCK_MOSQUE, MOCK_EVENTS } from '@/lib/mock-data';
 import MOCK_DONATIONS from '@/mocks/donations.json';
@@ -38,6 +40,15 @@ export default function AdminDashboardPage() {
     const activeCampaigns = MOCK_DONATIONS.campaigns.filter(c => c.status === 'ACTIVE');
     const [articles, setArticles] = useState<Article[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+
+    const greeting = useMemo(() => {
+        const hour = new Date().getHours();
+        if (hour < 4) return 'Selamat Malam';
+        if (hour < 10) return 'Selamat Pagi';
+        if (hour < 15) return 'Selamat Siang';
+        if (hour < 18) return 'Selamat Sore';
+        return 'Selamat Malam';
+    }, []);
 
     // Load balance from localStorage (onboarding data) on client
     useEffect(() => {
@@ -86,8 +97,9 @@ export default function AdminDashboardPage() {
 
             {/* Background Gradients */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] right-[-20%] w-[80%] h-[80%] bg-emerald-400/10 dark:bg-emerald-600/5 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-10%] left-[-20%] w-[70%] h-[70%] bg-blue-400/10 dark:bg-blue-600/5 rounded-full blur-[100px]" />
+                <div className="absolute top-[-10%] right-[-20%] w-[80%] h-[80%] bg-emerald-400/8 dark:bg-emerald-600/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] left-[-20%] w-[70%] h-[70%] bg-blue-400/8 dark:bg-blue-600/5 rounded-full blur-[100px]" />
+                <div className="absolute top-[40%] left-[30%] w-[50%] h-[50%] bg-pink-400/5 dark:bg-pink-600/3 rounded-full blur-[100px]" />
             </div>
 
             {/* Hero Section (Finance) */}
@@ -96,26 +108,39 @@ export default function AdminDashboardPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900 rounded-b-[2.5rem] rounded-t-[2rem]"></div>
                 <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-400 rounded-full blur-3xl opacity-20 translate-y-1/2 -translate-x-1/2"></div>
+                {/* Decorative pattern dots */}
+                <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
-                <div className="relative z-10 p-6 pt-8 pb-14 text-white">
-                    <div className="flex justify-between items-start mb-6">
+                <div className="relative z-10 p-6 pt-7 pb-14 text-white">
+                    {/* Greeting & Mosque Label */}
+                    <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-2">
+                            <Sparkles size={14} className="text-emerald-300/70" />
+                            <span className="text-emerald-200/90 text-xs font-semibold tracking-wide">{greeting}, Admin</span>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-end mb-5">
                         <div>
-                            <div className="text-emerald-100 text-sm font-medium mb-1 tracking-wide opacity-80">Total Saldo Kas</div>
-                            <h2 className="text-4xl font-bold text-white tracking-tight drop-shadow-sm">
+                            <div className="text-emerald-200/70 text-[11px] font-semibold mb-1.5 tracking-widest uppercase">Total Saldo Kas</div>
+                            <h2 className="text-[2rem] font-extrabold text-white tracking-tight drop-shadow-sm leading-none">
                                 {formatRupiah(displayBalance)}
                             </h2>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg">
-                            <Wallet className="text-emerald-300" size={20} />
+                        <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg">
+                            <Wallet className="text-emerald-300" size={22} />
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <span className="bg-emerald-500/20 backdrop-blur-sm text-emerald-50 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-400/30 flex items-center gap-1.5 shadow-lg shadow-emerald-900/10">
+                        <span className="bg-emerald-500/20 backdrop-blur-sm text-emerald-50 text-[11px] font-bold px-3 py-1.5 rounded-xl border border-emerald-400/20 flex items-center gap-1.5">
+                            <TrendingUp size={12} className="text-emerald-400" />
+                            +5% dari bulan lalu
+                        </span>
+                        <span className="bg-white/10 backdrop-blur-sm text-white/70 text-[11px] font-semibold px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                             Aman & Stabil
                         </span>
-                        <span className="text-emerald-200/90 text-xs font-medium">+5% dari bulan lalu</span>
                     </div>
                 </div>
             </div>
@@ -126,15 +151,16 @@ export default function AdminDashboardPage() {
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 dark:border-white/5 p-5 grid grid-cols-4 gap-y-6 gap-x-2"
+                    className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[1.8rem] shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-white/50 dark:border-white/5 p-4 grid grid-cols-4 gap-y-5 gap-x-2"
                 >
                     {menuItems.map((item) => (
                         <motion.div key={item.name} variants={itemVariants} className="w-full">
-                            <Link href={item.href} className="flex flex-col items-center gap-2 group w-full">
-                                <div className={`w-14 h-14 rounded-2xl ${item.bg} border ${item.border} flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-active:scale-95 shadow-sm`}>
-                                    <item.icon className={item.color} size={26} strokeWidth={2} />
+                            <Link href={item.href} className="flex flex-col items-center gap-1.5 group w-full">
+                                <div className={`w-[3.2rem] h-[3.2rem] rounded-2xl ${item.bg} border ${item.border} flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-active:scale-95 shadow-sm relative overflow-hidden`}>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent dark:from-white/10"></div>
+                                    <item.icon className={`${item.color} relative z-10`} size={24} strokeWidth={1.8} />
                                 </div>
-                                <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 text-center leading-tight tracking-tight group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 text-center leading-tight tracking-tight group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">
                                     {item.name}
                                 </span>
                             </Link>
@@ -149,9 +175,12 @@ export default function AdminDashboardPage() {
                 {/* Agenda Section */}
                 <div className="space-y-3">
                     <div className="flex items-center justify-between px-1">
-                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg tracking-tight">Agenda Terdekat</h3>
-                        <Link href="/admin/events" className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
-                            Lihat Semua <ArrowUpRight size={14} />
+                        <div className="flex items-center gap-2">
+                            <div className="w-1 h-5 rounded-full bg-gradient-to-b from-blue-500 to-indigo-500"></div>
+                            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base tracking-tight">Agenda Terdekat</h3>
+                        </div>
+                        <Link href="/admin/events" className="flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                            Lihat Semua <ArrowUpRight size={12} />
                         </Link>
                     </div>
 
@@ -206,9 +235,12 @@ export default function AdminDashboardPage() {
                 {/* Donasi Aktif Section */}
                 <div className="space-y-3 pt-2">
                     <div className="flex items-center justify-between px-1">
-                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg tracking-tight">Donasi & Infaq Berjalan</h3>
-                        <Link href="/admin/donations" className="flex items-center gap-1 text-xs text-pink-600 dark:text-pink-400 font-bold hover:underline">
-                            Kelola <ArrowUpRight size={14} />
+                        <div className="flex items-center gap-2">
+                            <div className="w-1 h-5 rounded-full bg-gradient-to-b from-pink-500 to-rose-500"></div>
+                            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base tracking-tight">Donasi & Infaq Berjalan</h3>
+                        </div>
+                        <Link href="/admin/donations" className="flex items-center gap-1 text-[11px] text-pink-600 dark:text-pink-400 font-bold bg-pink-50 dark:bg-pink-900/20 px-2.5 py-1 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/30 transition-colors">
+                            Kelola <ArrowUpRight size={12} />
                         </Link>
                     </div>
 
@@ -296,34 +328,43 @@ export default function AdminDashboardPage() {
                 {/* Berita Section */}
                 <div className="space-y-3 pt-2">
                     <div className="flex items-center justify-between px-1">
-                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg tracking-tight">Berita Terbaru</h3>
-                        <Link href="/admin/articles" className="flex items-center gap-1 text-xs text-sky-600 dark:text-sky-400 font-bold hover:underline">
-                            Lihat Semua <ArrowUpRight size={14} />
+                        <div className="flex items-center gap-2">
+                            <div className="w-1 h-5 rounded-full bg-gradient-to-b from-sky-500 to-blue-500"></div>
+                            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base tracking-tight">Berita Terbaru</h3>
+                        </div>
+                        <Link href="/admin/articles" className="flex items-center gap-1 text-[11px] text-sky-600 dark:text-sky-400 font-bold bg-sky-50 dark:bg-sky-900/20 px-2.5 py-1 rounded-lg hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors">
+                            Lihat Semua <ArrowUpRight size={12} />
                         </Link>
                     </div>
 
                     {articles.length > 0 ? (
-                        <div className="space-y-3">
-                            {articles.map((article) => (
+                        <div className="space-y-2.5">
+                            {articles.map((article, index) => (
                                 <Link href={`/admin/articles/${article.slug}`} key={article.id} className="block group">
-                                    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md p-4 rounded-xl border border-white/40 dark:border-white/5 shadow-sm flex gap-4 hover:shadow-md transition-shadow active:scale-[0.98]">
+                                    <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-md p-3.5 rounded-2xl border border-white/50 dark:border-white/5 shadow-sm flex gap-3.5 hover:shadow-md hover:bg-white/90 dark:hover:bg-slate-900/90 transition-all active:scale-[0.98]">
                                         {article.flyer_url ? (
-                                            <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                                                <img src={article.flyer_url} alt={article.title} className="w-full h-full object-cover" />
+                                            <div className="w-[4.5rem] h-[4.5rem] rounded-xl overflow-hidden flex-shrink-0 relative">
+                                                <img src={article.flyer_url} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                <div className="absolute top-1 left-1 w-5 h-5 rounded-md bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                                                    <span className="text-[9px] font-bold text-white">{index + 1}</span>
+                                                </div>
                                             </div>
                                         ) : (
-                                            <div className="w-20 h-20 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
-                                                <Newspaper className="text-slate-300 dark:text-slate-600" size={24} />
+                                            <div className="w-[4.5rem] h-[4.5rem] rounded-xl bg-gradient-to-br from-sky-100 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 flex items-center justify-center flex-shrink-0 relative">
+                                                <Newspaper className="text-sky-400 dark:text-sky-600" size={22} />
+                                                <div className="absolute top-1 left-1 w-5 h-5 rounded-md bg-sky-500/20 flex items-center justify-center">
+                                                    <span className="text-[9px] font-bold text-sky-600 dark:text-sky-400">{index + 1}</span>
+                                                </div>
                                             </div>
                                         )}
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 line-clamp-2 text-sm mb-1 leading-tight">{article.title}</h4>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mb-2">{article.excerpt}</p>
-                                            <div className="flex items-center gap-3 text-[10px] text-slate-400 font-medium">
+                                        <div className="flex-1 min-w-0 py-0.5">
+                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 line-clamp-2 text-[13px] mb-1 leading-snug group-hover:text-sky-700 dark:group-hover:text-sky-400 transition-colors">{article.title}</h4>
+                                            <div className="flex items-center gap-2.5 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
                                                 <div className="flex items-center gap-1">
                                                     <User size={10} />
                                                     <span>{article.author_name}</span>
                                                 </div>
+                                                <span className="text-slate-200 dark:text-slate-700">•</span>
                                                 <div className="flex items-center gap-1">
                                                     <Calendar size={10} />
                                                     <span>{article.published_at ? new Date(article.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}</span>
@@ -334,7 +375,8 @@ export default function AdminDashboardPage() {
                                 </Link>
                             ))}
                             <Link href="/admin/articles">
-                                <button className="w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-sm mt-2 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                <button className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 text-sky-700 dark:text-sky-400 font-bold text-xs mt-1 hover:from-sky-100 hover:to-blue-100 dark:hover:from-sky-900/30 dark:hover:to-blue-900/30 transition-all border border-sky-100 dark:border-sky-800/30 flex items-center justify-center gap-2">
+                                    <Newspaper size={14} />
                                     Lihat Semua Berita
                                 </button>
                             </Link>
