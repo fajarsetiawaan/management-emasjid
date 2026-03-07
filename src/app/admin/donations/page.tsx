@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HeartHandshake, Plus, Search, MapPin, Target, Users, ArrowRight, Activity, CalendarDays, SlidersHorizontal, Check } from 'lucide-react';
+import { HeartHandshake, Plus, Search, MapPin, Target, Users, ArrowRight, Activity, CalendarDays, SlidersHorizontal, Check, X } from 'lucide-react';
 import Link from 'next/link';
 import { FilterDropdown, FilterTrigger, FilterContent, FilterItem } from '@/components/shared/FilterDropdown';
 import AdminCampaignCard from '@/components/features/donations/AdminCampaignCard';
@@ -23,6 +23,7 @@ export default function AdminDonationsPage() {
     const [filterStatus, setFilterStatus] = useState('ALL');
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+    const [activeDrawer, setActiveDrawer] = useState<'NONE' | 'STATS'>('NONE');
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -31,34 +32,18 @@ export default function AdminDonationsPage() {
         }
     }, [isSearchExpanded]);
 
+    // Calculate aggregated stats
+    const totalTarget = DONATIONS_MOCK.campaigns.reduce((acc, c) => acc + c.target_amount, 0);
+    const totalCollected = DONATIONS_MOCK.campaigns.reduce((acc, c) => acc + c.current_amount, 0);
+    const totalDonors = DONATIONS_MOCK.campaign_donations.length;
+    const completionRate = (totalCollected / totalTarget) * 100;
+
     // Filter campaigns
     const filteredCampaigns = DONATIONS_MOCK.campaigns.filter(camp => {
         const matchesSearch = camp.title.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = filterStatus === 'ALL' || camp.status === filterStatus;
         return matchesSearch && matchesStatus;
     });
-
-    const getStatusStyle = (status: string) => {
-        switch (status) {
-            case 'ACTIVE': return 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50';
-            case 'COMPLETED': return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50';
-            case 'DRAFT': return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
-            default: return 'bg-slate-100 text-slate-700 border-slate-200';
-        }
-    };
-
-    const StatusLabel = ({ status }: { status: string }) => {
-        let label = status;
-        if (status === 'ACTIVE') label = 'Berjalan';
-        if (status === 'COMPLETED') label = 'Selesai';
-        if (status === 'DRAFT') label = 'Draft';
-
-        return (
-            <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusStyle(status)}`}>
-                {label}
-            </div>
-        );
-    };
 
     return (
         <div className="bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-300 relative pb-24">
@@ -181,24 +166,24 @@ export default function AdminDonationsPage() {
                         </div>
                         <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Buat Program</span>
                     </Link>
-                    <Link href="#" className="flex flex-col items-center gap-2 group opacity-60">
+                    <button onClick={() => setActiveDrawer('STATS')} className="flex flex-col items-center gap-2 group">
                         <div className="w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                             <Activity size={24} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Laporan</span>
-                    </Link>
-                    <Link href="#" className="flex flex-col items-center gap-2 group opacity-60">
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center text-blue-700/80">Laporan</span>
+                    </button>
+                    <Link href="/admin/donations/donors" className="flex flex-col items-center gap-2 group">
                         <div className="w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
                             <Users size={24} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Data Donatur</span>
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center text-emerald-700/80">Donatur</span>
                     </Link>
-                    <Link href="#" className="flex flex-col items-center gap-2 group opacity-60">
-                        <div className="w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                    <button onClick={() => setFilterStatus(filterStatus === 'COMPLETED' ? 'ALL' : 'COMPLETED')} className="flex flex-col items-center gap-2 group">
+                        <div className={`w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${filterStatus === 'COMPLETED' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'}`}>
                             <Target size={24} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Target & Goal</span>
-                    </Link>
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center text-amber-700/80">Arsip</span>
+                    </button>
                 </section>
 
                 <div className="mb-2 flex items-center justify-between mt-2">
@@ -214,7 +199,7 @@ export default function AdminDonationsPage() {
                     ))}
 
                     {filteredCampaigns.length === 0 && (
-                        <div className="text-center py-12 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-3xl border border-white/40 dark:border-white/10 border-dashed">
+                        <div className="text-center py-12 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-3xl border border-white/40 dark:border-white/10 border-dashed w-full max-w-sm mx-auto">
                             <HeartHandshake className="mx-auto text-slate-300 dark:text-slate-600 mb-3" size={48} />
                             <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">Tidak Ada Program</h3>
                             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Belum ada program donasi yang dibuat.</p>
@@ -222,6 +207,110 @@ export default function AdminDonationsPage() {
                     )}
                 </div>
             </main>
+
+            {/* Feature Drawers Overlay */}
+            <AnimatePresence>
+                {activeDrawer !== 'NONE' && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setActiveDrawer('NONE')}
+                            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60]"
+                        />
+                        <motion.div
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed bottom-0 left-0 right-0 max-w-[500px] mx-auto bg-white dark:bg-slate-950 rounded-t-[2.5rem] z-[70] shadow-2xl safe-area-bottom pb-8"
+                        >
+                            <div className="p-6">
+                                {/* Drawer Handle */}
+                                <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mx-auto mb-6" />
+
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white leading-none">
+                                        Analisis & Laporan
+                                    </h2>
+                                    <button
+                                        onClick={() => setActiveDrawer('NONE')}
+                                        className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {/* Financial Summary */}
+                                    <div className="p-6 rounded-3xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <p className="text-[10px] font-black text-emerald-600/60 dark:text-emerald-400/60 uppercase tracking-widest leading-none mb-1">Total Terkumpul</p>
+                                                <p className="text-2xl font-black text-emerald-900 dark:text-emerald-100 leading-none">{formatRupiah(totalCollected)}</p>
+                                            </div>
+                                            <div className="w-10 h-10 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+                                                <HeartHandshake size={20} />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-[11px] font-bold text-emerald-700/70 dark:text-emerald-400/70">
+                                                <span>Progress Target</span>
+                                                <span>{completionRate.toFixed(1)}%</span>
+                                            </div>
+                                            <div className="h-2 w-full bg-emerald-200 dark:bg-emerald-800/40 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${completionRate}%` }}
+                                                    className="h-full bg-emerald-500"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-5 rounded-3xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
+                                            <div className="w-10 h-10 rounded-2xl bg-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 mb-4">
+                                                <Users size={20} />
+                                            </div>
+                                            <p className="text-[10px] font-black text-blue-600/60 dark:text-blue-400/60 uppercase tracking-widest leading-none mb-1">Total Donatur</p>
+                                            <p className="text-xl font-black text-blue-900 dark:text-blue-100 leading-none">{totalDonors}</p>
+                                        </div>
+                                        <div className="p-5 rounded-3xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800">
+                                            <div className="w-10 h-10 rounded-2xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/30 mb-4">
+                                                <Target size={20} />
+                                            </div>
+                                            <p className="text-[10px] font-black text-amber-600/60 dark:text-amber-400/60 uppercase tracking-widest leading-none mb-1">Target Dana</p>
+                                            <p className="text-sm font-black text-amber-900 dark:text-amber-100 leading-none">{(totalTarget / 1000000).toFixed(0)} Juta</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Campaign Breakdown */}
+                                    <div>
+                                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Status Kampanye</h3>
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {[
+                                                { label: 'Berjalan', count: DONATIONS_MOCK.campaigns.filter(c => c.status === 'ACTIVE').length, color: 'bg-emerald-500' },
+                                                { label: 'Selesai', count: DONATIONS_MOCK.campaigns.filter(c => c.status === 'COMPLETED').length, color: 'bg-blue-500' },
+                                                { label: 'Draft', count: DONATIONS_MOCK.campaigns.filter(c => c.status === 'DRAFT').length, color: 'bg-slate-400' },
+                                            ].map((item, idx) => (
+                                                <div key={idx} className="flex items-center gap-4 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                                    <div className={`w-2 h-2 rounded-full ${item.color}`} />
+                                                    <span className="flex-1 font-bold text-slate-700 dark:text-slate-300 text-xs">{item.label}</span>
+                                                    <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 text-[11px] font-black text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
+                                                        {item.count}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
