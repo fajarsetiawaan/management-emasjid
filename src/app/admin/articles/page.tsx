@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Newspaper, Plus, Search, FileText, BarChart3, Archive, ArrowRight, SlidersHorizontal, Check } from 'lucide-react';
+import { Newspaper, Plus, Search, FileText, BarChart3, Archive, ArrowRight, SlidersHorizontal, Check, X, Heart, Eye, Send } from 'lucide-react';
 import Link from 'next/link';
 import { FilterDropdown, FilterTrigger, FilterContent, FilterItem } from '@/components/shared/FilterDropdown';
 import AdminArticleCard from '@/components/features/articles/AdminArticleCard';
@@ -14,6 +14,7 @@ export default function AdminArticlesPage() {
     const [filterCategory, setFilterCategory] = useState('ALL');
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+    const [activeDrawer, setActiveDrawer] = useState<'NONE' | 'CATEGORY' | 'STATS'>('NONE');
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -25,6 +26,21 @@ export default function AdminArticlesPage() {
             searchInputRef.current.focus();
         }
     }, [isSearchExpanded]);
+
+    // Calculate statistics
+    const stats = {
+        totalViews: articles.reduce((acc, a) => acc + (a.views || 0), 0),
+        totalLikes: articles.reduce((acc, a) => acc + (a.likes || 0), 0),
+        totalShares: articles.reduce((acc, a) => acc + (a.shares || 0), 0),
+    };
+
+    const catStats = {
+        PENGUMUMAN: articles.filter(a => a.category === 'PENGUMUMAN').length,
+        KAJIAN: articles.filter(a => a.category === 'KAJIAN').length,
+        KEGIATAN: articles.filter(a => a.category === 'KEGIATAN').length,
+        EDUKASI: articles.filter(a => a.category === 'EDUKASI').length,
+        INFAQ: articles.filter(a => a.category === 'INFAQ').length,
+    };
 
     // Filter articles
     const filteredArticles = articles.filter(art => {
@@ -127,31 +143,31 @@ export default function AdminArticlesPage() {
             <main className="relative z-10 px-6 pt-6 flex flex-col gap-6">
 
                 {/* Quick Actions Grid */}
-                <section className="grid grid-cols-4 gap-4 mb-2">
+                <section className="grid grid-cols-4 gap-4 mb-2 px-1">
                     <Link href="/admin/articles/new" className="flex flex-col items-center gap-2 group">
-                        <div className="w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                            <Plus size={24} strokeWidth={2.5} />
+                        <div className="w-14 h-14 rounded-[1.5rem] flex items-center justify-center shadow-md transition-all group-hover:scale-110 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 group-hover:border-blue-500 group-hover:bg-blue-50/50">
+                            <Plus size={24} strokeWidth={2.5} className="text-blue-600" />
                         </div>
-                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Buat Artikel</span>
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Baru</span>
                     </Link>
-                    <Link href="#" className="flex flex-col items-center gap-2 group opacity-60">
-                        <div className="w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                    <button onClick={() => setActiveDrawer('CATEGORY')} className="flex flex-col items-center gap-2 group">
+                        <div className="w-14 h-14 rounded-[1.5rem] flex items-center justify-center shadow-md transition-all group-hover:scale-110 bg-[#F5F3FF] text-[#7C3AED] dark:bg-purple-900/30 dark:text-purple-400">
                             <FileText size={24} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Kategori</span>
-                    </Link>
-                    <Link href="#" className="flex flex-col items-center gap-2 group opacity-60">
-                        <div className="w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center text-purple-700/80">Kategori</span>
+                    </button>
+                    <button onClick={() => setActiveDrawer('STATS')} className="flex flex-col items-center gap-2 group">
+                        <div className="w-14 h-14 rounded-[1.5rem] flex items-center justify-center shadow-md transition-all group-hover:scale-110 bg-[#ECFDF5] text-[#10B981] dark:bg-emerald-900/30 dark:text-emerald-400">
                             <BarChart3 size={24} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Statistik</span>
-                    </Link>
-                    <Link href="#" className="flex flex-col items-center gap-2 group opacity-60">
-                        <div className="w-14 h-14 rounded-[1.2rem] flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center text-emerald-700/80">Statistik</span>
+                    </button>
+                    <button onClick={() => setFilterStatus(filterStatus === 'ARCHIVED' ? 'ALL' : 'ARCHIVED')} className="flex flex-col items-center gap-2 group">
+                        <div className={`w-14 h-14 rounded-[1.5rem] flex items-center justify-center shadow-md transition-all group-hover:scale-110 ${filterStatus === 'ARCHIVED' ? 'bg-amber-500 text-white' : 'bg-[#FFFBEB] text-[#F59E0B] dark:bg-amber-900/30 dark:text-amber-400'}`}>
                             <Archive size={24} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">Arsip</span>
-                    </Link>
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center text-amber-700/80">Arsip</span>
+                    </button>
                 </section>
 
                 {/* Article Slider */}
@@ -174,14 +190,14 @@ export default function AdminArticlesPage() {
                             key={tab.key}
                             onClick={() => setFilterStatus(tab.key)}
                             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 ${filterStatus === tab.key
-                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
-                                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
+                                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                                 }`}
                         >
                             {tab.label}
                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${filterStatus === tab.key
-                                    ? 'bg-white/20 text-white'
-                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                                ? 'bg-white/20 text-white'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
                                 }`}>
                                 {tab.count}
                             </span>
@@ -203,6 +219,97 @@ export default function AdminArticlesPage() {
                     )}
                 </div>
             </main>
+
+            {/* Feature Drawers Overlay */}
+            <AnimatePresence>
+                {activeDrawer !== 'NONE' && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setActiveDrawer('NONE')}
+                            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60]"
+                        />
+                        <motion.div
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed bottom-0 left-0 right-0 max-w-[500px] mx-auto bg-white dark:bg-slate-950 rounded-t-[2.5rem] z-[70] shadow-2xl safe-area-bottom pb-8"
+                        >
+                            <div className="p-6">
+                                {/* Drawer Handle */}
+                                <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mx-auto mb-6" />
+
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                                        {activeDrawer === 'CATEGORY' ? 'Distribusi Kategori' : 'Statistik Artikel'}
+                                    </h2>
+                                    <button
+                                        onClick={() => setActiveDrawer('NONE')}
+                                        className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                </div>
+
+                                {activeDrawer === 'CATEGORY' ? (
+                                    <div className="space-y-3">
+                                        {[
+                                            { id: 'PENGUMUMAN', label: 'Pengumuman', color: 'bg-blue-500', count: catStats.PENGUMUMAN },
+                                            { id: 'KAJIAN', label: 'Kajian', color: 'bg-purple-500', count: catStats.KAJIAN },
+                                            { id: 'KEGIATAN', label: 'Kegiatan', color: 'bg-orange-500', count: catStats.KEGIATAN },
+                                            { id: 'EDUKASI', label: 'Edukasi', color: 'bg-emerald-500', count: catStats.EDUKASI },
+                                            { id: 'INFAQ', label: 'Infaq', color: 'bg-pink-500', count: catStats.INFAQ },
+                                        ].map((cat) => (
+                                            <div key={cat.id} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                                <div className={`w-3 h-3 rounded-full ${cat.color}`} />
+                                                <span className="flex-1 font-bold text-slate-700 dark:text-slate-300 text-sm">{cat.label}</span>
+                                                <span className="px-3 py-1 rounded-lg bg-white dark:bg-slate-800 text-xs font-black text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
+                                                    {cat.count}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 gap-4">
+                                        <div className="p-6 rounded-3xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-2xl bg-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                                                    <Eye size={24} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-black text-blue-600/60 dark:text-blue-400/60 uppercase tracking-widest leading-none mb-1">Total Tayangan</p>
+                                                    <p className="text-2xl font-black text-blue-900 dark:text-blue-100 leading-none">{(stats.totalViews / 1000).toFixed(1)}K</p>
+                                                </div>
+                                            </div>
+                                            <BarChart3 className="text-blue-200 dark:text-blue-800" size={48} />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="p-5 rounded-3xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800">
+                                                <div className="w-10 h-10 rounded-2xl bg-red-500 flex items-center justify-center text-white shadow-lg shadow-red-500/30 mb-4">
+                                                    <Heart size={20} fill="currentColor" />
+                                                </div>
+                                                <p className="text-[10px] font-black text-red-600/60 dark:text-red-400/60 uppercase tracking-widest leading-none mb-1">Total Suka</p>
+                                                <p className="text-xl font-black text-red-900 dark:text-red-100 leading-none">{stats.totalLikes}</p>
+                                            </div>
+                                            <div className="p-5 rounded-3xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800">
+                                                <div className="w-10 h-10 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 mb-4">
+                                                    <Send size={18} />
+                                                </div>
+                                                <p className="text-[10px] font-black text-emerald-600/60 dark:text-emerald-400/60 uppercase tracking-widest leading-none mb-1">Total Bagikan</p>
+                                                <p className="text-xl font-black text-emerald-900 dark:text-emerald-100 leading-none">{stats.totalShares}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

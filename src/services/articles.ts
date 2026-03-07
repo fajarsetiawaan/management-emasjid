@@ -21,6 +21,9 @@ export interface Article {
     category: 'PENGUMUMAN' | 'KAJIAN' | 'KEGIATAN' | 'EDUKASI' | 'INFAQ';
     status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
     published_at: string | null;
+    views?: number;
+    likes?: number;
+    shares?: number;
     created_at: string;
     updated_at: string;
 }
